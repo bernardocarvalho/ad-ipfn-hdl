@@ -54,8 +54,8 @@
 `define DEV_FW_MAJOR     8'h01
 
 // Use Linux command: date +%s to get UNIX timestamp
-`define DEV_TSTAMP      32'd1668172404
-//Fri 11 Nov 2022 01:13:26 PM WET
+`define DEV_TSTAMP      32'd1668689661
+//Thu 17 Nov 2022 12:54:22 PM WET
 
 `define DEV_NAME1         "1cdA" // first char right1631556386
 `define DEV_NAME2         "girT"
@@ -72,14 +72,14 @@
 
 `define MOD_TRIG_REG_OFF    6'h10         // Base address of Module Device
 
-//#### MODULE DMA MODULE REGISTERS ######//
+//#### MODULE TRIGGER DMA MODULE REGISTERS ######//
 `define MOD_TRIG_MAGIC      16'h534D       //offset_addr dev_mod1_addr
 `define MOD_TRIG_MAJOR      8'h01
 `define MOD_TRIG_MINOR      8'h00
 `define MOD_TRIG_NEXT_ADDR  32'h00         //offset_addr dev_mod1_addr+0x04
 `define MOD_TRIG_FW_VENDOR  16'h1570       //offset_addr dev_mod1_addr+0x08
 `define MOD_TRIG_FW_ID      16'h0076
-`define MOD_TRIG_FW_PATCH   16'h0000       //offset_addr dev_mod1_addr+0x0c
+`define MOD_TRIG_FW_PATCH   16'h0001       //offset_addr dev_mod1_addr+0x0c
 `define MOD_TRIG_FW_MINOR   8'h00
 `define MOD_TRIG_FW_MAJOR   8'h01
 `define MOD_TRIG_NAME       "kAdoM1aB" // 64'h44_6D_61_4D_6F_64_41_6B //  DmaModAk

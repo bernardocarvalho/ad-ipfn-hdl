@@ -63,11 +63,12 @@ module trigger_gen #(
 
     input      [31:0]  param_mul,
     input      [31:0]  param_off,
+    input      [31:0]  init_delay,
+
+    input      [31:0]  param_init_delay,
 
     output [31:0] pulse_tof,  // Difference Pulse_0 -> Pulse_1
-    output [3:0] detect_pls //channel 4 Osc
-//    output detect_pls_1,  // 
-//    output detect_pls_2  // Channel 3 Osc
+    output [7:0] detect_pls //channel 4 Osc
   );
 /*********** Function Declarations ***************/
 
@@ -164,7 +165,7 @@ endfunction
             adc_sum_d <= adc_channel_sum_f(adc_data_d);
 	end
 
-	reg [3:0] detect_pls_r = 4'h0;
+	reg [7:0] detect_pls_r = 'h00;
     assign detect_pls = detect_pls_r;
 
     //(* mark_debug = "true" *) 
@@ -206,6 +207,7 @@ endfunction
     always @(posedge rxclk)
        if (!trig_enable) begin
           state <= START;
+     	  detect_pls_r <= 'h00;
           //detect_pls_0_r  <=  0;
           //detect_pls_1_r  <=  0;
           //detect_pls_2_r  <=  0;
@@ -218,14 +220,14 @@ endfunction
                    state <= WAIT_PULSE1;
                    //pulse_delay_r  <=   32'h0A; // Testing
                 end
-        	    detect_pls_r <= 4'h0;
+        	    detect_pls_r <= 'h01;
                 hold_cnt_r <=  hold_cnt_r - 32'h01;
                 pulse_delay_r  <= trig_level_a; //  {trig_level_b_p, trig_level_b_m} ; // Debug
              end
              WAIT_PULSE1: begin // Armed: Waiting first pulse
                 if (trigger_eval_f(adc_sum_a, trig_level_a_p, trig_level_a_m)) begin
                    state <= HOLD1;
-                   detect_pls_r[0]  <=  1'b1;
+                   detect_pls_r[1]  <=  1'b1;
                    pulse_delay_r  <=   {trig_level_b_m, 16'h0B} ; // Testing
                    hold_cnt_r        <= 32'd2500;  //(* 8ns). Dead Time  = 20 us ,
                    delay_time <= 'h00;    // Reset delay counting
@@ -245,7 +247,7 @@ endfunction
              WAIT_PULSE2: begin // Got first pulse. waiting second probe
                 if (trigger_eval_f(adc_sum_b, trig_level_b_p, trig_level_b_m)) begin
                     state <= HOLD2;
-                    detect_pls_r[1]  <=  1'b1;
+                    detect_pls_r[2]  <=  1'b1;
                     pulse_delay_r   <= wait_cnt_r;  // Save waiting cycles
                     delay_time      <=  delay_time + $signed(param_off);  // Save pulse B-A  Time + Offset
                     hold_cnt_r      <= 32'd2500; // (* 8ns) Dead Time  = 20 us, 200mm , (1 us = 10 mm @10km/s)
@@ -265,16 +267,14 @@ endfunction
              end
              WAIT_PULSE3: begin   //   Waiting Third channel
                 if (trigger_eval_f(adc_sum_c, trig_level_c_p, trig_level_c_m)) begin
-                    detect_pls_r[2]  <=  1'b1;
+                    detect_pls_r[3]  <=  1'b1;
                     state       <= DELAY_TRIGGER;
                     counter     <= 32'h00;
                 end
              end
              DELAY_TRIGGER : begin   // Got Third pulse. Waiting calculated delay
                 if (counter >= delay_time) begin
-                   //detect_pls_0_r <=  1'b1;
-                   detect_pls_r[3]  <=  1'b1;
-                   //detect_pls_1_r <=  1'b1;
+                   detect_pls_r[4]  <=  1'b1;
                    state        <= TRIGGER;
                 end
                 else begin

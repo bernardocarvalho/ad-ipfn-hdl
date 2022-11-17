@@ -304,11 +304,11 @@ module system_top #
 
 
     wire [31:0] triglvl_0, triglvl_1, triglvl_2;
-    wire [31:0] param_mul_i, param_off_i, pulse_tof_i;
+    wire [31:0] param_mul_i, param_off_i, init_delay_i, pulse_tof_i;
 
     wire [31:0] control_reg_i;
     wire acq_en_i = control_reg_i[`ACQE_BIT];
-    wire [3:0] detect_pls_i;
+    wire [7:0] detect_pls_i;
     //wire trigger1_i;
 
     // instantiations
@@ -592,7 +592,7 @@ module system_top #
     wire [15:0] rd_data_count;
 
     wire [31:0] status_reg_i = {rd_data_count,
-        4'h0,  detect_pls_i,
+        detect_pls_i,
         3'h0, acq_on_r,      almost_full_axis, almost_empty_axis, prog_full, prog_empty};
 
     shapi_regs_v1 # (
@@ -627,7 +627,8 @@ module system_top #
            .trig_2(triglvl_2),
            .param_mul(param_mul_i),
            .param_off(param_off_i),
-
+           .init_delay(init_delay_i),
+           
            .pulse_tof(pulse_tof_i),
 
            .control_reg(control_reg_i)
@@ -659,19 +660,21 @@ module system_top #
         .trig_enable(acq_en_i), // bit 4 second gpio gpio_o[36]
 
         .trig_level_a(triglvl_0),
-        .trig_level_b(triglvl_1),  //I
+        .trig_level_b(triglvl_1),  // i
         .trig_level_c(triglvl_2),
         .param_mul(param_mul_i),
         .param_off(param_off_i),
+        
+        .init_delay(init_delay_i),
 
-        .pulse_tof(pulse_tof_i), //O
+        .pulse_tof(pulse_tof_i), // o
 
-        .detect_pls (detect_pls_i)
+        .detect_pls (detect_pls_i)  // o
     );
 
-    wire m_axis128_tvalid, m_axis128_tready;
-    wire [127:0] m_axis128_data;
-    wire m_axis64_tvalid, s_axis64_tready;
+    //wire m_axis128_tvalid, m_axis128_tready;
+    //wire [127:0] m_axis128_data;
+    //wire m_axis64_tvalid, s_axis64_tready;
 
       // AXI streaming ports
 
@@ -683,15 +686,10 @@ module system_top #
         else if (s_axis_c2h_tvalid_0 && s_axis_c2h_tready_0)
             s_axis_c2h_cnt <= s_axis_c2h_cnt +1;
 
-
       assign s_axis_c2h_tlast_0 = (s_axis_c2h_cnt ==15'h3FF)? 1'b1:1'b0;// m_axis_h2c_tlast_0;
 
-      //assign s_axis_c2h_tdata_0 =  m_axis_h2c_tdata_0;
-      //assign s_axis_c2h_tlast_0 =  1'b0;// m_axis_h2c_tlast_0;
-      //assign s_axis_c2h_tvalid_0 =  m_axis_h2c_tvalid_0;
-      //assign s_axis_c2h_tkeep_0 =  8'hFF;// m_axis_h2c_tkeep_0;
       // H2C dump
-    assign m_axis_h2c_tready_0 = 1'b1;// s_axis_c2h_tready_0;
+    assign m_axis_h2c_tready_0 = 1'b1; // H2C data discarded
 
     wire almost_full_axis_pre;
 
@@ -714,12 +712,10 @@ module system_top #
                 else
                     begin
                          acq_soft_trig_dly <=  #TCQ  {acq_soft_trig_dly[0], control_reg_i[`STRG_BIT]}; // delay pipe
-                         acq_hard_trig_dly <=  #TCQ  {acq_hard_trig_dly[0], detect_pls_i[0]}; // delay pipe
+                         acq_hard_trig_dly <=  #TCQ  {acq_hard_trig_dly[0], detect_pls_i[1]}; // delay pipe
 
-                         if( (acq_soft_trig_dly == 2'b01) ||  (acq_hard_trig_dly == 2'b01)) //
+                         if( (acq_soft_trig_dly == 2'b01) ||  (acq_hard_trig_dly == 2'b01)) // detect rising  edge
                                 acq_on_r <= #TCQ  1'b1;
-//                         if(hard_trig_dly == 2'b10) // detect falling  edge
-//                                acq_on_r <= #TCQ  1'b1;
                     end
     end
     wire s_axis_tready_pre;
@@ -744,10 +740,11 @@ module system_top #
     wire s_axis_tready_main;
     wire prog_empty_axis_pre;
     //wire m_axis_tready_pre = s_axis_tready_main || ( (!acq_on_r) && (!prog_empty_axis_pre) ) ; // on ACQ disable, fill  PRE  buffer up to  almost_full
-    wire m_axis_tready_pre = s_axis_tready_main || ( (!acq_on_r) && almost_full_axis_pre ) ; // on ACQ disable, fill  PRE  buffer up to  almost_full
+//    wire m_axis_tready_pre = s_axis_tready_main || ( (!acq_on_r) && almost_full_axis_pre ) ; // on ACQ disable, fill  PRE  buffer up to  almost_full
+    wire m_axis_tready_pre = (acq_on_r)? s_axis_tready_main :
+                                           almost_full_axis_pre; // on ACQ disable, empty PRE  buffer when almost_full ( keep pre-trigger samples)
     wire m_axis_tvalid_pre;
     wire s_axis_tvalid_main = m_axis_tvalid_pre &&  acq_on_rx_r ; // Fill Main only with ACQ enable
-
 
    xpm_fifo_axis #(
       .CDC_SYNC_STAGES(3),            // DECIMAL Range: 2 - 8. Default value = 2.
@@ -856,7 +853,7 @@ module system_top #
       .m_aclk(),                         // 1-bit input: Master Interface Clock: All signals on master
       //.m_aclk(pci_user_clk),                         // 1-bit input: Master Interface Clock: All signals on master
 
-      .m_axis_tready(m_axis_tready_pre),           // 1-bit input: TREADY: Indicates that the slave can accept a m_axis128_tvalid
+      .m_axis_tready(m_axis_tready_pre),           // 1-bit input: TREADY: Indicates that the slave can accept a 
                                                // transfer in the current cycle.
 
       .s_aclk(rx_clk),                         // 1-bit input: Slave Interface Clock: All signals on slave

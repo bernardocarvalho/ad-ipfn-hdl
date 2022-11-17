@@ -127,8 +127,10 @@ module shapi_regs_v1 #
         output      [31:0]  trig_2,
         output      [31:0]  param_mul,
         output      [31:0]  param_off,
-        input       [31:0]  pulse_tof,
+        output      [31:0]  init_delay,
         
+        input       [31:0]  pulse_tof,
+           
         input       [31:0]  status_reg,
         output      [31:0]  control_reg
 
@@ -139,13 +141,15 @@ module shapi_regs_v1 #
 
     reg   [31:0]     control_r = 32'h00;
     reg   [31:0]     trig0_r, trig1_r, trig2_r;
-    reg   [31:0]     param0_r =32'h0001_0000, param1_r = 32'h0001_0000;
-    
+    reg   [31:0]     param_mul_r =32'h0001_0000, param_off_r = 32'h0001_0000;
+    reg   [31:0]     param_init_delay_r = 32'd12_500_000; // (* 8ns) Initial Idle Time  = 0.1 s Max 4294967294/34 s    
     assign trig_0 = trig0_r;
     assign trig_1 = trig1_r;
     assign trig_2 = trig2_r;
-    assign param_mul = param0_r;
-    assign param_off = param1_r;
+    assign param_mul = param_mul_r;
+    assign param_off = param_off_r;
+    assign init_delay = param_init_delay_r;
+    
     assign control_reg = control_r;
 
     //#### STANDARD DEVICE  ######//
@@ -342,8 +346,9 @@ module shapi_regs_v1 #
             trig0_r         <=  32'h0400_8000; // +1024 / -16385
             trig1_r         <=  32'h0400_8000; // +1024 / -16385
             trig2_r         <=  32'h0400_8000;
-            param0_r        <=  32'h0001_0000;
-            param1_r        <=  32'h0001_0000;
+            param_mul_r     <=  32'h0001_0000;
+            param_off_r         <= 32'h0001_0000;
+            param_init_delay_r  <= 32'd12_500_000; // (* 8ns) Initial Idle Time  = 0.1 s Max 4294967294/34 s    
 
             slv_reg50 <= 0;
             slv_reg51 <= 0;
@@ -356,7 +361,7 @@ module shapi_regs_v1 #
             if (slv_reg_wren)
             begin
                 case ( axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
-                    6'h0F: dev_scratch_reg <= S_AXI_WDATA; // BAR 0 regsmod_interrupt_mask
+                                         6'h0F: dev_scratch_reg <= S_AXI_WDATA; // BAR 0 regsmod_interrupt_mask
 
                     (`MOD_TRIG_REG_OFF + 6'h08): mod_control_r  <= S_AXI_WDATA[31:30];
                     (`MOD_TRIG_REG_OFF + 6'h0A): mod_interrupt_flag_clear_r  <= S_AXI_WDATA;
@@ -367,25 +372,16 @@ module shapi_regs_v1 #
                     (`MOD_TRIG_REG_OFF + 6'h12): trig0_r               <= S_AXI_WDATA;
                     (`MOD_TRIG_REG_OFF + 6'h13): trig1_r               <= S_AXI_WDATA;
                     (`MOD_TRIG_REG_OFF + 6'h14): trig2_r               <= S_AXI_WDATA;
-                    (`MOD_TRIG_REG_OFF + 6'h15): param0_r             <= S_AXI_WDATA;
-                    (`MOD_TRIG_REG_OFF + 6'h16): param1_r             <= S_AXI_WDATA;
+                    (`MOD_TRIG_REG_OFF + 6'h15): param_mul_r              <= S_AXI_WDATA;
+                    (`MOD_TRIG_REG_OFF + 6'h16): param_off_r              <= S_AXI_WDATA;
+                    (`MOD_TRIG_REG_OFF + 6'h17): param_init_delay_r    <= S_AXI_WDATA;
+                                        
                     /*
                     //(`MOD_TRIG_REG_OFF + 6'h17): slv_reg39             <= S_AXI_WDATA;
-                    //(`MOD_TRIG_REG_OFF + 6'h18): slv_reg40             <= S_AXI_WDATA;
-                    (`MOD_TRIG_REG_OFF + 6'h19): slv_reg41             <= S_AXI_WDATA;
-                    (`MOD_TRIG_REG_OFF + 6'h1A): slv_reg42             <= S_AXI_WDATA;
-                    (`MOD_TRIG_REG_OFF + 6'h1B): slv_reg43             <= S_AXI_WDATA;
+
                     (`MOD_TRIG_REG_OFF + 6'h1C): slv_reg44             <= S_AXI_WDATA;
                     */
-                    //                    (`MOD_TRIG_REG_OFF + 6'h12): dma_size_r            <= S_AXI_WDATA[23:0]; // DMA Byte Size
-                    //            (`MOD_TRIG_REG_OFF + 6'h13): dma_prog_thresh_r     <= S_AXI_WDATA[23:5]; // DMA Byte Size
-                    /**
-                        (`MOD_TRIG_REG_OFF + 6'h69): ilck_param_r[319:288]  <= S_AXI_WDATA;
 
-                        */
-
-                        //
-                        //(`MOD_TRIG_REG_OFF + 6'h15): dma_prog_thresh_r     <= post_wr_data[20:5]; // DMA Byte Size
                         default : begin
                             slv_reg50 <= slv_reg50;
                             slv_reg51 <= slv_reg51;
@@ -547,8 +543,10 @@ module shapi_regs_v1 #
             (`MOD_TRIG_REG_OFF + 6'h12): reg_data_out <= #TCQ trig0_r; // rw
             (`MOD_TRIG_REG_OFF + 6'h13): reg_data_out <= #TCQ trig1_r; // rw
             (`MOD_TRIG_REG_OFF + 6'h14): reg_data_out <= #TCQ trig2_r; // rw
-            (`MOD_TRIG_REG_OFF + 6'h15): reg_data_out <= #TCQ param0_r; // rw
-            (`MOD_TRIG_REG_OFF + 6'h16): reg_data_out <= #TCQ param1_r; // rw
+            (`MOD_TRIG_REG_OFF + 6'h15): reg_data_out <= #TCQ param_mul_r; // rw param_mul 
+            (`MOD_TRIG_REG_OFF + 6'h16): reg_data_out <= #TCQ param_off_r; // rw  param_off
+            (`MOD_TRIG_REG_OFF + 6'h17): reg_data_out <= #TCQ param_init_delay_r; // rw
+              
             (`MOD_TRIG_REG_OFF + 6'h20): reg_data_out <= #TCQ pulse_tof; // ro
             (`MOD_TRIG_REG_OFF + 6'h21): reg_data_out <= #TCQ 32'hA5A5; //pulse_tof; // ro
 
