@@ -3,7 +3,7 @@
 <!--                                                         -->
 <!-- Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.   -->
 
-<Project Version="7" Minor="40" Path="/home/bernardo/FPGA/Vivado/2019.1/ad-ipfn-hdl/projects/fmcjesdadc1/kc705/fmcjesdadc1_kc705.xpr">
+<Project Version="7" Minor="40" Path="/home/esther/FPGA/vivado/2019.1/ad-ipfn-hdl/projects/fmcjesdadc1/kc705/fmcjesdadc1_kc705.xpr">
   <DefaultLaunch Dir="$PRUNDIR"/>
   <Configuration>
     <Option Name="Id" Val="85dd5cf1ae03447d8de9400edced3e1f"/>
@@ -22,7 +22,6 @@
     <Option Name="DefaultLib" Val="xil_defaultlib"/>
     <Option Name="ProjectType" Val="Default"/>
     <Option Name="IPRepoPath" Val="$PPRDIR/../../../library"/>
-    <Option Name="IPRepoPath" Val="$PPRDIR/../../../../ghdl/library"/>
     <Option Name="IPOutputRepo" Val="$PCACHEDIR/ip"/>
     <Option Name="IPCachePermission" Val="read"/>
     <Option Name="IPCachePermission" Val="write"/>
@@ -136,6 +135,8 @@
         <Option Name="DesignMode" Val="RTL"/>
         <Option Name="TopModule" Val="system_top"/>
         <Option Name="TopAutoSet" Val="TRUE"/>
+        <Generic Name="ip_cache_permissions" Val="read"/>
+        <Generic Name="write"/>
       </Config>
     </FileSet>
     <FileSet Name="constrs_1" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">

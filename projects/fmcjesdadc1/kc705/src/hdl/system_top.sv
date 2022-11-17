@@ -308,15 +308,17 @@ module system_top #
 
     wire [31:0] control_reg_i;
     wire acq_en_i = control_reg_i[`ACQE_BIT];
-    wire detect_0_i, detect_1_i, trigger1_i ;
+    wire [3:0] detect_pls_i;
+    //wire trigger1_i;
 
     // instantiations
-
-  OBUF   obuf_J11  (.O(user_sma_clk_p),  .I(detect_0_i));
-  OBUF   obuf_J22  (.O(user_sma_clk_n),  .I(detect_1_i));
+  wire sma_j11 =  detect_pls_i[0];
+  OBUF   obuf_J11  (.O(user_sma_clk_p),  .I(sma_j11));
+  wire sma_j12 =  detect_pls_i[1];
+  OBUF   obuf_J12  (.O(user_sma_clk_n),  .I(sma_j12));
+  wire sma_j4_1 =  detect_pls_i[2];
   OBUF   obuf_J4_1 (.O(user_sma_gpio_n), .I(acq_en_i)); // J14.1 bellow J11
-//  OBUF   obuf_j22 (.O(user_sma_gpio_p), .I(trigger1_i));
-//
+  OBUF   obuf_j13 (.O(user_sma_gpio_p), .I(detect_pls_i[3]));
 
   IBUFDS_GTE2 i_ibufds_rx_ref_clk (
     .CEB (1'd0),
@@ -583,7 +585,6 @@ module system_top #
     );
 
     // BAR0 register Space 8-bit address, 32-bit Data
-	//reg [31:0] status_reg_i = 32'hA5A5;
     (* keep = "true" *) reg  acq_on_r, acq_on_q;
     wire almost_full_axis, almost_empty_axis, prog_full, prog_empty;
 	//wire [31:0] control_reg_i;
@@ -591,9 +592,8 @@ module system_top #
     wire [15:0] rd_data_count;
 
     wire [31:0] status_reg_i = {rd_data_count,
-        8'h00,
-        3'h0, acq_on_r, almost_full_axis, almost_empty_axis, prog_full, prog_empty};
-
+        4'h0,  detect_pls_i,
+        3'h0, acq_on_r,      almost_full_axis, almost_empty_axis, prog_full, prog_empty};
 
     shapi_regs_v1 # (
         .C_S_AXI_DATA_WIDTH(32),
@@ -666,8 +666,7 @@ module system_top #
 
         .pulse_tof(pulse_tof_i), //O
 
-        .detect_pls_0 (detect_0_i), // user_sma_clk_n
-        .detect_pls_1 (detect_1_i) //J14detect_0_i
+        .detect_pls (detect_pls_i)
     );
 
     wire m_axis128_tvalid, m_axis128_tready;
@@ -694,38 +693,40 @@ module system_top #
       // H2C dump
     assign m_axis_h2c_tready_0 = 1'b1;// s_axis_c2h_tready_0;
 
+    wire almost_full_axis_pre;
+
     reg [15:0] adc_cnt = 'h00;
     wire [31:0] adc_data3  = adc_data[3];
-    wire [C_S_AXI_DATA_WIDTH-1:0] adc_data_all = {adc_cnt, adc_data3[15:0], adc_data[2], adc_data[1], adc_data[0]};
+    wire [C_S_AXI_DATA_WIDTH-1:0] adc_data_all = {adc_cnt[15:2], almost_full_axis, almost_full_axis_pre, adc_data3[15:0], adc_data[2], adc_data[1], adc_data[0]};
     wire  adc_dma_tvalid = adc_enable[0]; // && detect_0_i; //&& adc_valid[0] Write DMA FIFO only after trigger 0
 
-    reg [1:0] soft_trig_dly;
-    reg [1:0] hard_trig_dly;
+    reg [1:0] acq_soft_trig_dly;
+    reg [1:0] acq_hard_trig_dly;
 
 // Trigger generation
     always @(posedge pci_user_clk or negedge acq_en_i) begin
         if (!acq_en_i)
                     begin
                         acq_on_r <= #TCQ  1'b0;
-                        soft_trig_dly <=  #TCQ 2'b11;
-                        hard_trig_dly <=  #TCQ 2'b11;
+                        acq_soft_trig_dly <=  #TCQ 2'b11;
+                        acq_hard_trig_dly <=  #TCQ 2'b11;
                     end
                 else
                     begin
-                         soft_trig_dly <=  #TCQ  {soft_trig_dly[0], control_reg_i[`STRG_BIT]}; // delay pipe
-                         hard_trig_dly <=  #TCQ  {hard_trig_dly[0], detect_0_i}; // delay pipe
+                         acq_soft_trig_dly <=  #TCQ  {acq_soft_trig_dly[0], control_reg_i[`STRG_BIT]}; // delay pipe
+                         acq_hard_trig_dly <=  #TCQ  {acq_hard_trig_dly[0], detect_pls_i[0]}; // delay pipe
 
-                         if( (soft_trig_dly == 2'b01) ||  (hard_trig_dly == 2'b01)) //
+                         if( (acq_soft_trig_dly == 2'b01) ||  (acq_hard_trig_dly == 2'b01)) //
                                 acq_on_r <= #TCQ  1'b1;
 //                         if(hard_trig_dly == 2'b10) // detect falling  edge
 //                                acq_on_r <= #TCQ  1'b1;
                     end
     end
-
+    wire s_axis_tready_pre;
      always @(posedge rx_clk or posedge sys_rst)
         if (sys_rst)
             adc_cnt <= 0;
-        else if (adc_dma_tvalid)
+        else if (adc_dma_tvalid) // && s_axis_tready_pre)
             adc_cnt <= adc_cnt + 1;
 
    reg acq_on_rx_r = 1'b0;
@@ -740,7 +741,6 @@ module system_top #
    assign s_axis_c2h_tvalid_0 = m_axis_tvalid_main &&  acq_on_r ; // Stream only with ACQ enable
 
     wire [127:0] m_axis_tdata_pre;
-    wire almost_full_axis_pre;
     wire s_axis_tready_main;
     wire prog_empty_axis_pre;
     //wire m_axis_tready_pre = s_axis_tready_main || ( (!acq_on_r) && (!prog_empty_axis_pre) ) ; // on ACQ disable, fill  PRE  buffer up to  almost_full
@@ -838,7 +838,7 @@ module system_top #
                                                // indicates the number of words available for reading in the
                                                // FIFO.
 
-      .s_axis_tready(),           // 1-bit output: TREADY: Indicates that the slave can accept a
+      .s_axis_tready(s_axis_tready_pre),           // 1-bit output: TREADY: Indicates that the slave can accept a
                                                // transfer in the current cycle.
 
       .sbiterr_axis(),             // 1-bit output: Single Bit Error- Indicates that the ECC

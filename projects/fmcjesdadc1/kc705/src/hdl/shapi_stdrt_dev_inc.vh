@@ -7,14 +7,14 @@
 // Design Name:
 // Module Name:    shapi_stdrt_dev_inc
 // Target Devices:
-// Tool versions:  Vivado 2019.2
+// Tool versions:  Vivado 2019.1
 //
 // Description:
 // Verilog Header
 // SHAPI registers - standard device definitions
 //
 //
-// Copyright 2015 - 2021 IPFN-Instituto Superior Tecnico, Portugal
+// Copyright 2015 - 2022 IPFN-Instituto Superior Tecnico, Portugal
 // Creation Date  2017-11-09
 //
 // Licensed under the EUPL, Version 1.2 or - as soon they
@@ -54,8 +54,8 @@
 `define DEV_FW_MAJOR     8'h01
 
 // Use Linux command: date +%s to get UNIX timestamp
-`define DEV_TSTAMP      32'd1642550084
-//TS Tue Jan 18 23:54:44 WET 2022
+`define DEV_TSTAMP      32'd1668172404
+//Fri 11 Nov 2022 01:13:26 PM WET
 
 `define DEV_NAME1         "1cdA" // first char right1631556386
 `define DEV_NAME2         "girT"
@@ -90,9 +90,8 @@
 `define MOD_TRIG_FULL_RST_CAPAB 1'b0
 `define MOD_TRIG_INTERRUPT_ID   32'h00000000
 
-`define MOD_TRIG_MAX_BYTES       32'h00200000  // 2MB DMA packets
-//`define MOD_TRIG_MAX_BYTES       32'h00400000  // 4MB DMA packets
-//`define MOD_TRIG_MAX_BYTES       32'h003FF000  //  Max allowed by Linux Driver
+//`define MOD_TRIG_MAX_BYTES       32'h00200000  // 2MB DMA packets
+`define MOD_TRIG_MAX_BYTES       32'h00800000  // 8MB DMA packets
 
 `define MOD_TRIG_TLP_PAYLOAD     32'h00000020  // 32 DW 128 Bytes. Depends or PCIe HW
 
