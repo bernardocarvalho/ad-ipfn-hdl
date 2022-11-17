@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
+// Company: IPFN IST
+// Engineer: Bernardo Carvalho
 //
 // Create Date: 04/30/2019 03:15:44 PM
 // Design Name:
@@ -40,34 +40,37 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module trigger_gen #(
-  parameter     ADC_DATA_WIDTH = 16)  // ADC is 14 bit, but data is 16
+      parameter integer C_S_AXI_DATA_WIDTH    = 32,
+    
+      parameter     ADC_DATA_WIDTH = 16,  // ADC is 14 bit, but data is 16
+      parameter     ADC_TWIN_DATA_WIDTH = 2 * ADC_DATA_WIDTH,
+      parameter TCQ  = 1
+  )
   (
     input rxclk,      // 125 Mhz , two samples per clock
-    input [31:0] adc_data_a,
+    input [ADC_TWIN_DATA_WIDTH-1:0] adc_data_a,
     input adc_enable_a,
-    input adc_valid_a,
-    input [31:0] adc_data_b,
+    //input adc_valid_a,
+    input [ADC_TWIN_DATA_WIDTH-1:0] adc_data_b,
     input adc_enable_b,
-    input adc_valid_b,
+    //input adc_valid_b,
     input [31:0] adc_data_c,
     input adc_enable_c,
-    input adc_valid_c,
+    //input adc_valid_c,
     input [31:0] adc_data_d,
     input adc_enable_d,
-    input adc_valid_d,
+    //input adc_valid_d,
 
     input trig_enable,  // Enable/Reset State Machine
-    input  [31:0] trig_level_a,
-    input  [31:0] trig_level_b,
-    input  [31:0] trig_level_c,
+    input  [C_S_AXI_DATA_WIDTH-1:0] trig_level_a,
+    input  [C_S_AXI_DATA_WIDTH-1:0] trig_level_b,
+    input  [C_S_AXI_DATA_WIDTH-1:0] trig_level_c,
 
-    input      [31:0]  param_mul,
-    input      [31:0]  param_off,
-    input      [31:0]  init_delay,
+    input      [C_S_AXI_DATA_WIDTH-1:0]  param_mul,
+    input      [C_S_AXI_DATA_WIDTH-1:0]  param_off,
+    input      [C_S_AXI_DATA_WIDTH-1:0]  init_delay,
 
-    input      [31:0]  param_init_delay,
-
-    output [31:0] pulse_tof,  // Difference Pulse_0 -> Pulse_1
+    output [C_S_AXI_DATA_WIDTH-1:0] pulse_tof,  // Difference Pulse_0 -> Pulse_1
     output [7:0] detect_pls //channel 4 Osc
   );
 /*********** Function Declarations ***************/
@@ -84,56 +87,6 @@ function signed [ADC_DATA_WIDTH:0] adc_channel_sum_f;  // 17 bit for sum headroo
 	  end
   endfunction
   
-/*
-function  trigger_rising_eval_f;
-	input signed [ADC_DATA_WIDTH:0] adc_channel_mean;
-	input signed [ADC_DATA_WIDTH-1:0] trig_lvl;
-
-    reg signed [ADC_DATA_WIDTH:0] trig_lvl_ext;
-	begin
-       trig_lvl_ext          = $signed({trig_lvl, 1'b0}); // Mult * 2 with sign
-       trigger_rising_eval_f =(adc_channel_mean > trig_lvl_ext)? 1'b1: 1'b0;
-    end
-endfunction
-
-
-https://web.mit.edu/6.111/www/f2016/handouts/L08_4.pdf
-wire signed [31:0] a,b,s;
-wire z,n,v,c;
-assign {c,s} = a + b;
-assign z = ~|s;
-assign n = s[31];
-assign v = a[31]^b[31]^s[31]^c; /overload
-*/
-/*
-function  trigger_falling_eval_f;
-	input signed [ADC_DATA_WIDTH:0] adc_channel_mean;
-	input signed [ADC_DATA_WIDTH-1:0] trig_lvl;
-	reg signed [ADC_DATA_WIDTH:0] trig_lvl_ext;
-    reg signed [ADC_DATA_WIDTH-1:0] s;
-	reg z,n,v,c;
-	begin
-	    trig_lvl_ext = $signed({trig_lvl, 1'b0}); // Mult * 2  with  sign extend
-	    {c,s} = adc_channel_mean + trig_lvl_ext;
-	    trigger_falling_eval_f = s[31]; // negative if adc_channel_mean
-        //trig_lvl_ext = $signed({trig_lvl, 1'b0}); // Mult * 2  with  sign extend
-        // trigger_falling_eval_f =(adc_channel_mean < trig_lvl_ext)? 1'b1: 1'b0;
-    end
-endfunction
-
-
-function  trigger_falling_eval_f;
-	input signed [ADC_DATA_WIDTH:0] adc_channel_mean;
-	input signed [ADC_DATA_WIDTH-1:0] trig_lvl;
-	reg signed [ADC_DATA_WIDTH:0] trig_lvl_ext;
-	reg less;
-	begin
-        trig_lvl_ext = $signed({trig_lvl, 1'b0}); // Mult * 2  with  sign extend
-        less = adc_channel_mean < trig_lvl_ext;
-        trigger_falling_eval_f =(less)? 1'b1: 1'b0;
-    end
-endfunction
-*/
 
 function  trigger_eval_f;
         input signed [ADC_DATA_WIDTH:0] adc_channel_mean;
@@ -180,29 +133,28 @@ endfunction
 
      //(* mark_debug = "true" *) wire less_i = trigger_falling_eval_f(adc_sum_b, trig_level_b_m);
 
-     localparam WAIT_WIDTH = 32;
+     //localparam WAIT_WIDTH = 32;
 
-     reg [31:0] pulse_delay_r         =  32'hFFFF;
-     reg [WAIT_WIDTH-1:0] hold_cnt_r  = 'h00;
+     reg [C_S_AXI_DATA_WIDTH-1:0] pulse_delay_r         =  32'hFFFF;
+     reg [C_S_AXI_DATA_WIDTH-1:0] hold_cnt_r  = 'h00;
      assign pulse_tof = pulse_delay_r;
 
-     localparam START            = 3'b000;
+     localparam START           = 3'b000;
      localparam WAIT_PULSE1     = 3'b001;
      localparam HOLD1           = 3'b011;
      localparam WAIT_PULSE2     = 3'b010;
      localparam HOLD2           = 3'b110;
      localparam WAIT_PULSE3     = 3'b111;
-     localparam DELAY_TRIGGER    = 3'b101;
+     localparam DELAY_TRIGGER   = 3'b101;
      localparam TRIGGER         = 3'b100;
-
-     //localparam WAIT_WIDTH = 24;
 
      reg signed [31:0] delay_time = 'h00;  // Q16.16 Number. 32'h0001_0000 = 8ns
 
-     (* mark_debug = "true" *)  reg [2:0] state = START;
+     //(* mark_debug = "true" *)  
+     reg [2:0] state = START;
 
-    reg signed [31:0] counter=0;
-    reg  [31:0] wait_cnt_r = 32'h0;
+    reg signed [31:0] counter = 'h00;
+    reg  [31:0] wait_cnt_r = 'h00;
 
     always @(posedge rxclk)
        if (!trig_enable) begin
@@ -211,12 +163,12 @@ endfunction
           //detect_pls_0_r  <=  0;
           //detect_pls_1_r  <=  0;
           //detect_pls_2_r  <=  0;
-          hold_cnt_r    <= 32'd12_500_000; // (* 8ns) Initial Idle Time  = 0.1 s Max 4294967294/34 s
+          hold_cnt_r    <= init_delay; //32'd12_500_000; // (* 8ns) Initial Idle Time  = 0.1 s Max 4294967294/34 s
        end
        else
           case (state)
              START: begin        // Sleeping
-                if (hold_cnt_r == {WAIT_WIDTH{1'b0}}) begin
+                if (hold_cnt_r == {C_S_AXI_DATA_WIDTH{1'b0}}) begin
                    state <= WAIT_PULSE1;
                    //pulse_delay_r  <=   32'h0A; // Testing
                 end
@@ -235,7 +187,7 @@ endfunction
                 end
              end
              HOLD1: begin        // Holding period, no detect, but counting
-                if (hold_cnt_r == {WAIT_WIDTH{1'b0}}) begin  // Holding time
+                if (hold_cnt_r == {C_S_AXI_DATA_WIDTH{1'b0}}) begin  // Holding time
                    state <= WAIT_PULSE2;
                 end
                 else begin
@@ -258,7 +210,7 @@ endfunction
                 end
              end
              HOLD2: begin        // Got second pulse. Holding period, no detect.
-                if (hold_cnt_r == {WAIT_WIDTH{1'b0}}) begin  // Holding time
+                if (hold_cnt_r == {C_S_AXI_DATA_WIDTH{1'b0}}) begin  // Holding time
                    state       <= WAIT_PULSE3;
                 end
                 else begin
@@ -290,3 +242,44 @@ endfunction
 
 
 endmodule
+
+/*
+
+https://web.mit.edu/6.111/www/f2016/handouts/L08_4.pdf
+wire signed [31:0] a,b,s;
+wire z,n,v,c;
+assign {c,s} = a + b;
+assign z = ~|s;
+assign n = s[31];
+assign v = a[31]^b[31]^s[31]^c; /overload
+*/
+/*
+function  trigger_falling_eval_f;
+	input signed [ADC_DATA_WIDTH:0] adc_channel_mean;
+	input signed [ADC_DATA_WIDTH-1:0] trig_lvl;
+	reg signed [ADC_DATA_WIDTH:0] trig_lvl_ext;
+    reg signed [ADC_DATA_WIDTH-1:0] s;
+	reg z,n,v,c;
+	begin
+	    trig_lvl_ext = $signed({trig_lvl, 1'b0}); // Mult * 2  with  sign extend
+	    {c,s} = adc_channel_mean + trig_lvl_ext;
+	    trigger_falling_eval_f = s[31]; // negative if adc_channel_mean
+        //trig_lvl_ext = $signed({trig_lvl, 1'b0}); // Mult * 2  with  sign extend
+        // trigger_falling_eval_f =(adc_channel_mean < trig_lvl_ext)? 1'b1: 1'b0;
+    end
+endfunction
+
+
+function  trigger_falling_eval_f;
+	input signed [ADC_DATA_WIDTH:0] adc_channel_mean;
+	input signed [ADC_DATA_WIDTH-1:0] trig_lvl;
+	reg signed [ADC_DATA_WIDTH:0] trig_lvl_ext;
+	reg less;
+	begin
+        trig_lvl_ext = $signed({trig_lvl, 1'b0}); // Mult * 2  with  sign extend
+        less = adc_channel_mean < trig_lvl_ext;
+        trigger_falling_eval_f =(less)? 1'b1: 1'b0;
+    end
+endfunction
+*/
+

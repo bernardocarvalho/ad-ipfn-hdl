@@ -14,7 +14,7 @@
 //
 // Revision 0.01 - File Created
 // Additional Comments:
-// Copyright 2015 - 2021 IPFN-Instituto Superior Tecnico, Portugal
+// Copyright 2015 - 2022 IPFN-Instituto Superior Tecnico, Portugal
 // Creation Date  2017-11-09
 //
 // Licensed under the EUPL, Version 1.2 or - as soon they
@@ -48,11 +48,9 @@ module shapi_regs_v1 #
 
         // Width of S_AXI data bus
         parameter integer C_S_AXI_DATA_WIDTH    = 32,
-        // Width of S_AXI address busslv_reg89
+        // Width of S_AXI address bus
         parameter integer C_S_AXI_ADDR_WIDTH    = 8,
-
         parameter TCQ        = 1
-
     )
     (
         // Users to add ports here
@@ -136,13 +134,12 @@ module shapi_regs_v1 #
 
     );
 
-
-    /********IPFN reg ***********/
+    /********IPFN regr ***********/
 
     reg   [31:0]     control_r = 32'h00;
     reg   [31:0]     trig0_r, trig1_r, trig2_r;
     reg   [31:0]     param_mul_r =32'h0001_0000, param_off_r = 32'h0001_0000;
-    reg   [31:0]     param_init_delay_r = 32'd12_500_000; // (* 8ns) Initial Idle Time  = 0.1 s Max 4294967294/34 s    
+    reg   [31:0]     param_init_delay_r = 32'd25_000_000; // (* 8ns) Initial Idle Time  = 0.2 s Max 4294967294/34 s    
     assign trig_0 = trig0_r;
     assign trig_1 = trig1_r;
     assign trig_2 = trig2_r;
@@ -340,19 +337,19 @@ module shapi_regs_v1 #
     begin
         if ( S_AXI_ARESETN == 1'b0 )
         begin
-            dev_scratch_reg <=  32'hBB;
-            dev_control_r   <= 31'h0;
-            control_r       <=  32'h00;
+            dev_scratch_reg <=  32'h00BB;
+            dev_control_r   <=  31'h0000;
+            control_r       <=  32'h0000;
             trig0_r         <=  32'h0400_8000; // +1024 / -16385
             trig1_r         <=  32'h0400_8000; // +1024 / -16385
             trig2_r         <=  32'h0400_8000;
             param_mul_r     <=  32'h0001_0000;
             param_off_r         <= 32'h0001_0000;
-            param_init_delay_r  <= 32'd12_500_000; // (* 8ns) Initial Idle Time  = 0.1 s Max 4294967294/34 s    
+            param_init_delay_r  <= 32'd25_000_000; // (* 8ns) Initial Idle Time  = 0.2 s Max 4294967294/34 s    
 
-            slv_reg50 <= 0;
-            slv_reg51 <= 0;
-            slv_reg52 <= 0;
+            slv_reg50 <= 'h00;
+            slv_reg51 <= 'h00;
+            slv_reg52 <= 'h00;
             slv_reg53 <= 0;
             slv_reg54 <= 0;
             slv_reg55 <= 0;

@@ -414,17 +414,6 @@ module system_top #
       .msi_enable        (msi_enable),
       .msi_vector_width  (msi_vector_width),
 
-/*
-     // Config managemnet interface
-      .cfg_mgmt_addr  ( 19'b0 ),
-      .cfg_mgmt_write ( 1'b0 ),
-      .cfg_mgmt_write_data ( 32'b0 ),
-      .cfg_mgmt_byte_enable ( 4'b0 ),
-      .cfg_mgmt_read  ( 1'b0 ),
-      .cfg_mgmt_read_data (),
-      .cfg_mgmt_read_write_done (),
-      .cfg_mgmt_type1_cfg_reg_access ( 1'b0 ),
-*/
       //-- AXI Global
       .axi_aclk        ( pci_user_clk ),
       .axi_aresetn   (pci_user_resetn),
@@ -432,74 +421,6 @@ module system_top #
       .user_lnk_up     ( pci_user_lnk_up )
     );
 
-/*
- *
- *  xdma_0 xdma_id7028_i
- *     (
- *      //---------------------------------------------------------------------------------------//
- *      //  PCI Express (pci_exp) Interface                                                      //
- *      //---------------------------------------------------------------------------------------//
- *      .sys_rst_n       ( pci_sys_rst_n_c ),
- *      .sys_clk         ( pci_sys_clk ),
- *
- *      // Tx
- *      .pci_exp_txn     ( pci_exp_txn ),
- *      .pci_exp_txp     ( pci_exp_txp ),
- *
- *      // Rx
- *      .pci_exp_rxn     ( pci_exp_rxn ),
- *      .pci_exp_rxp     ( pci_exp_rxp ),
- *
- *      // AXI streaming ports
- *      .s_axis_c2h_tdata_0(s_axis_c2h_tdata_0),
- *      .s_axis_c2h_tlast_0(s_axis_c2h_tlast_0),
- *      .s_axis_c2h_tvalid_0(s_axis_c2h_tvalid_0),
- *      .s_axis_c2h_tready_0(s_axis_c2h_tready_0), // O
- *      .s_axis_c2h_tkeep_0(s_axis_c2h_tkeep_0),
- *      .m_axis_h2c_tdata_0(m_axis_h2c_tdata_0),
- *      .m_axis_h2c_tlast_0(m_axis_h2c_tlast_0),
- *      .m_axis_h2c_tvalid_0(m_axis_h2c_tvalid_0),
- *      .m_axis_h2c_tready_0(m_axis_h2c_tready_0),
- *      .m_axis_h2c_tkeep_0(m_axis_h2c_tkeep_0),
- *     // LITE interface
- *      //-- AXI Master Write Address Channel
- *      .m_axil_awaddr    (m_axil_awaddr),
- *      .m_axil_awprot    (m_axil_awprot),
- *      .m_axil_awvalid   (m_axil_awvalid),
- *      .m_axil_awready   (m_axil_awready),
- *      //-- AXI Master Write Data Channel
- *      .m_axil_wdata     (m_axil_wdata),
- *      .m_axil_wstrb     (m_axil_wstrb),
- *      .m_axil_wvalid    (m_axil_wvalid),
- *      .m_axil_wready    (m_axil_wready),
- *      //-- AXI Master Write Response Channel
- *      .m_axil_bvalid    (m_axil_bvalid),
- *      .m_axil_bresp     (m_axil_bresp),
- *      .m_axil_bready    (m_axil_bready),
- *      //-- AXI Master Read Address Channel
- *      .m_axil_araddr    (m_axil_araddr),
- *      .m_axil_arprot    (m_axil_arprot),
- *      .m_axil_arvalid   (m_axil_arvalid),
- *      .m_axil_arready   (m_axil_arready),
- *      .m_axil_rdata     (m_axil_rdata),
- *      //-- AXI Master Read Data Channel
- *      .m_axil_rresp     (m_axil_rresp),
- *      .m_axil_rvalid    (m_axil_rvalid),
- *      .m_axil_rready    (m_axil_rready),
- *
- *
- *      .usr_irq_req       (usr_irq_req),
- *      .usr_irq_ack       (usr_irq_ack),
- *      .msi_enable        (msi_enable),
- *      .msi_vector_width  (msi_vector_width),
- *
- *      //-- AXI Global
- *      .axi_aclk        ( pci_user_clk ),
- *      .axi_aresetn   (pci_user_resetn),
- *
- *      .user_lnk_up     ( pci_user_lnk_up )
- *    );
- */
 
   system_wrapper i_system_wrapper (
 
@@ -639,20 +560,20 @@ module system_top #
 
         .adc_data_a (adc_data[0]),
         .adc_enable_a (adc_enable[0]),
-        .adc_valid_a (adc_valid[0]),
+        //.adc_valid_a (adc_valid[0]),
 
         .adc_data_b (adc_data[1]),
 
         .adc_enable_b (adc_enable[1]),
-        .adc_valid_b (adc_valid[1]),
+        //.adc_valid_b (adc_valid[1]),
 
         .adc_data_c (adc_data[2]),
         .adc_enable_c (adc_enable[2]),
-        .adc_valid_c (adc_valid[2]),
+        //.adc_valid_c (adc_valid[2]),
 
         .adc_data_d (adc_data[3]),
         .adc_enable_d (adc_enable[3]),
-        .adc_valid_d (adc_valid[3]),
+        //.adc_valid_d (adc_valid[3]),
 
         // Latency 480 ns ?
         //Trigger levels are positive
@@ -671,10 +592,6 @@ module system_top #
 
         .detect_pls (detect_pls_i)  // o
     );
-
-    //wire m_axis128_tvalid, m_axis128_tready;
-    //wire [127:0] m_axis128_data;
-    //wire m_axis64_tvalid, s_axis64_tready;
 
       // AXI streaming ports
 
@@ -698,8 +615,7 @@ module system_top #
     wire [C_S_AXI_DATA_WIDTH-1:0] adc_data_all = {adc_cnt[15:2], almost_full_axis, almost_full_axis_pre, adc_data3[15:0], adc_data[2], adc_data[1], adc_data[0]};
     wire  adc_dma_tvalid = adc_enable[0]; // && detect_0_i; //&& adc_valid[0] Write DMA FIFO only after trigger 0
 
-    reg [1:0] acq_soft_trig_dly;
-    reg [1:0] acq_hard_trig_dly;
+    reg [1:0] acq_soft_trig_dly, acq_hard_trig_dly;
 
 // Trigger generation
     always @(posedge pci_user_clk or negedge acq_en_i) begin
