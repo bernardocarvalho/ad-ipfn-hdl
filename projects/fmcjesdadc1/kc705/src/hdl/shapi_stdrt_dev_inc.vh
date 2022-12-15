@@ -52,9 +52,9 @@
 `define DEV_FW_MINOR        8'h00
 `define DEV_FW_MAJOR        8'h01
 
-// Use Linux command: date +%s; date  to get UNIX timestamp
-`define DEV_TSTAMP      32'd1668699093
-//Thu 17 Nov 2022 03:31:33 PM WET
+// Use Linux command: date +%s to get UNIX timestamp
+`define DEV_TSTAMP      32'd1670946844
+//TS Tue 13 Dec 2022 03:54:04 PM WET
 
 `define DEV_NAME1         "1cdA" // first char right
 `define DEV_NAME2         "girT"

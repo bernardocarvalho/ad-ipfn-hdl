@@ -1,21 +1,22 @@
 //////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
+// Company: IPFN IST
+// Engineer: Bernardo Carvalho
+//
+// vim: sta:et:sw=4:ts=4:sts=4
 //
 // Create Date: 04/30/2021 03:15:44 PM
 // Design Name:
 // Module Name: system_top
-// Project Name:
-// Target Devices: Kintex- 7
-// Tool Versions:
+// Project Name: ESTHER Shock Tube Trigger/DAQ system
+// Target Devices: Kintex-7
+// Tool Versions: Vivado 2019.1
 // Description:
 //
 // Dependencies:
-//
+//      trigger_gen
 // Additional Comments:
 //
-//
-// Copyright 2018 IPFN-Instituto Superior Tecnico, Portugal
+// Copyright 2018-2023 IPFN-Instituto Superior Tecnico, Portugal
 // Creation Date   04/30/2018 03:15:44 PM
 //
 // Licensed under the EUPL, Version 1.2 or - as soon they
@@ -41,7 +42,7 @@
 //
 
 `timescale 1ns/100ps
-//`include "shapi_stdrt_dev_inc.vh"
+
 `define ACQE_BIT 		23
 `define STRG_BIT 		24 // Soft Trigger
 
@@ -59,7 +60,6 @@ module system_top #
    parameter AXIS_CCIX_TX_TDATA_WIDTH     = 256,
    parameter AXIS_CCIX_RX_TUSER_WIDTH     = 46,
    parameter AXIS_CCIX_TX_TUSER_WIDTH     = 46
-
    )
 (
 
@@ -114,7 +114,6 @@ module system_top #
     output                  linear_flash_oen,
     output                  linear_flash_wen,
 
-
     output                  fan_pwm,
 
     inout       [ 6:0]      gpio_lcd,
@@ -139,16 +138,16 @@ module system_top #
 
 // IPFN mods
 
-  //User SMA Clock
+  // User SMA Clocks
     output          user_sma_clk_p, // SMA J11
 
     output          user_sma_clk_n, // SMA J12
-    //User SMA Gpio
+    //User SMA Gpios
     output          user_sma_gpio_p, //Y23 USER_SMA_GPIO_P LVCMOS25 J13.1
     output          user_sma_gpio_n, //Y24 USER_SMA_GPIO_N LVCMOS25 J14.1 bellow J11
 
 
-    //PCIE
+    //PciE
     output  [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_txp,
     output  [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_txn,
     input   [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_rxp,
@@ -188,9 +187,6 @@ module system_top #
   wire    [N_ADC_CHANNELS-1:0] adc_valid;
   wire    [31:0] adc_data[0:N_ADC_CHANNELS-1]; // array of  32-bit registers;
 
-
-  //wire    [13:0]      gpio_trigg_lvl = gpio_o[31:18]; // 14 bit GPIO lines 18 -31
-
   assign ddr3_1_p = 2'b11;
   assign ddr3_1_n = 3'b000;
   assign fan_pwm = 1'b1;
@@ -201,7 +197,6 @@ module system_top #
    //  AXI Interface                                                                                                 //
    //----------------------------------------------------------------------------------------------------------------//
 
-
    wire 					   pci_user_clk;
    wire 					   pci_user_resetn;
 // PCIe XDMA
@@ -211,7 +206,6 @@ module system_top #
   //----------------------------------------------------------------------------------------------------------------//
 
     wire                                    pci_sys_clk;
-//    wire                                    pci_sys_clk_gt;
     wire                                    pci_sys_rst_n_c;
 
   // User Clock LED Heartbeat
@@ -261,7 +255,7 @@ module system_top #
      wire                            m_axi_rvalid;
      wire                            m_axi_rready;
 
-//////////////////////////////////////////////////  LITE
+//////////////////////////////////////////////////  AXI Master LITE
    //-- AXI Master Write Address Channel
     wire [31:0] m_axil_awaddr;
     wire [2:0]  m_axil_awprot;
@@ -325,13 +319,15 @@ module system_top #
     .I (rx_ref_clk_p),
     .IB (rx_ref_clk_n),
     .O (rx_ref_clk),
-    .ODIV2 ());
+    .ODIV2 ()
+  );
 
   ad_iobuf #(.DATA_WIDTH(17)) i_iobuf (
     .dio_t (gpio_t[16:0]),
     .dio_i (gpio_o[16:0]),
     .dio_o (gpio_i[16:0]),
-    .dio_p (gpio_bd));
+    .dio_p (gpio_bd)
+  );
 
   assign gpio_i[63:32] = gpio_o[63:32];
   assign gpio_i[31:17] = gpio_o[31:17];
@@ -341,12 +337,14 @@ module system_top #
     .spi_clk (spi_clk),
     .spi_mosi (spi_mosi),
     .spi_miso (spi_miso),
-    .spi_sdio (spi_sdio));
+    .spi_sdio (spi_sdio)
+  );
 
   ad_sysref_gen #(.SYSREF_PERIOD(64)) i_sysref (
     .core_clk (rx_clk),
     .sysref_en (gpio_o[32]),
-    .sysref_out (rx_sysref));
+    .sysref_out (rx_sysref)
+  );
 
  // Ref clock buffer
   IBUFDS_GTE2 pci_refclk_ibuf (.O(pci_sys_clk), .ODIV2(), .I(pci_sys_clk_p), .CEB(1'b0), .IB(pci_sys_clk_n));
@@ -422,22 +420,22 @@ module system_top #
     );
 
 
-  system_wrapper i_system_wrapper (
+    system_wrapper i_system_wrapper (
 
-          .adc_data_a (adc_data[0]),
-          .adc_enable_a (adc_enable[0]),
-          .adc_valid_a (adc_valid[0]),
-          .adc_data_b (adc_data[1]),
-          .adc_enable_b (adc_enable[1]),
-          .adc_valid_b (adc_valid[1]),
-          .adc_data_c (adc_data[2]),
-          .adc_enable_c (adc_enable[2]),
-          .adc_valid_c (adc_valid[2]),
-          .adc_data_d (adc_data[3]),
-          .adc_enable_d (adc_enable[3]),
-          .adc_valid_d (adc_valid[3]),
+        .adc_data_a (adc_data[0]),
+        .adc_enable_a (adc_enable[0]),
+        .adc_valid_a (adc_valid[0]),
+        .adc_data_b (adc_data[1]),
+        .adc_enable_b (adc_enable[1]),
+        .adc_valid_b (adc_valid[1]),
+        .adc_data_c (adc_data[2]),
+        .adc_enable_c (adc_enable[2]),
+        .adc_valid_c (adc_valid[2]),
+        .adc_data_d (adc_data[3]),
+        .adc_enable_d (adc_enable[3]),
+        .adc_valid_d (adc_valid[3]),
 
-         .ddr3_addr (ddr3_addr),
+        .ddr3_addr (ddr3_addr),
         .ddr3_ba (ddr3_ba),
         .ddr3_cas_n (ddr3_cas_n),
         .ddr3_ck_n (ddr3_ck_n),
@@ -507,52 +505,52 @@ module system_top #
 
     // BAR0 register Space 8-bit address, 32-bit Data
     (* keep = "true" *) reg  acq_on_r, acq_on_q;
-    wire almost_full_axis, almost_empty_axis, prog_full, prog_empty;
-	//wire [31:0] control_reg_i;
+    wire almost_full_axis, almost_empty_axis; //, prog_full, prog_empty;
+    //wire [31:0] control_reg_i;
 
     wire [15:0] rd_data_count;
-
+    wire prog_empty_axis_pre;
     wire [31:0] status_reg_i = {rd_data_count,
         detect_pls_i,
-        3'h0, acq_on_r,      almost_full_axis, almost_empty_axis, prog_full, prog_empty};
+        3'h0, acq_on_r,      almost_full_axis, almost_empty_axis, 1'b0, prog_empty_axis_pre}; //, prog_full, prog_empty};
 
     shapi_regs_v1 # (
         .C_S_AXI_DATA_WIDTH(32),
         .C_S_AXI_ADDR_WIDTH(8)
     ) shapi_regs_v1_inst (
-           .S_AXI_ACLK(pci_user_clk),
-          .S_AXI_ARESETN(pci_user_resetn),
-          .S_AXI_AWADDR(m_axil_awaddr[7:0]),
-          //.S_AXI_AWPROT(s_axil_awprot), // Not used
-          .S_AXI_AWVALID(m_axil_awvalid),
-          .S_AXI_AWREADY(m_axil_awready),
-          .S_AXI_WDATA(m_axil_wdata),
-          .S_AXI_WSTRB(m_axil_wstrb),
-          .S_AXI_WVALID(m_axil_wvalid),
-          .S_AXI_WREADY(m_axil_wready),
-          .S_AXI_BRESP(m_axil_bresp),
-          .S_AXI_BVALID(m_axil_bvalid),
-          .S_AXI_BREADY(m_axil_bready),
-          .S_AXI_ARADDR(m_axil_araddr[9:0]),
-          //.S_AXI_ARPROT(s_axil_arprot), // Not used
-          .S_AXI_ARVALID(m_axil_arvalid),
-          .S_AXI_ARREADY(m_axil_arready),
-          .S_AXI_RDATA(m_axil_rdata),
-          .S_AXI_RRESP(m_axil_rresp),
-          .S_AXI_RVALID(m_axil_rvalid),
-          .S_AXI_RREADY(m_axil_rready),
+        .S_AXI_ACLK(pci_user_clk),
+        .S_AXI_ARESETN(pci_user_resetn),
+        .S_AXI_AWADDR(m_axil_awaddr[7:0]),
+        //.S_AXI_AWPROT(s_axil_awprot), // Not used
+        .S_AXI_AWVALID(m_axil_awvalid),
+        .S_AXI_AWREADY(m_axil_awready),
+        .S_AXI_WDATA(m_axil_wdata),
+        .S_AXI_WSTRB(m_axil_wstrb),
+        .S_AXI_WVALID(m_axil_wvalid),
+        .S_AXI_WREADY(m_axil_wready),
+        .S_AXI_BRESP(m_axil_bresp),
+        .S_AXI_BVALID(m_axil_bvalid),
+        .S_AXI_BREADY(m_axil_bready),
+        .S_AXI_ARADDR(m_axil_araddr[9:0]),
+        //.S_AXI_ARPROT(s_axil_arprot), // Not used
+        .S_AXI_ARVALID(m_axil_arvalid),
+        .S_AXI_ARREADY(m_axil_arready),
+        .S_AXI_RDATA(m_axil_rdata),
+        .S_AXI_RRESP(m_axil_rresp),
+        .S_AXI_RVALID(m_axil_rvalid),
+        .S_AXI_RREADY(m_axil_rready),
 
-           .status_reg(status_reg_i),
-           .trig_0(triglvl_0),
-           .trig_1(triglvl_1),  // I
-           .trig_2(triglvl_2),
-           .param_mul(param_mul_i),
-           .param_off(param_off_i),
-           .init_delay(init_delay_i),
-           
-           .pulse_tof(pulse_tof_i),
+        .status_reg(status_reg_i),
+        .trig_0(triglvl_0),
+        .trig_1(triglvl_1),  // I
+        .trig_2(triglvl_2),
+        .param_mul(param_mul_i),
+        .param_off(param_off_i),
+        .init_delay(init_delay_i),
 
-           .control_reg(control_reg_i)
+        .pulse_tof(pulse_tof_i),
+
+        .control_reg(control_reg_i)
     );
 
     trigger_gen trigger_gen_i (
@@ -585,7 +583,7 @@ module system_top #
         .trig_level_c(triglvl_2),
         .param_mul(param_mul_i),
         .param_off(param_off_i),
-        
+
         .init_delay(init_delay_i),
 
         .pulse_tof(pulse_tof_i), // o
@@ -593,385 +591,390 @@ module system_top #
         .detect_pls (detect_pls_i)  // o
     );
 
-      // AXI streaming ports
+    // AXI streaming ports
 
-     reg [14:0] s_axis_c2h_cnt = 15'h00; // 15'h3FF;
+    reg [14:0] s_axis_c2h_cnt = 15'h00; // 15'h3FF;
 
-     always @(posedge pci_user_clk or negedge pci_user_resetn)
+    always @(posedge pci_user_clk or negedge pci_user_resetn)
         if (!pci_user_resetn)
             s_axis_c2h_cnt <= 15'h00;
         else if (s_axis_c2h_tvalid_0 && s_axis_c2h_tready_0)
             s_axis_c2h_cnt <= s_axis_c2h_cnt +1;
 
-      assign s_axis_c2h_tlast_0 = (s_axis_c2h_cnt ==15'h3FF)? 1'b1:1'b0;// m_axis_h2c_tlast_0;
+    assign s_axis_c2h_tlast_0 = (s_axis_c2h_cnt ==15'h3FF)? 1'b1:1'b0;// m_axis_h2c_tlast_0;
 
-      // H2C dump
+    //-- H2C data dump
     assign m_axis_h2c_tready_0 = 1'b1; // H2C data discarded
 
     wire almost_full_axis_pre;
 
     reg [15:0] adc_cnt = 'h00;
     wire [31:0] adc_data3  = adc_data[3];
-    wire [C_S_AXI_DATA_WIDTH-1:0] adc_data_all = {adc_cnt[15:2], almost_full_axis, almost_full_axis_pre, adc_data3[15:0], adc_data[2], adc_data[1], adc_data[0]};
+    wire [C_S_AXI_DATA_WIDTH-1:0] adc_data_all = {adc_cnt[15:3], almost_empty_axis, almost_full_axis, almost_full_axis_pre, adc_data3[15:0], adc_data[2], adc_data[1], adc_data[0]};
     wire  adc_dma_tvalid = adc_enable[0]; // && detect_0_i; //&& adc_valid[0] Write DMA FIFO only after trigger 0
 
     reg [1:0] acq_soft_trig_dly, acq_hard_trig_dly;
 
-// Trigger generation
+    // -- Trigger generation
     always @(posedge pci_user_clk or negedge acq_en_i) begin
         if (!acq_en_i)
-                    begin
-                        acq_on_r <= #TCQ  1'b0;
-                        acq_soft_trig_dly <=  #TCQ 2'b11;
-                        acq_hard_trig_dly <=  #TCQ 2'b11;
-                    end
-                else
-                    begin
-                         acq_soft_trig_dly <=  #TCQ  {acq_soft_trig_dly[0], control_reg_i[`STRG_BIT]}; // delay pipe
-                         acq_hard_trig_dly <=  #TCQ  {acq_hard_trig_dly[0], detect_pls_i[1]}; // delay pipe
+        begin
+            acq_on_r <= #TCQ  1'b0;
+            acq_soft_trig_dly <=  #TCQ 2'b11;
+            acq_hard_trig_dly <=  #TCQ 2'b11;
+        end
+        else
+        begin
+            acq_soft_trig_dly <=  #TCQ  {acq_soft_trig_dly[0], control_reg_i[`STRG_BIT]}; // delay pipe
+            acq_hard_trig_dly <=  #TCQ  {acq_hard_trig_dly[0], detect_pls_i[1]}; // delay pipe
 
-                         if( (acq_soft_trig_dly == 2'b01) ||  (acq_hard_trig_dly == 2'b01)) // detect rising  edge
-                                acq_on_r <= #TCQ  1'b1;
-                    end
+            if( (acq_soft_trig_dly == 2'b01) ||  (acq_hard_trig_dly == 2'b01)) // detect rising  edge
+                acq_on_r <= #TCQ  1'b1;
+        end
     end
+
     wire s_axis_tready_pre;
-     always @(posedge rx_clk or posedge sys_rst)
+    always @(posedge rx_clk or posedge sys_rst)
         if (sys_rst)
             adc_cnt <= 0;
         else if (adc_dma_tvalid) // && s_axis_tready_pre)
             adc_cnt <= adc_cnt + 1;
 
-   reg acq_on_rx_r = 1'b0;
-   always @(posedge rx_clk or posedge sys_rst)
+    reg acq_on_rx_r = 1'b0;
+    always @(posedge rx_clk or posedge sys_rst)
         if (sys_rst)
             acq_on_rx_r <= 1'b0;
         else
             acq_on_rx_r <= acq_on_r;
 
-   wire   m_axis_tready_main = s_axis_c2h_tready_0 || (!acq_on_r ) ;// && prog_full); // Flush MAIN buffer on ACQ disable
-   wire   m_axis_tvalid_main;
-   assign s_axis_c2h_tvalid_0 = m_axis_tvalid_main &&  acq_on_r ; // Stream only with ACQ enable
+    wire   m_axis_tready_main = s_axis_c2h_tready_0 || (!acq_on_r ) ;// && prog_full); // Flush MAIN buffer on ACQ OFF
+    wire   m_axis_tvalid_main;
+    assign s_axis_c2h_tvalid_0 = m_axis_tvalid_main &&  acq_on_r ; // Stream only with ACQ ON
 
     wire [127:0] m_axis_tdata_pre;
     wire s_axis_tready_main;
-    wire prog_empty_axis_pre;
+
     //wire m_axis_tready_pre = s_axis_tready_main || ( (!acq_on_r) && (!prog_empty_axis_pre) ) ; // on ACQ disable, fill  PRE  buffer up to  almost_full
-//    wire m_axis_tready_pre = s_axis_tready_main || ( (!acq_on_r) && almost_full_axis_pre ) ; // on ACQ disable, fill  PRE  buffer up to  almost_full
+    //    wire m_axis_tready_pre = s_axis_tready_main || ( (!acq_on_r) && almost_full_axis_pre ) ; // on ACQ disable, fill  PRE  buffer up to  almost_full
     wire m_axis_tready_pre = (acq_on_r)? s_axis_tready_main :
-                                           almost_full_axis_pre; // on ACQ disable, empty PRE  buffer when almost_full ( keep pre-trigger samples)
+                                         almost_full_axis_pre; // on ACQ disable, empty PRE  buffer when almost_full ( keep pre-trigger samples)
+                                         //  !prog_empty_axis_pre;  
     wire m_axis_tvalid_pre;
-    wire s_axis_tvalid_main = m_axis_tvalid_pre &&  acq_on_rx_r ; // Fill Main only with ACQ enable
+    wire s_axis_tvalid_main = m_axis_tvalid_pre &&  acq_on_rx_r ; // Fill Main only with ACQ ON
 
-   xpm_fifo_axis #(
-      .CDC_SYNC_STAGES(3),            // DECIMAL Range: 2 - 8. Default value = 2.
-  //    .CLOCKING_MODE("independent_clock"), // String
-      .CLOCKING_MODE("common_clock"), // String
-      .ECC_MODE("no_ecc"),            // String
-    //  .FIFO_DEPTH(16384),              // DECIMAL 131072 65536  32768 16384   ~0.131 ms pre-trigger ACQ
-      .FIFO_DEPTH(32768),              // DECIMAL    ~0.25 ms pre-trigger ACQ
-      .FIFO_MEMORY_TYPE("auto"),      // String
-      .PACKET_FIFO("false"),          // String
-      .PROG_EMPTY_THRESH(32760),         // DECIMAL 
-      .PROG_FULL_THRESH(32760),       // DECIMAL 8- 32763 // Not used
-      //.RD_DATA_COUNT_WIDTH(14),        // DECIMAL
-      .RELATED_CLOCKS(0),             // DECIMAL
-      .SIM_ASSERT_CHK(0),             // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
-      .TDATA_WIDTH(128),               // DECIMAL Defines the width of the TDATA port, s_axis_tdata and m_axis_tdata
-      .TDEST_WIDTH(1),                // DECIMAL
-      .TID_WIDTH(1),                  // DECIMAL
-      .TUSER_WIDTH(1),                // DECIMAL
-      .USE_ADV_FEATURES("0208") //,      // String  [3] enables almost_full flag; [9]  to 1 enables prog_empty flag; 
-      //.WR_DATA_COUNT_WIDTH(15)         // DECIMAL log2(32768) + 1 = 16
-   )
-   xpm_fifo_axis_pre_trigg_i (
-      .almost_empty_axis(),   // 1-bit output: Almost Empty : When asserted, this signal
-                                               // indicates that only one more user_clkread can be performed before the
-                                               // FIFO goes to empty.
+    xpm_fifo_axis #(
+        .CDC_SYNC_STAGES(3),            // DECIMAL Range: 2 - 8. Default value = 2.
+        .CLOCKING_MODE("independent_clock"), // String
+        //.CLOCKING_MODE("common_clock"), // String
+        .ECC_MODE("no_ecc"),            // String
+        .FIFO_DEPTH(32768),              // DECIMAL    ~0.25 ms pre-trigger ACQ
+        .FIFO_MEMORY_TYPE("auto"),      // String
+        .PACKET_FIFO("false"),          // String
+        .PROG_EMPTY_THRESH(32760),         // DECIMAL 
+        .PROG_FULL_THRESH(32760),       // DECIMAL 8- 32763 // Not used
+        //.RD_DATA_COUNT_WIDTH(14),        // DECIMAL
+        .RELATED_CLOCKS(0),             // DECIMAL
+        .SIM_ASSERT_CHK(0),             // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+        .TDATA_WIDTH(128),               // DECIMAL Defines the width of the TDATA port, s_axis_tdata and m_axis_tdata
+        .TDEST_WIDTH(1),                // DECIMAL
+        .TID_WIDTH(1),                  // DECIMAL
+        .TUSER_WIDTH(1),                // DECIMAL
+        .USE_ADV_FEATURES("0208")      // String  [3] enables almost_full flag; 
+                                        //         [9]  to 1 enables prog_empty flag; 
+        //.WR_DATA_COUNT_WIDTH(15)         // DECIMAL log2(32768) + 1 = 16
+    ) xpm_fifo_axis_pre_trigg_i (
+        .almost_empty_axis(),   // 1-bit output: Almost Empty : When asserted, this signal
+        // indicates that only one more user_clkread can be performed before the
+        // FIFO goes to empty.
 
-      .almost_full_axis(almost_full_axis_pre),     // 1-bit output: Almost Full: When asserted, this signal
-                                               // indicates that only one more write can be performed before
-                                               // the FIFO is full.
+        .almost_full_axis(almost_full_axis_pre),     // 1-bit output: Almost Full: When asserted, this signal
+        // indicates that only one more write can be performed before
+        // the FIFO is full.
 
-      .dbiterr_axis(),             // 1-bit output: Double Bit Error- Indicates that the ECC
-                                               // decoder detected a double-bit error and data in the FIFO core
-                                               // is corrupted.
+        .dbiterr_axis(),             // 1-bit output: Double Bit Error- Indicates that the ECC
+        // decoder detected a double-bit error and data in the FIFO core
+        // is corrupted.
 
-      .m_axis_tdata(m_axis_tdata_pre),        // TDATA_WIDTH-bit output: TDATA: The primary payload that is m_axis128_data
-                                               // used to provide the data that is passing across the
-                                               // interface. The width of the data payload is an integer number
-                                               // of bytes.
+        .m_axis_tdata(m_axis_tdata_pre),        // TDATA_WIDTH-bit output: TDATA: The primary payload that is m_axis128_data
+        // used to provide the data that is passing across the
+        // interface. The width of the data payload is an integer number
+        // of bytes.
 
-      .m_axis_tdest(),             // TDEST_WIDTH-bit output: TDEST: Provides routing information
-                                               // for the data stream.
+        .m_axis_tdest(),             // TDEST_WIDTH-bit output: TDEST: Provides routing information
+        // for the data stream.
 
-      .m_axis_tid(),                 // TID_WIDTH-bit output: TID: The data stream identifier that
-                                               // indicates different streams of data.
+        .m_axis_tid(),                 // TID_WIDTH-bit output: TID: The data stream identifier that
+        // indicates different streams of data.
 
-      .m_axis_tkeep(),             // TDATA_WIDTH/8-bit output: TKEEP: The byte qualifier that
-                                               // indicates whether the content of the associated byte of TDATA
-                                               // is processed as part of the data stream. Associated bytes
-                                               // that have the TKEEP byte qualifier deasserted are null bytes
-                                               // and can be removed from the data stream. For a 64-bit DATA,
-                                               // bit 0 corresponds to the least significant byte on DATA, and
-                                               // bit 7 corresponds to the most significant byte. For example:
-                                               // KEEP[0] = 1b, DATA[7:0] is not a NULL byte KEEP[7] = 0b,
-                                               // DATA[63:56] is a NULL byte
+        .m_axis_tkeep(),             // TDATA_WIDTH/8-bit output: TKEEP: The byte qualifier that
+        // indicates whether the content of the associated byte of TDATA
+        // is processed as part of the data stream. Associated bytes
+        // that have the TKEEP byte qualifier deasserted are null bytes
+        // and can be removed from the data stream. For a 64-bit DATA,
+        // bit 0 corresponds to the least significant byte on DATA, and
+        // bit 7 corresponds to the most significant byte. For example:
+        // KEEP[0] = 1b, DATA[7:0] is not a NULL byte KEEP[7] = 0b,
+        // DATA[63:56] is a NULL byte
 
-      .m_axis_tlast(),             // 1-bit output: TLAST: Indicates the boundary of a packet.
-      .m_axis_tstrb(),             // TDATA_WIDTH/8-bit output: TSTRB: The byte qualifier that
-                                               // indicates whether the content of the associated byte of TDATA
-                                               // is processed as a data byte or a position byte. For a 64-bit
-                                               // DATA, biprog_empty_axis_pret 0 corresponds to the least significant byte on
-                                               // DATA, and bit 0 corresponds to the least significant byte on
-                                               // DATA, and bit 7 corresponds to the most significant byte. For
-                                               // example: STROBE[0] = 1b, DATA[7:0] is valid STROBE[7] = 0b,
-                                               // DATA[63:56] is not valid
+        .m_axis_tlast(),             // 1-bit output: TLAST: Indicates the boundary of a packet.
+        .m_axis_tstrb(),             // TDATA_WIDTH/8-bit output: TSTRB: The byte qualifier that
+        // indicates whether the content of the associated byte of TDATA
+        // is processed as a data byte or a position byte. For a 64-bit
+        // DATA, biprog_empty_axis_pret 0 corresponds to the least significant byte on
+        // DATA, and bit 0 corresponds to the least significant byte on
+        // DATA, and bit 7 corresponds to the most significant byte. For
+        // example: STROBE[0] = 1b, DATA[7:0] is valid STROBE[7] = 0b,
+        // DATA[63:56] is not valid
 
-      .m_axis_tuser(),             // TUSER_WIDTH-bit output: TUSER: The user-defined sideband
-                                               // information that can be transmitted alongside the data
-                                               // stream.
+        .m_axis_tuser(),             // TUSER_WIDTH-bit output: TUSER: The user-defined sideband
+        // information that can be transmitted alongside the data
+        // stream.
 
-      .m_axis_tvalid(m_axis_tvalid_pre),           // 1-bit output: TVALID: Indicates that the master is driving a m_axis128_tvalid
-                                               // valid transfer. A transfer takes place when both TVALID and
-                                               // TREADY are asserted
+        .m_axis_tvalid(m_axis_tvalid_pre),           // 1-bit output: TVALID: Indicates that the master is driving a m_axis128_tvalid
+        // valid transfer. A transfer takes place when both TVALID and
+        // TREADY are asserted
 
-      .prog_empty_axis(prog_empty_axis_pre),       // 1-bit output: Programmable Empty- This signal is asserted
-                                               // when the number of words in the FIFO is less than or equal to
-                                               // the programmable empty threshold value. It is de-asserted
-                                               // when the number of words in the FIFO exceeds the programmable
-                                               // empty threshold value.
+        .prog_empty_axis(prog_empty_axis_pre),       // 1-bit output: Programmable Empty- This signal is asserted
+        // when the number of words in the FIFO is less than or equal to
+        // the programmable empty threshold value. It is de-asserted
+        // when the number of words in the FIFO exceeds the programmable
+        // empty threshold value.
 
-      .prog_full_axis(),         // 1-bit output: Programmable Full: This signal is asserted when
-                                               // the number of words in the FIFO is greater than or equal to
-                                               // the programmable full threshold value. It is de-asserted when
-                                               // the number of words in the FIFO is less than the programmable
-                                               // full threshold value.
+        .prog_full_axis(),         // 1-bit output: Programmable Full: This signal is asserted when
+        // the number of words in the FIFO is greater than or equal to
+        // the programmable full threshold value. It is de-asserted when
+        // the number of words in the FIFO is less than the programmable
+        // full threshold value.
 
-      .rd_data_count_axis(), // RD_DATA_COUNT_WIDTH-bit output: Read Data Count- This bus
-                                               // indicates the number of words available for reading in the
-                                               // FIFO.
+        .rd_data_count_axis(), // RD_DATA_COUNT_WIDTH-bit output: Read Data Count- This bus
+        // indicates the number of words available for reading in the
+        // FIFO.
 
-      .s_axis_tready(s_axis_tready_pre),           // 1-bit output: TREADY: Indicates that the slave can accept a
-                                               // transfer in the current cycle.
+        .s_axis_tready(s_axis_tready_pre),           // 1-bit output: TREADY: Indicates that the slave can accept a
+        // transfer in the current cycle.
 
-      .sbiterr_axis(),             // 1-bit output: Single Bit Error- Indicates that the ECC
-                                               // decoder detected and fixed a single-bit error.
+        .sbiterr_axis(),             // 1-bit output: Single Bit Error- Indicates that the ECC
+        // decoder detected and fixed a single-bit error.
 
-      .wr_data_count_axis(), // WR_DATA_COUNT_WIDTH-bit output: Write Data Count: This bus
-                                               // indicates the number of words written into the FIFO.
+        .wr_data_count_axis(), // WR_DATA_COUNT_WIDTH-bit output: Write Data Count: This bus
+        // indicates the number of words written into the FIFO.
 
-      .injectdbiterr_axis(1'b0), // 1-bit input: Double Bit Error Injection- Injects a double bit
-                                               // error if the ECC feature is used.
+        .injectdbiterr_axis(1'b0), // 1-bit input: Double Bit Error Injection- Injects a double bit
+        // error if the ECC feature is used.
 
-      .injectsbiterr_axis(1'b0), // 1-bit input: Single Bit Error Injection- Injects a single bit
-                                               // error if the ECC feature is used.
+        .injectsbiterr_axis(1'b0), // 1-bit input: Single Bit Error Injection- Injects a single bit
+        // error if the ECC feature is used.
 
-      .m_aclk(),                         // 1-bit input: Master Interface Clock: All signals on master
-      //.m_aclk(pci_user_clk),                         // 1-bit input: Master Interface Clock: All signals on master
+        //.m_aclk(),                         // 1-bit input: Master Interface Clock:
+        .m_aclk(pci_user_clk),                         // 1-bit input: Master Interface Clock:
 
-      .m_axis_tready(m_axis_tready_pre),           // 1-bit input: TREADY: Indicates that the slave can accept a 
-                                               // transfer in the current cycle.
+        .m_axis_tready(m_axis_tready_pre),           // 1-bit input: TREADY: Indicates that the slave can accept a 
+        // transfer in the current cycle.
 
-      .s_aclk(rx_clk),                         // 1-bit input: Slave Interface Clock: All signals on slave
-                                               // interface are sampled on the rising edge of this clock.
+        .s_aclk(rx_clk),                         // 1-bit input: Slave Interface Clock:
 
-      .s_aresetn(pci_user_resetn),                   // 1-bit input: Active low asynchronous reset.
-      .s_axis_tdata(adc_data_all),             // TDATA_WIDTH-bit input: TDATA: The primary payload that is
-                                               // used to provide the data that is passing across the
-                                               // interface. The width of the data payload is an integer number
-                                               // of bytes.
+        .s_aresetn(pci_user_resetn),                   // 1-bit input: Active low asynchronous reset.
+        .s_axis_tdata(adc_data_all),             // TDATA_WIDTH-bit input: TDATA: The primary payload that is
+        // used to provide the data that is passing across the
+        // interface. The width of the data payload is an integer number
+        // of bytes.
 
-      .s_axis_tdest(1'b0),             // TDEST_WIDTH-bit input: TDEST: Provides routing information
-                                               // for the data stream.
+        .s_axis_tdest(1'b0),             // TDEST_WIDTH-bit input: TDEST: Provides routing information
+        // for the data stream.
 
-      .s_axis_tid(1'b0),                 // TID_WIDTH-bit input: TID: The data stream identifier that
-                                               // indicates different streams of data.
+        .s_axis_tid(1'b0),                 // TID_WIDTH-bit input: TID: The data stream identifier that
+        // indicates different streams of data.
 
-      .s_axis_tkeep(16'hFFFF),             // TDATA_WIDTH/8-bit input: TKEEP: The byte qualifier that
-                                               // indicates whether the content of the associated byte of TDATA
-                                               // is processed as part of the data stream. Associated bytes
-                                               // that have the TKEEP byte qualifier deasserted are null bytes
-                                               // and can be removed from the data stream. For a 64-bit DATA,
-                                               // bit 0 corresponds to the least significant byte on DATA, and
-                                               // bit 7 corresponds to the most significant byte. For example:
-                                               // KEEP[0] = 1b, DATA[7:0] is not a NULL byte KEEP[7] = 0b,
-                                               // DATA[63:56] is a NULL byte
+        .s_axis_tkeep(16'hFFFF),             // TDATA_WIDTH/8-bit input: TKEEP: The byte qualifier that
+        // indicates whether the content of the associated byte of TDATA
+        // is processed as part of the data stream. Associated bytes
+        // that have the TKEEP byte qualifier deasserted are null bytes
+        // and can be removed from the data stream. For a 64-bit DATA,
+        // bit 0 corresponds to the least significant byte on DATA, and
+        // bit 7 corresponds to the most significant byte. For example:
+        // KEEP[0] = 1b, DATA[7:0] is not a NULL byte KEEP[7] = 0b,
+        // DATA[63:56] is a NULL byte
 
-      .s_axis_tlast(1'b0),             // 1-bit input: TLAST: Indicates the boundary of a packet.
-      .s_axis_tstrb(8'h00),             // TDATA_WIDTH/8-bit input: TSTRB: The byte qualifier that
-                                               // indicates whether the content of the associated byte of TDATA
-                                               // is processed as a data byte or a position byte. For a 64-bit
-                                               // DATA, bit 0 corresponds to the least significant byte on
-                                               // DATA, and bit 0 corresponds to the least significant byte on
-                                               // DATA, and bit 7 corresponds to the most significant byte. For
-                                               // example: STROBE[0] = 1b, DATA[7:0] is valid STROBE[7] = 0b,
-                                               // DATA[63:56] is not valid
+        .s_axis_tlast(1'b0),             // 1-bit input: TLAST: Indicates the boundary of a packet.
+        .s_axis_tstrb(8'h00),             // TDATA_WIDTH/8-bit input: TSTRB: The byte qualifier that
+        // indicates whether the content of the associated byte of TDATA
+        // is processed as a data byte or a position byte. For a 64-bit
+        // DATA, bit 0 corresponds to the least significant byte on
+        // DATA, and bit 0 corresponds to the least significant byte on
+        // DATA, and bit 7 corresponds to the most significant byte. For
+        // example: STROBE[0] = 1b, DATA[7:0] is valid STROBE[7] = 0b,
+        // DATA[63:56] is not valid
 
-      .s_axis_tuser(1'b0),             // TUSER_WIDTH-bit input: TUSER: The user-defined sideband
-                                               // information that can be transmitted alongside the data
-                                               // stream.
+        .s_axis_tuser(1'b0),             // TUSER_WIDTH-bit input: TUSER: The user-defined sideband
+        // information that can be transmitted alongside the data
+        // stream.
 
-      .s_axis_tvalid(adc_dma_tvalid)            // 1-bit input: TVALID: Indicates that the master is driving a
-                                               // valid transfer. A transfer takes place when both TVALID and
-                                               // TREADY are asserted
+        .s_axis_tvalid(adc_dma_tvalid)            // 1-bit input: TVALID: Indicates that the master is driving a
+        // valid transfer. A transfer takes place when both TVALID and
+        // TREADY are asserted
 
-   );
+    );
 
-   xpm_fifo_axis #(
-      .CDC_SYNC_STAGES(3),            // DECIMAL Range: 2 - 8. Default value = 2.
-      .CLOCKING_MODE("independent_clock"), 
-//      .CLOCKING_MODE("common_clock"), // String
-      .ECC_MODE("no_ecc"),            // String
-      .FIFO_DEPTH(32768),              // DECIMAL 131072 65536  32768 (65536 Max 4194304 bit?) ~0.5 ms ACQ
-      .FIFO_MEMORY_TYPE("auto"),      // String
-      .PACKET_FIFO("false"),          // String
-      .PROG_EMPTY_THRESH(10000),         // DECIMAL
-      .PROG_FULL_THRESH(20000),       // DECIMAL 8- 32763
-      .RD_DATA_COUNT_WIDTH(16),        // DECIMAL
-      .RELATED_CLOCKS(0),             // DECIMAL
-      .SIM_ASSERT_CHK(0),             // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
-      .TDATA_WIDTH(128),               // DECIMAL Defines the width of the TDATA port, s_axis_tdata and m_axis_tdata
-      .TDEST_WIDTH(1),                // DECIMAL
-      .TID_WIDTH(1),                  // DECIMAL
-      .TUSER_WIDTH(1),                // DECIMAL
-//      .USE_ADV_FEATURES("0202"),      // String
-      .USE_ADV_FEATURES("0E0A"),      // String
-      .WR_DATA_COUNT_WIDTH(16)         // DECIMAL
-   )
-   xpm_fifo_axis_c2h0_i (
-      .almost_empty_axis(almost_empty_axis),   // 1-bit output: Almost Empty : When asserted, this signal
-                                               // indicates that only one more user_clkread can be performed before the
-                                               // FIFO goes to empty.
+    xpm_fifo_axis #(
+        .CDC_SYNC_STAGES(3),            // DECIMAL Range: 2 - 8. Default value = 2.
+        //.CLOCKING_MODE("independent_clock"), 
+        .CLOCKING_MODE("common_clock"), // String
+        .ECC_MODE("no_ecc"),            // String
+        .FIFO_DEPTH(32768),              // DECIMAL 131072 65536  32768 (65536 Max 4194304 bit?) ~0.5 ms ACQ
+        .FIFO_MEMORY_TYPE("auto"),      // String
+        .PACKET_FIFO("false"),          // String
+        .PROG_EMPTY_THRESH(10000),         // DECIMAL
+        .PROG_FULL_THRESH(20000),       // DECIMAL 8- 32763
+        .RD_DATA_COUNT_WIDTH(16),        // DECIMAL
+        .RELATED_CLOCKS(0),             // DECIMAL
+        .SIM_ASSERT_CHK(0),             // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+        .TDATA_WIDTH(128),               // DECIMAL Defines the width of the TDATA port, s_axis_tdata and m_axis_tdata
+        .TDEST_WIDTH(1),                // DECIMAL
+        .TID_WIDTH(1),                  // DECIMAL
+        .TUSER_WIDTH(1),                // DECIMAL
+        //      .USE_ADV_FEATURES("0202"),      // String
 
-      .almost_full_axis(almost_full_axis),     // 1-bit output: Almost Full: When asserted, this signal
-                                               // indicates that only one more write can be performed before
-                                               // the FIFO is full.
+        // |   Setting USE_ADV_FEATURES[3]  to 1 enables almost_full flag;  Default value of this bit is 0                       |
+        // |   Setting USE_ADV_FEATURES[11] to 1 enables almost_empty flag; Default value of this bit is 0               
+        .USE_ADV_FEATURES("0808"),      // String
 
-      .dbiterr_axis(),             // 1-bit output: Double Bit Error- Indicates that the ECC
-                                               // decoder detected a double-bit error and data in the FIFO core
-                                               // is corrupted.
+        //.USE_ADV_FEATURES("0E0A"),      // String
+        .WR_DATA_COUNT_WIDTH(16)         // DECIMAL
+    ) xpm_fifo_axis_c2h0_i (
+        .almost_empty_axis(almost_empty_axis),   // 1-bit output: Almost Empty : When asserted, this signal
+        // indicates that only one more user_clkread can be performed before the
+        // FIFO goes to empty.
 
-      .m_axis_tdata(s_axis_c2h_tdata_0),        // TDATA_WIDTH-bit output: TDATA: The primary payload that is m_axis128_data
-                                               // used to provide the data that is passing across the
-                                               // interface. The width of the data payload is an integer number
-                                               // of bytes.
+        .almost_full_axis(almost_full_axis),     // 1-bit output: Almost Full: When asserted, this signal
+        // indicates that only one more write can be performed before
+        // the FIFO is full.
 
-      .m_axis_tdest(),             // TDEST_WIDTH-bit output: TDEST: Provides routing information
-                                               // for the data stream.
+        .dbiterr_axis(),             // 1-bit output: Double Bit Error- Indicates that the ECC
+        // decoder detected a double-bit error and data in the FIFO core
+        // is corrupted.
 
-      .m_axis_tid(),                 // TID_WIDTH-bit output: TID: The data stream identifier that
-                                               // indicates different streams of data.
+        .m_axis_tdata(s_axis_c2h_tdata_0),        // TDATA_WIDTH-bit output: TDATA: The primary payload that is m_axis128_data
+        // used to provide the data that is passing across the
+        // interface. The width of the data payload is an integer number
+        // of bytes.
 
-      .m_axis_tkeep(s_axis_c2h_tkeep_0),             // TDATA_WIDTH/8-bit output: TKEEP: The byte qualifier that
-                                               // indicates whether the content of the associated byte of TDATA
-                                               // is processed as part of the data stream. Associated bytes
-                                               // that have the TKEEP byte qualifier deasserted are null bytes
-                                               // and can be removed from the data stream. For a 64-bit DATA,
-                                               // bit 0 corresponds to the least significant byte on DATA, and
-                                               // bit 7 corresponds to the most significant byte. For example:
-                                               // KEEP[0] = 1b, DATA[7:0] is not a NULL byte KEEP[7] = 0b,
-                                               // DATA[63:56] is a NULL byte
+        .m_axis_tdest(),             // TDEST_WIDTH-bit output: TDEST: Provides routing information
+        // for the data stream.
 
-      .m_axis_tlast(),             // 1-bit output: TLAST: Indicates the boundary of a packet.
-      .m_axis_tstrb(),             // TDATA_WIDTH/8-bit output: TSTRB: The byte qualifier that
-                                               // indicates whether the content of the associated byte of TDATA
-                                               // is processed as a data byte or a position byte. For a 64-bit
-                                               // DATA, bit 0 corresponds to the least significant byte on
-                                               // DATA, and bit 0 corresponds to the least significant byte on
-                                               // DATA, and bit 7 corresponds to the most significant byte. For
-                                               // example: STROBE[0] = 1b, DATA[7:0] is valid STROBE[7] = 0b,
-                                               // DATA[63:56] is not valid
+        .m_axis_tid(),                 // TID_WIDTH-bit output: TID: The data stream identifier that
+        // indicates different streams of data.
 
-      .m_axis_tuser(),             // TUSER_WIDTH-bit output: TUSER: The user-defined sideband
-                                               // information that can be transmitted alongside the data
-                                               // stream.
+        .m_axis_tkeep(s_axis_c2h_tkeep_0),             // TDATA_WIDTH/8-bit output: TKEEP: The byte qualifier that
+        // indicates whether the content of the associated byte of TDATA
+        // is processed as part of the data stream. Associated bytes
+        // that have the TKEEP byte qualifier deasserted are null bytes
+        // and can be removed from the data stream. For a 64-bit DATA,
+        // bit 0 corresponds to the least significant byte on DATA, and
+        // bit 7 corresponds to the most significant byte. For example:
+        // KEEP[0] = 1b, DATA[7:0] is not a NULL byte KEEP[7] = 0b,
+        // DATA[63:56] is a NULL byte
 
-      .m_axis_tvalid(m_axis_tvalid_main),           // 1-bit output: TVALID: Indicates that the master is driving a m_axis128_tvalid
-                                               // valid transfer. A transfer takes place when both TVALID and
-                                               // TREADY are asserted
+        .m_axis_tlast(),             // 1-bit output: TLAST: Indicates the boundary of a packet.
+        .m_axis_tstrb(),             // TDATA_WIDTH/8-bit output: TSTRB: The byte qualifier that
+        // indicates whether the content of the associated byte of TDATA
+        // is processed as a data byte or a position byte. For a 64-bit
+        // DATA, bit 0 corresponds to the least significant byte on
+        // DATA, and bit 0 corresponds to the least significant byte on
+        // DATA, and bit 7 corresponds to the most significant byte. For
+        // example: STROBE[0] = 1b, DATA[7:0] is valid STROBE[7] = 0b,
+        // DATA[63:56] is not valid
 
-      .prog_empty_axis(prog_empty),       // 1-bit output: Programmable Empty- This signal is asserted
-                                               // when the number of words in the FIFO is less than or equal to
-                                               // the programmable empty threshold value. It is de-asserted
-                                               // when the number of words in the FIFO exceeds the programmable
-                                               // empty threshold value.
+        .m_axis_tuser(),             // TUSER_WIDTH-bit output: TUSER: The user-defined sideband
+        // information that can be transmitted alongside the data
+        // stream.
 
-      .prog_full_axis(prog_full),         // 1-bit output: Programmable Full: This signal is asserted when
-                                               // the number of words in the FIFO is greater than or equal to
-                                               // the programmable full threshold value. It is de-asserted when
-                                               // the number of words in the FIFO is less than the programmable
-                                               // full threshold value.
+        .m_axis_tvalid(m_axis_tvalid_main),           // 1-bit output: TVALID: Indicates that the master is driving a m_axis128_tvalid
+        // valid transfer. A transfer takes place when both TVALID and
+        // TREADY are asserted
 
-      .rd_data_count_axis(rd_data_count), // RD_DATA_COUNT_WIDTH-bit output: Read Data Count- This bus
-                                               // indicates the number of words available for reading in the
-                                               // FIFO.
+        .prog_empty_axis(),       // 1-bit output: Programmable Empty- This signal is asserted
+        // when the number of words in the FIFO is less than or equal to
+        // the programmable empty threshold value. It is de-asserted
+        // when the number of words in the FIFO exceeds the programmable
+        // empty threshold value.
 
-      .s_axis_tready(s_axis_tready_main),           // 1-bit output: TREADY: Indicates that the slave can accept a
-                                               // transfer in the current cycle.
+        .prog_full_axis(),         // 1-bit output: Programmable Full: This signal is asserted when
+        // the number of words in the FIFO is greater than or equal to
+        // the programmable full threshold value. It is de-asserted when
+        // the number of words in the FIFO is less than the programmable
+        // full threshold value.
 
-      .sbiterr_axis(),             // 1-bit output: Single Bit Error- Indicates that the ECC
-                                               // decoder detected and fixed a single-bit error.
+        .rd_data_count_axis(rd_data_count), // RD_DATA_COUNT_WIDTH-bit output: Read Data Count- This bus
+        // indicates the number of words available for reading in the
+        // FIFO.
 
-      .wr_data_count_axis(), // WR_DATA_COUNT_WIDTH-bit output: Write Data Count: This bus
-                                               // indicates the number of words written into the FIFO.
+        .s_axis_tready(s_axis_tready_main),           // 1-bit output: TREADY: Indicates that the slave can accept a
+        // transfer in the current cycle.
 
-      .injectdbiterr_axis(1'b0), // 1-bit input: Double Bit Error Injection- Injects a double bit
-                                               // error if the ECC feature is used.
+        .sbiterr_axis(),             // 1-bit output: Single Bit Error- Indicates that the ECC
+        // decoder detected and fixed a single-bit error.
 
-      .injectsbiterr_axis(1'b0), // 1-bit input: Single Bit Error Injection- Injects a single bit
-                                               // error if the ECC feature is used.
+        .wr_data_count_axis(), // WR_DATA_COUNT_WIDTH-bit output: Write Data Count: This bus
+        // indicates the number of words written into the FIFO.
 
-      .m_aclk(pci_user_clk),                         // 1-bit input: Master Interface Clock: All signals on master
-                                               // interface are sampled on the rising edge of this clock.
+        .injectdbiterr_axis(1'b0), // 1-bit input: Double Bit Error Injection- Injects a double bit
+        // error if the ECC feature is used.
 
-      .m_axis_tready(m_axis_tready_main),           // 1-bit input: TREADY: Indicates that the slave can accept a m_axis128_tvalid
-                                               // transfer in the current cycle.
+        .injectsbiterr_axis(1'b0), // 1-bit input: Single Bit Error Injection- Injects a single bit
+        // error if the ECC feature is used.
 
-      .s_aclk(rx_clk),                         // 1-bit input: Slave Interface Clock: All signals on slave
-                                               // interface are sampled on the rising edge of this clock.
+        //.m_aclk(pci_user_clk),                         // 1-bit input: Master Interface Clock:
+        .m_aclk(),                         // 1-bit input: Master Interface Clock: All signals on slave clock
+        // interface are sampled on the rising edge of this clock.
 
-      .s_aresetn(pci_user_resetn),                   // 1-bit input: Active low asynchronous reset.
-      .s_axis_tdata(m_axis_tdata_pre),             // TDATA_WIDTH-bit input: TDATA: The primary payload that is
-                                               // used to provide the data that is passing across the
-                                               // interface. The width of the data payload is an integer number
-                                               // of bytes.
+        .m_axis_tready(m_axis_tready_main),           // 1-bit input: TREADY: Indicates that the slave can accept a m_axis128_tvalid
+        // transfer in the current cycle.
 
-      .s_axis_tdest(1'b0),             // TDEST_WIDTH-bit input: TDEST: Provides routing information
-                                               // for the data stream.
+        //.s_aclk(rx_clk),                         // 1-bit input: Slave Interface Clock: All signals on slave clock
+        .s_aclk(pci_user_clk),                         // 1-bit input: Slave Interface Clock: All signals on slave clock
+        // interface are sampled on the rising edge of this clock.
 
-      .s_axis_tid(1'b0),                 // TID_WIDTH-bit input: TID: The data stream identifier that
-                                               // indicates different streams of data.
+        .s_aresetn(pci_user_resetn),                   // 1-bit input: Active low asynchronous reset.
+        .s_axis_tdata(m_axis_tdata_pre),             // TDATA_WIDTH-bit input: TDATA: The primary payload that is
+        // used to provide the data that is passing across the
+        // interface. The width of the data payload is an integer number
+        // of bytes.
 
-      .s_axis_tkeep(16'hFFFF),             // TDATA_WIDTH/8-bit input: TKEEP: The byte qualifier that
-                                               // indicates whether the content of the associated byte of TDATA
-                                               // is processed as part of the data stream. Associated bytes
-                                               // that have the TKEEP byte qualifier deasserted are null bytes
-                                               // and can be removed from the data stream. For a 64-bit DATA,
-                                               // bit 0 corresponds to the least significant byte on DATA, and
-                                               // bit 7 corresponds to the most significant byte. For example:
-                                               // KEEP[0] = 1b, DATA[7:0] is not a NULL byte KEEP[7] = 0b,
-                                               // DATA[63:56] is a NULL byte
+        .s_axis_tdest(1'b0),             // TDEST_WIDTH-bit input: TDEST: Provides routing information
+        // for the data stream.
 
-      .s_axis_tlast(1'b0),             // 1-bit input: TLAST: Indicates the boundary of a packet.
-      .s_axis_tstrb(8'h00),             // TDATA_WIDTH/8-bit input: TSTRB: The byte qualifier that
-                                               // indicates whether the content of the associated byte of TDATA
-                                               // is processed as a data byte or a position byte. For a 64-bit
-                                               // DATA, bit 0 corresponds to the least significant byte on
-                                               // DATA, and bit 0 corresponds to the least significant byte on
-                                               // DATA, and bit 7 corresponds to the most significant byte. For
-                                               // example: STROBE[0] = 1b, DATA[7:0] is valid STROBE[7] = 0b,
-                                               // DATA[63:56] is not valid
+        .s_axis_tid(1'b0),                 // TID_WIDTH-bit input: TID: The data stream identifier that
+        // indicates different streams of data.
 
-      .s_axis_tuser(1'b0),             // TUSER_WIDTH-bit input: TUSER: The user-defined sideband
-                                               // information that can be transmitted alongside the data
-                                               // stream.
+        .s_axis_tkeep(16'hFFFF),             // TDATA_WIDTH/8-bit input: TKEEP: The byte qualifier that
+        // indicates whether the content of the associated byte of TDATA
+        // is processed as part of the data stream. Associated bytes
+        // that have the TKEEP byte qualifier deasserted are null bytes
+        // and can be removed from the data stream. For a 64-bit DATA,
+        // bit 0 corresponds to the least significant byte on DATA, and
+        // bit 7 corresponds to the most significant byte. For example:
+        // KEEP[0] = 1b, DATA[7:0] is not a NULL byte KEEP[7] = 0b,
+        // DATA[63:56] is a NULL byte
 
-      .s_axis_tvalid(s_axis_tvalid_main)            // 1-bit input: TVALID: Indicates that the master is driving a
-                                               // valid transfer. A transfer takes place when both TVALID and
-                                               // TREADY are asserted
+        .s_axis_tlast(1'b0),             // 1-bit input: TLAST: Indicates the boundary of a packet.
+        .s_axis_tstrb(8'h00),             // TDATA_WIDTH/8-bit input: TSTRB: The byte qualifier that
+        // indicates whether the content of the associated byte of TDATA
+        // is processed as a data byte or a position byte. For a 64-bit
+        // DATA, bit 0 corresponds to the least significant byte on
+        // DATA, and bit 0 corresponds to the least significant byte on
+        // DATA, and bit 7 corresponds to the most significant byte. For
+        // example: STROBE[0] = 1b, DATA[7:0] is valid STROBE[7] = 0b,
+        // DATA[63:56] is not valid
 
-   );
+        .s_axis_tuser(1'b0),             // TUSER_WIDTH-bit input: TUSER: The user-defined sideband
+        // information that can be transmitted alongside the data
+        // stream.
 
+        .s_axis_tvalid(s_axis_tvalid_main)            // 1-bit input: TVALID: Indicates that the master is driving a
+        // valid transfer. A transfer takes place when both TVALID and
+        // TREADY are asserted
+
+    );
 
 endmodule
 
