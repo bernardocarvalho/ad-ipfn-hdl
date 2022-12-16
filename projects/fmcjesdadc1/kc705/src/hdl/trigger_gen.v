@@ -104,10 +104,10 @@ module trigger_gen #(
       end
   endfunction
 
-  /*********** End Function Declarations ***************/
+  //------ End Function Declarations -----------
 
   //--  Trigger Logic
-  /* ADC Data comes in pairs. Compute mean, or simply add */
+  //---- ADC Data comes in pairs. Compute mean (or simply add) 
   // (* mark_debug = "true" *)
   reg signed [ADC_DATA_WIDTH:0] adc_sum_a, adc_sum_b, adc_sum_c, adc_sum_d ;
   always @(posedge rxclk) begin
@@ -134,9 +134,6 @@ module trigger_gen #(
   wire  signed [15:0]  trig_level_c_p = trig_level_c[31:16];
   wire  signed [15:0]  trig_level_c_m = trig_level_c[15:0];
 
-
-  //localparam WAIT_WIDTH = 32;
-
   reg [C_S_AXI_DATA_WIDTH-1:0] pulse_delay_r         =  32'hFFFF;
   reg [C_S_AXI_DATA_WIDTH-1:0] hold_cnt_r  = 'h00;
   assign pulse_tof = pulse_delay_r;
@@ -149,6 +146,9 @@ module trigger_gen #(
   localparam WAIT_PULSE3     = 3'b111;
   localparam DELAY_TRIGGER   = 3'b101;
   localparam TRIGGER         = 3'b100;
+
+//-- dead time (no detection between channels)
+  localparam DEAD_TIME         =  32'd2500; // (* 8ns) Dead Time  = 20 us, 200mm , (1 us = 10 mm @10km/s)
 
   reg signed [31:0] delay_time = 'h00;  // Q16.16 Number. 32'h0001_0000 = 8ns
 
@@ -183,7 +183,7 @@ module trigger_gen #(
                       state <= HOLD1;
                       detect_pls_r[1]  <=  1'b1;
                       pulse_delay_r  <=   {trig_level_b_m, 16'h0B} ; // Testing
-                      hold_cnt_r        <= 32'd2500;  //(* 8ns). Dead Time  = 20 us ,
+                      hold_cnt_r        <= DEAD_TIME; //(* 8ns).
                       delay_time <= 'h00;    // Reset delay counting
                       wait_cnt_r <= 'h00;    // Reset unit counting
                   end
@@ -204,7 +204,7 @@ module trigger_gen #(
                       detect_pls_r[2]  <=  1'b1;
                       pulse_delay_r   <= wait_cnt_r;  // Save waiting cycles
                       delay_time      <=  delay_time + $signed(param_off);  // Save pulse B-A  Time + Offset
-                      hold_cnt_r      <= 32'd2500; // (* 8ns) Dead Time  = 20 us, 200mm , (1 us = 10 mm @10km/s)
+                      hold_cnt_r      <= DEAD_TIME;// (* 8ns)
                   end
                   else begin
                       delay_time   <=  delay_time + $signed(param_mul);           //  time units

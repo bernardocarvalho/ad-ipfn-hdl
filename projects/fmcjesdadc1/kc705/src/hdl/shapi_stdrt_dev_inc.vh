@@ -49,7 +49,7 @@
     `define DEV_FW_VENDOR    16'h1570       //offset_addr 0x0c
     `define DEV_FW_ID        16'h0032
 
-    `define DEV_FW_PATCH     16'h0001       //offset_addr 0x10
+    `define DEV_FW_PATCH     16'h0002       //offset_addr 0x10
     `define DEV_FW_MINOR        8'h01
     `define DEV_FW_MAJOR        8'h01
 
@@ -62,7 +62,7 @@
     `define DEV_NAME3         "htsE"
     `define DEV_ENDIAN_CAPAB   1'b0   //offset_addr 0x24
     `define DEV_RTM_CAPAB      1'b0
-    `define DEV_SOFT_RST_CAPAB 1'b0
+    `define DEV_SOFT_RST_CAPAB 1'b1
     `define DEV_FULL_RST_CAPAB 1'b0
 
     `define DEV_CNTRL_FULL_RST_BIT 31

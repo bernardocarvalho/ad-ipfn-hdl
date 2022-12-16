@@ -162,11 +162,10 @@ module shapi_regs_v1 #
     reg  [31:0] dev_interrupt_active_r; // = 32'h0;                    //offset_addr 0x38
     reg  [31:0] dev_scratch_reg  ;//      = 32'h0;          //offset_addr 0x3c
 
-    reg  [31:1] dev_control_r        = 31'h0;  //offset_addr 0x2c
+    reg  [31:0] dev_control_r        = 'h00;  //offset_addr 0x2c
     wire  dev_endian_control   = control_r[10]; // dev_control_r[`DEV_CNTRL_ENDIAN_BIT];
     wire  dev_soft_rst_control = dev_control_r[`DEV_CNTRL_SFT_RST_BIT];
     wire  dev_full_rst_control = dev_control_r[`DEV_CNTRL_FULL_RST_BIT];
-
 
     //#### MODULE REGISTERS ######//
     wire [63:0] mod_name = `MOD_TRIG_NAME; // Two words
@@ -339,7 +338,7 @@ module shapi_regs_v1 #
         if ( S_AXI_ARESETN == 1'b0 )
         begin
             dev_scratch_reg <=  32'h00BB;
-            dev_control_r   <=  31'h0000;
+            dev_control_r   <=  'h00;
             control_r       <=  32'h0000;
             trig0_r         <=  32'h0400_8000; // +1024 / -16385
             trig1_r         <=  32'h0400_8000; // +1024 / -16385
@@ -359,6 +358,20 @@ module shapi_regs_v1 #
             if (slv_reg_wren)
             begin
                 case ( axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
+                    6'h00: begin
+                        if(S_AXI_WDATA[`DEV_CNTRL_SFT_RST_BIT]) begin
+                            //  Device Control, soft reset bit 
+                            dev_scratch_reg <=  32'h00;
+                            dev_control_r   <=  'h00; //  Device Control
+                            control_r       <=  'h00;
+                            trig0_r         <=  32'h0400_8000; // +1024 / -16385
+                            trig1_r         <=  32'h0400_8000; // +1024 / -16385
+                            trig2_r         <=  32'h0400_8000;
+                            param_mul_r     <=  32'h0001_0000;
+                            param_off_r         <= 32'h0001_0000;
+                            param_init_delay_r  <= 32'd25_000_000; // (* 8ns) Initial Idle Time  = 0.2 s Max 4294967294/34 s    
+                        end
+                    end
                     6'h0F: dev_scratch_reg <= S_AXI_WDATA; // BAR 0 regsmod_interrupt_mask
 
                     (`MOD_TRIG_REG_OFF + 6'h08): mod_control_r  <= S_AXI_WDATA[31:30];
