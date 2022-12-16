@@ -615,7 +615,7 @@ module system_top #
 
     reg [15:0] adc_cnt = 'h00;
     wire [31:0] adc_data3  = adc_data[3];
-    wire [C_S_AXI_DATA_WIDTH-1:0] adc_data_all = {adc_cnt[15:2], almost_full_axis, almost_full_axis_pre, adc_data3[15:0], adc_data[2], adc_data[1], adc_data[0]};
+    wire [C_S_AXI_DATA_WIDTH-1:0] adc_data_all = {adc_cnt, adc_data3[15:2], almost_full_axis, almost_full_axis_pre,  adc_data[2], adc_data[1], adc_data[0]};
     wire  adc_dma_tvalid = adc_enable[0]; // && detect_0_i; //&& adc_valid[0] Write DMA FIFO only after trigger 0
 
     reg [1:0] acq_soft_trig_dly, acq_hard_trig_dly;
