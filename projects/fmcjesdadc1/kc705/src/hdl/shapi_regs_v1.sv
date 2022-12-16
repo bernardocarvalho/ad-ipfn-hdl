@@ -1,9 +1,10 @@
 //////////////////////////////////////////////////////////////////////////////////
-// Company: IPFN-IST
-// Engineer: BBC
+// vim: sta:et:sw=4:ts=4:sts=4
+// Company: INSTITUTO DE PLASMAS E FUSAO NUCLEAR/IST
+// Engineer: Bernardo Carvalho
 //
 // Create Date: 05/08/2021 07:21:01 PM
-// Design Name: shapi_regs_v1
+// Design Name: esther_trigger
 // Module Name: shapi_regs_v1
 // Project Name: Esther Trigger System
 // Target Devices: kintex-7
@@ -14,7 +15,7 @@
 //
 // Revision 0.01 - File Created
 // Additional Comments:
-// Copyright 2015 - 2022 IPFN-Instituto Superior Tecnico, Portugal
+// Copyright 2015 - 2023 IPFN-Instituto Superior Tecnico, Portugal
 // Creation Date  2017-11-09
 //
 // Licensed under the EUPL, Version 1.2 or - as soon they
@@ -126,9 +127,9 @@ module shapi_regs_v1 #
         output      [31:0]  param_mul,
         output      [31:0]  param_off,
         output      [31:0]  init_delay,
-        
+
         input       [31:0]  pulse_tof,
-           
+
         input       [31:0]  status_reg,
         output      [31:0]  control_reg
 
@@ -146,7 +147,7 @@ module shapi_regs_v1 #
     assign param_mul = param_mul_r;
     assign param_off = param_off_r;
     assign init_delay = param_init_delay_r;
-    
+
     assign control_reg = control_r;
 
     //#### STANDARD DEVICE  ######//
@@ -358,7 +359,7 @@ module shapi_regs_v1 #
             if (slv_reg_wren)
             begin
                 case ( axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
-                                         6'h0F: dev_scratch_reg <= S_AXI_WDATA; // BAR 0 regsmod_interrupt_mask
+                    6'h0F: dev_scratch_reg <= S_AXI_WDATA; // BAR 0 regsmod_interrupt_mask
 
                     (`MOD_TRIG_REG_OFF + 6'h08): mod_control_r  <= S_AXI_WDATA[31:30];
                     (`MOD_TRIG_REG_OFF + 6'h0A): mod_interrupt_flag_clear_r  <= S_AXI_WDATA;
@@ -372,29 +373,29 @@ module shapi_regs_v1 #
                     (`MOD_TRIG_REG_OFF + 6'h15): param_mul_r              <= S_AXI_WDATA;
                     (`MOD_TRIG_REG_OFF + 6'h16): param_off_r              <= S_AXI_WDATA;
                     (`MOD_TRIG_REG_OFF + 6'h17): param_init_delay_r    <= S_AXI_WDATA;
-                                        
+
                     /*
                     //(`MOD_TRIG_REG_OFF + 6'h17): slv_reg39             <= S_AXI_WDATA;
 
                     (`MOD_TRIG_REG_OFF + 6'h1C): slv_reg44             <= S_AXI_WDATA;
                     */
 
-                        default : begin
-                            slv_reg50 <= slv_reg50;
-                            slv_reg51 <= slv_reg51;
-                            slv_reg52 <= slv_reg52;
-                            slv_reg53 <= slv_reg53;
-                            slv_reg54 <= slv_reg54;
-                            slv_reg55 <= slv_reg55;
-                            slv_reg56 <= slv_reg56;
-                            slv_reg57 <= slv_reg57;
-                            slv_reg58 <= slv_reg58;
-                            slv_reg59 <= slv_reg59;
-                            slv_reg60 <= slv_reg60;
-                            slv_reg61 <= slv_reg61;
-                            slv_reg62 <= slv_reg62;
-                            slv_reg63 <= slv_reg63;
-                        end
+                    default : begin
+                        slv_reg50 <= slv_reg50;
+                        slv_reg51 <= slv_reg51;
+                        slv_reg52 <= slv_reg52;
+                        slv_reg53 <= slv_reg53;
+                        slv_reg54 <= slv_reg54;
+                        slv_reg55 <= slv_reg55;
+                        slv_reg56 <= slv_reg56;
+                        slv_reg57 <= slv_reg57;
+                        slv_reg58 <= slv_reg58;
+                        slv_reg59 <= slv_reg59;
+                        slv_reg60 <= slv_reg60;
+                        slv_reg61 <= slv_reg61;
+                        slv_reg62 <= slv_reg62;
+                        slv_reg63 <= slv_reg63;
+                    end
                 endcase
             end
         end
@@ -543,7 +544,7 @@ module shapi_regs_v1 #
             (`MOD_TRIG_REG_OFF + 6'h15): reg_data_out <= #TCQ param_mul_r; // rw param_mul 
             (`MOD_TRIG_REG_OFF + 6'h16): reg_data_out <= #TCQ param_off_r; // rw  param_off
             (`MOD_TRIG_REG_OFF + 6'h17): reg_data_out <= #TCQ param_init_delay_r; // rw
-              
+
             (`MOD_TRIG_REG_OFF + 6'h20): reg_data_out <= #TCQ pulse_tof; // ro
             (`MOD_TRIG_REG_OFF + 6'h21): reg_data_out <= #TCQ 32'hA5A5; //pulse_tof; // ro
 

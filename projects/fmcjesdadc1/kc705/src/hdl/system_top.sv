@@ -1,8 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////
+// vim: sta:et:sw=4:ts=4:sts=4
 // Company: IPFN IST
 // Engineer: Bernardo Carvalho
-//
-// vim: sta:et:sw=4:ts=4:sts=4
 //
 // Create Date: 04/30/2021 03:15:44 PM
 // Design Name:
@@ -14,7 +13,10 @@
 //
 // Dependencies:
 //      trigger_gen
+//
+//
 // Additional Comments:
+//
 //
 // Copyright 2018-2023 IPFN-Instituto Superior Tecnico, Portugal
 // Creation Date   04/30/2018 03:15:44 PM
@@ -42,221 +44,222 @@
 //
 
 `timescale 1ns/100ps
-
 `define ACQE_BIT 		23
 `define STRG_BIT 		24 // Soft Trigger
 
 module system_top #
+    (
+        parameter PL_LINK_CAP_MAX_LINK_WIDTH          = 8,            // 1- X1; 2 - X2; 4 - X4; 8 - X8
+        parameter PL_SIM_FAST_LINK_TRAINING           = "FALSE",      // Simulation Speedup
+        parameter PL_LINK_CAP_MAX_LINK_SPEED          = 2,             // 1- GEN1; 2 - GEN2; 4 - GEN3
+        parameter C_DATA_WIDTH                        = 128 ,
+        parameter EXT_PIPE_SIM                        = "FALSE",  // This Parameter has effect on selecting Enable External PIPE Interface in GUI.
+        parameter C_ROOT_PORT                         = "FALSE",      // PCIe block is in root port mode
+        parameter C_DEVICE_NUMBER                     = 0,            // Device number for Root Port configurations only
+        parameter AXIS_CCIX_RX_TDATA_WIDTH     = 256,
+        parameter AXIS_CCIX_TX_TDATA_WIDTH     = 256,
+        parameter AXIS_CCIX_RX_TUSER_WIDTH     = 46,
+        parameter AXIS_CCIX_TX_TUSER_WIDTH     = 46
+    )
+    (
 
-  (
-   parameter PL_LINK_CAP_MAX_LINK_WIDTH          = 8,            // 1- X1; 2 - X2; 4 - X4; 8 - X8
-   parameter PL_SIM_FAST_LINK_TRAINING           = "FALSE",      // Simulation Speedup
-   parameter PL_LINK_CAP_MAX_LINK_SPEED          = 2,             // 1- GEN1; 2 - GEN2; 4 - GEN3
-   parameter C_DATA_WIDTH                        = 128 ,
-   parameter EXT_PIPE_SIM                        = "FALSE",  // This Parameter has effect on selecting Enable External PIPE Interface in GUI.
-   parameter C_ROOT_PORT                         = "FALSE",      // PCIe block is in root port mode
-   parameter C_DEVICE_NUMBER                     = 0,            // Device number for Root Port configurations only
-   parameter AXIS_CCIX_RX_TDATA_WIDTH     = 256,
-   parameter AXIS_CCIX_TX_TDATA_WIDTH     = 256,
-   parameter AXIS_CCIX_RX_TUSER_WIDTH     = 46,
-   parameter AXIS_CCIX_TX_TUSER_WIDTH     = 46
-   )
-(
+        input                   sys_rst,
+        input                   sys_clk_p,
+        input                   sys_clk_n,
 
-    input                   sys_rst,
-    input                   sys_clk_p,
-    input                   sys_clk_n,
+        input                   uart_sin,
+        output                  uart_sout,
 
-    input                   uart_sin,
-    output                  uart_sout,
+        output      [ 2:0]      ddr3_1_n,
+        output      [ 1:0]      ddr3_1_p,
+        output                  ddr3_reset_n,
+        output      [13:0]      ddr3_addr,
+        output      [ 2:0]      ddr3_ba,
 
-    output      [ 2:0]      ddr3_1_n,
-    output      [ 1:0]      ddr3_1_p,
-    output                  ddr3_reset_n,
-    output      [13:0]      ddr3_addr,
-    output      [ 2:0]      ddr3_ba,
+        output                  ddr3_cas_n,
+        output                  ddr3_ras_n,
+        output                  ddr3_we_n,
+        output      [ 0:0]      ddr3_ck_n,
+        output      [ 0:0]      ddr3_ck_p,
 
-    output                  ddr3_cas_n,
-    output                  ddr3_ras_n,
-    output                  ddr3_we_n,
-    output      [ 0:0]      ddr3_ck_n,
-    output      [ 0:0]      ddr3_ck_p,
+        output      [ 0:0]      ddr3_cke,
+        output      [ 0:0]      ddr3_cs_n,
 
-    output      [ 0:0]      ddr3_cke,
-    output      [ 0:0]      ddr3_cs_n,
+        output      [ 7:0]      ddr3_dm,
+        inout       [63:0]      ddr3_dq,
+        inout       [ 7:0]      ddr3_dqs_n,
+        inout       [ 7:0]      ddr3_dqs_p,
+        output      [ 0:0]      ddr3_odt,
 
-    output      [ 7:0]      ddr3_dm,
-    inout       [63:0]      ddr3_dq,
-    inout       [ 7:0]      ddr3_dqs_n,
-    inout       [ 7:0]      ddr3_dqs_p,
-    output      [ 0:0]      ddr3_odt,
+        output                  mdio_mdc,
+        inout                   mdio_mdio,
+        output                  mii_rst_n,
+        input                   mii_col,
 
-    output                  mdio_mdc,
-    inout                   mdio_mdio,
-    output                  mii_rst_n,
-    input                   mii_col,
-
-    input                   mii_crs,
-    input                   mii_rx_clk,
-    input                   mii_rx_er,
-    input                   mii_rx_dv,
-    input       [ 3:0]      mii_rxd,
-
-
-    input                   mii_tx_clk,
-    output                  mii_tx_en,
-    output      [ 3:0]      mii_txd,
-
-    output      [26:1]      linear_flash_addr,
-    output                  linear_flash_adv_ldn,
-    output                  linear_flash_ce_n,
-    inout       [15:0]      linear_flash_dq_io,
-    output                  linear_flash_oen,
-    output                  linear_flash_wen,
-
-    output                  fan_pwm,
-
-    inout       [ 6:0]      gpio_lcd,
-    inout       [16:0]      gpio_bd,
-
-    output                  iic_rstn,
-    inout                   iic_scl,
-    inout                   iic_sda,
-
-    input                   rx_ref_clk_p,
-
-    input                   rx_ref_clk_n,
-    output                  rx_sysref,
-    output                  rx_sync,
-    input       [ 3:0]      rx_data_p,
-    input       [ 3:0]      rx_data_n,
+        input                   mii_crs,
+        input                   mii_rx_clk,
+        input                   mii_rx_er,
+        input                   mii_rx_dv,
+        input       [ 3:0]      mii_rxd,
 
 
-    output                  spi_csn_0,
-    output                  spi_clk,
-    inout                   spi_sdio,
+        input                   mii_tx_clk,
+        output                  mii_tx_en,
+        output      [ 3:0]      mii_txd,
 
-// IPFN mods
-
-  // User SMA Clocks
-    output          user_sma_clk_p, // SMA J11
-
-    output          user_sma_clk_n, // SMA J12
-    //User SMA Gpios
-    output          user_sma_gpio_p, //Y23 USER_SMA_GPIO_P LVCMOS25 J13.1
-    output          user_sma_gpio_n, //Y24 USER_SMA_GPIO_N LVCMOS25 J14.1 bellow J11
+        output      [26:1]      linear_flash_addr,
+        output                  linear_flash_adv_ldn,
+        output                  linear_flash_ce_n,
+        inout       [15:0]      linear_flash_dq_io,
+        output                  linear_flash_oen,
+        output                  linear_flash_wen,
 
 
-    //PciE
-    output  [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_txp,
-    output  [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_txn,
-    input   [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_rxp,
-    input   [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_rxn,
+        output                  fan_pwm,
 
-    input   pci_sys_clk_p,
-    input   pci_sys_clk_n,
-    input   pci_sys_rst_n
-  );
+        inout       [ 6:0]      gpio_lcd,
+        inout       [16:0]      gpio_bd,
 
-   // Local Parameters derived from user selection
-   localparam integer                              USER_CLK_FREQ         = ((PL_LINK_CAP_MAX_LINK_SPEED == 3'h4) ? 5 : 4);
-   localparam TCQ = 1;
+        output                  iic_rstn,
+        inout                   iic_scl,
+        inout                   iic_sda,
 
-   localparam C_S_AXI_ID_WIDTH = 4;
-   localparam C_M_AXI_ID_WIDTH = 4;
-   localparam C_S_AXI_DATA_WIDTH = C_DATA_WIDTH;
-   localparam C_M_AXI_DATA_WIDTH = C_DATA_WIDTH;
-   localparam C_S_AXI_ADDR_WIDTH = 64;
-   localparam C_M_AXI_ADDR_WIDTH = 64;
-   localparam C_NUM_USR_IRQ      = 1;
+        input                   rx_ref_clk_p,
+
+        input                   rx_ref_clk_n,
+        output                  rx_sysref,
+        output                  rx_sync,
+        input       [ 3:0]      rx_data_p,
+        input       [ 3:0]      rx_data_n,
+
+
+        output                  spi_csn_0,
+        output                  spi_clk,
+        inout                   spi_sdio,
+
+        // IPFN mods
+
+        //User SMA Clock
+        output          user_sma_clk_p, // SMA J11
+
+        output          user_sma_clk_n, // SMA J12
+        //User SMA Gpio
+        output          user_sma_gpio_p, //Y23 USER_SMA_GPIO_P LVCMOS25 J13.1
+        output          user_sma_gpio_n, //Y24 USER_SMA_GPIO_N LVCMOS25 J14.1 bellow J11
+
+        // PCIe
+        output  [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_txp,
+        output  [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_txn,
+        input   [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_rxp,
+        input   [(PL_LINK_CAP_MAX_LINK_WIDTH - 1):0]    pci_exp_rxn,
+
+        input   pci_sys_clk_p,
+        input   pci_sys_clk_n,
+        input   pci_sys_rst_n
+    );
+
+    // Local Parameters derived from user selection
+    localparam integer                              USER_CLK_FREQ         = ((PL_LINK_CAP_MAX_LINK_SPEED == 3'h4) ? 5 : 4);
+    localparam TCQ = 1;
+
+    localparam C_S_AXI_ID_WIDTH = 4;
+    localparam C_M_AXI_ID_WIDTH = 4;
+    localparam C_S_AXI_DATA_WIDTH = C_DATA_WIDTH;
+    localparam C_M_AXI_DATA_WIDTH = C_DATA_WIDTH;
+    localparam C_S_AXI_ADDR_WIDTH = 64;
+    localparam C_M_AXI_ADDR_WIDTH = 64;
+    localparam C_NUM_USR_IRQ      = 1;
 
     localparam N_ADC_CHANNELS  = 4;
 
-  // internal signals
+    // internal signals
 
-  wire    [63:0]  gpio_i;
-  wire    [63:0]  gpio_o;
-  wire    [63:0]  gpio_t;
-  wire    [ 7:0]  spi_csn;
-  wire            spi_mosi;
-  wire            spi_miso;
-  wire            rx_ref_clk;
-  wire            rx_clk;
+    wire    [63:0]  gpio_i;
+    wire    [63:0]  gpio_o;
+    wire    [63:0]  gpio_t;
+    wire    [ 7:0]  spi_csn;
+    wire            spi_mosi;
+    wire            spi_miso;
+    wire            rx_ref_clk;
+    wire            rx_clk;
 
-  wire    [N_ADC_CHANNELS-1:0] adc_enable;
-  wire    [N_ADC_CHANNELS-1:0] adc_valid;
-  wire    [31:0] adc_data[0:N_ADC_CHANNELS-1]; // array of  32-bit registers;
+    wire    [N_ADC_CHANNELS-1:0] adc_enable;
+    wire    [N_ADC_CHANNELS-1:0] adc_valid;
+    wire    [31:0] adc_data[0:N_ADC_CHANNELS-1]; // array of  32-bit registers;
 
-  assign ddr3_1_p = 2'b11;
-  assign ddr3_1_n = 3'b000;
-  assign fan_pwm = 1'b1;
-  assign iic_rstn = 1'b1;
-  assign spi_csn_0 = spi_csn[0];
 
-  //----------------------------------------------------------------------------------------------------------------//
-   //  AXI Interface                                                                                                 //
-   //----------------------------------------------------------------------------------------------------------------//
+    assign ddr3_1_p = 2'b11;
+    assign ddr3_1_n = 3'b000;
+    assign fan_pwm = 1'b1;
+    assign iic_rstn = 1'b1;
+    assign spi_csn_0 = spi_csn[0];
 
-   wire 					   pci_user_clk;
-   wire 					   pci_user_resetn;
-// PCIe XDMA
-   wire 					   pci_user_lnk_up;
-//----------------------------------------------------------------------------------------------------------------//
-  //    System(SYS) Interface                                                                                       //
-  //----------------------------------------------------------------------------------------------------------------//
+    //----------------------------------------------------------------------------------------------------------------//
+    //  AXI Interface                                                                                                 //
+    //----------------------------------------------------------------------------------------------------------------//
+
+
+    wire 					   pci_user_clk;
+    wire 					   pci_user_resetn;
+    // PCIe XDMA
+    wire 					   pci_user_lnk_up;
+    //----------------------------------------------------------------------------------------------------------------//
+    //    System(SYS) Interface                                                                                       //
+    //----------------------------------------------------------------------------------------------------------------//
 
     wire                                    pci_sys_clk;
+    //    wire                                    pci_sys_clk_gt;
     wire                                    pci_sys_rst_n_c;
 
-  // User Clock LED Heartbeat
-     reg [25:0]                              user_clk_heartbeat;
-     reg [((2*C_NUM_USR_IRQ)-1):0]              usr_irq_function_number=0;
-     reg [C_NUM_USR_IRQ-1:0]                 usr_irq_req = 0;
-     wire [C_NUM_USR_IRQ-1:0]                usr_irq_ack;
+    // User Clock LED Heartbeat
+    reg [25:0]                              user_clk_heartbeat;
+    reg [((2*C_NUM_USR_IRQ)-1):0]              usr_irq_function_number=0;
+    reg [C_NUM_USR_IRQ-1:0]                 usr_irq_req = 0;
+    wire [C_NUM_USR_IRQ-1:0]                usr_irq_ack;
 
-      //-- AXI Master Write Address Channel
-     wire [C_M_AXI_ADDR_WIDTH-1:0] m_axi_awaddr;
-     wire [C_M_AXI_ID_WIDTH-1:0] m_axi_awid;
-     wire [2:0]                  m_axi_awprot;
-     wire [1:0]                  m_axi_awburst;
-     wire [2:0]                  m_axi_awsize;
-     wire [3:0]                  m_axi_awcache;
-     wire [7:0]                  m_axi_awlen;
-     wire                        m_axi_awlock;
-     wire                        m_axi_awvalid;
-     wire                        m_axi_awready;
+    //-- AXI Master Write Address Channel
+    wire [C_M_AXI_ADDR_WIDTH-1:0] m_axi_awaddr;
+    wire [C_M_AXI_ID_WIDTH-1:0] m_axi_awid;
+    wire [2:0]                  m_axi_awprot;
+    wire [1:0]                  m_axi_awburst;
+    wire [2:0]                  m_axi_awsize;
+    wire [3:0]                  m_axi_awcache;
+    wire [7:0]                  m_axi_awlen;
+    wire                        m_axi_awlock;
+    wire                        m_axi_awvalid;
+    wire                        m_axi_awready;
 
-     //-- AXI Master Write Data Channel
-     wire [C_M_AXI_DATA_WIDTH-1:0]     m_axi_wdata;
-     wire [(C_M_AXI_DATA_WIDTH/8)-1:0] m_axi_wstrb;
-     wire                              m_axi_wlast;
-     wire                              m_axi_wvalid;
-   //-- AXI Master Write Response Channel
-     wire                              m_axi_bvalid;
-     wire                              m_axi_bready;
-     wire [C_M_AXI_ID_WIDTH-1 : 0]     m_axi_bid ;
-     wire [1:0]                        m_axi_bresp ;
+    //-- AXI Master Write Data Channel
+    wire [C_M_AXI_DATA_WIDTH-1:0]     m_axi_wdata;
+    wire [(C_M_AXI_DATA_WIDTH/8)-1:0] m_axi_wstrb;
+    wire                              m_axi_wlast;
+    wire                              m_axi_wvalid;
+    //-- AXI Master Write Response Channel
+    wire                              m_axi_bvalid;
+    wire                              m_axi_bready;
+    wire [C_M_AXI_ID_WIDTH-1 : 0]     m_axi_bid ;
+    wire [1:0]                        m_axi_bresp ;
 
-     //-- AXI Master Read Address Channel
-     wire [C_M_AXI_ID_WIDTH-1 : 0]     m_axi_arid;
-     wire [C_M_AXI_ADDR_WIDTH-1:0]     m_axi_araddr;
-     wire [7:0]                        m_axi_arlen;
-     wire [2:0]                        m_axi_arsize;
-     wire [1:0]                        m_axi_arburst;
-     wire [2:0]                        m_axi_arprot;
-     wire                              m_axi_arvalid;
-     wire                              m_axi_arready;
-     wire                              m_axi_arlock;
-     wire [3:0]                        m_axi_arcache;
-     //-- AXI Master Read Data Channel
-     wire [C_M_AXI_ID_WIDTH-1 : 0]   m_axi_rid;
-     wire [C_M_AXI_DATA_WIDTH-1:0]   m_axi_rdata;
-     wire [1:0]                      m_axi_rresp;
-     wire                            m_axi_rvalid;
-     wire                            m_axi_rready;
+    //-- AXI Master Read Address Channel
+    wire [C_M_AXI_ID_WIDTH-1 : 0]     m_axi_arid;
+    wire [C_M_AXI_ADDR_WIDTH-1:0]     m_axi_araddr;
+    wire [7:0]                        m_axi_arlen;
+    wire [2:0]                        m_axi_arsize;
+    wire [1:0]                        m_axi_arburst;
+    wire [2:0]                        m_axi_arprot;
+    wire                              m_axi_arvalid;
+    wire                              m_axi_arready;
+    wire                              m_axi_arlock;
+    wire [3:0]                        m_axi_arcache;
+    //-- AXI Master Read Data Channel
+    wire [C_M_AXI_ID_WIDTH-1 : 0]   m_axi_rid;
+    wire [C_M_AXI_DATA_WIDTH-1:0]   m_axi_rdata;
+    wire [1:0]                      m_axi_rresp;
+    wire                            m_axi_rvalid;
+    wire                            m_axi_rready;
 
-//////////////////////////////////////////////////  AXI Master LITE
-   //-- AXI Master Write Address Channel
+    //////////////////////////////////////////////////  LITE
+    //-- AXI Master Write Address Channel
     wire [31:0] m_axil_awaddr;
     wire [2:0]  m_axil_awprot;
     wire        m_axil_awvalid;
@@ -284,7 +287,7 @@ module system_top #
 
     wire [2:0]    msi_vector_width;
     wire          msi_enable;
-     // AXI streaming ports
+    // AXI streaming ports
     wire [C_DATA_WIDTH-1:0]     m_axis_h2c_tdata_0;
     wire                        m_axis_h2c_tlast_0;
     wire                        m_axis_h2c_tvalid_0;
@@ -306,117 +309,116 @@ module system_top #
     //wire trigger1_i;
 
     // instantiations
-  wire sma_j11 =  detect_pls_i[0];
-  OBUF   obuf_J11  (.O(user_sma_clk_p),  .I(sma_j11));
-  wire sma_j12 =  detect_pls_i[1];
-  OBUF   obuf_J12  (.O(user_sma_clk_n),  .I(sma_j12));
-  wire sma_j4_1 =  detect_pls_i[2];
-  OBUF   obuf_J4_1 (.O(user_sma_gpio_n), .I(acq_en_i)); // J14.1 bellow J11
-  OBUF   obuf_j13 (.O(user_sma_gpio_p), .I(detect_pls_i[3]));
+    wire sma_j11 =  detect_pls_i[0];
+    OBUF   obuf_J11  (.O(user_sma_clk_p),  .I(sma_j11));
+    wire sma_j12 =  detect_pls_i[1];
+    OBUF   obuf_J12  (.O(user_sma_clk_n),  .I(sma_j12));
+    wire sma_j4_1 =  detect_pls_i[2];
+    OBUF   obuf_J4_1 (.O(user_sma_gpio_n), .I(acq_en_i)); // J14.1 bellow J11
+    OBUF   obuf_j13 (.O(user_sma_gpio_p), .I(detect_pls_i[3]));
 
-  IBUFDS_GTE2 i_ibufds_rx_ref_clk (
-    .CEB (1'd0),
-    .I (rx_ref_clk_p),
-    .IB (rx_ref_clk_n),
-    .O (rx_ref_clk),
-    .ODIV2 ()
-  );
+    IBUFDS_GTE2 i_ibufds_rx_ref_clk (
+        .CEB (1'd0),
+        .I (rx_ref_clk_p),
+        .IB (rx_ref_clk_n),
+        .O (rx_ref_clk),
+        .ODIV2 ()
+    );
 
-  ad_iobuf #(.DATA_WIDTH(17)) i_iobuf (
-    .dio_t (gpio_t[16:0]),
-    .dio_i (gpio_o[16:0]),
-    .dio_o (gpio_i[16:0]),
-    .dio_p (gpio_bd)
-  );
+    ad_iobuf #(.DATA_WIDTH(17)) i_iobuf (
+        .dio_t (gpio_t[16:0]),
+        .dio_i (gpio_o[16:0]),
+        .dio_o (gpio_i[16:0]),
+        .dio_p (gpio_bd)
+    );
 
-  assign gpio_i[63:32] = gpio_o[63:32];
-  assign gpio_i[31:17] = gpio_o[31:17];
+    assign gpio_i[63:32] = gpio_o[63:32];
+    assign gpio_i[31:17] = gpio_o[31:17];
 
-  fmcjesdadc1_spi i_fmcjesdadc1_spi (
-    .spi_csn (spi_csn[0]),
-    .spi_clk (spi_clk),
-    .spi_mosi (spi_mosi),
-    .spi_miso (spi_miso),
-    .spi_sdio (spi_sdio)
-  );
+    fmcjesdadc1_spi i_fmcjesdadc1_spi (
+        .spi_csn (spi_csn[0]),
+        .spi_clk (spi_clk),
+        .spi_mosi (spi_mosi),
+        .spi_miso (spi_miso),
+        .spi_sdio (spi_sdio)
+    );
 
-  ad_sysref_gen #(.SYSREF_PERIOD(64)) i_sysref (
-    .core_clk (rx_clk),
-    .sysref_en (gpio_o[32]),
-    .sysref_out (rx_sysref)
-  );
+    ad_sysref_gen #(.SYSREF_PERIOD(64)) i_sysref (
+        .core_clk (rx_clk),
+        .sysref_en (gpio_o[32]),
+        .sysref_out (rx_sysref)
+    );
 
- // Ref clock buffer
-  IBUFDS_GTE2 pci_refclk_ibuf (.O(pci_sys_clk), .ODIV2(), .I(pci_sys_clk_p), .CEB(1'b0), .IB(pci_sys_clk_n));
-  // Reset buffer
-  IBUF   pci_sys_reset_n_ibuf (.O(pci_sys_rst_n_c), .I(pci_sys_rst_n));
+    // Ref clock buffer
+    IBUFDS_GTE2 pci_refclk_ibuf (.O(pci_sys_clk), .ODIV2(), .I(pci_sys_clk_p), .CEB(1'b0), .IB(pci_sys_clk_n));
+    // Reset buffer
+    IBUF   pci_sys_reset_n_ibuf (.O(pci_sys_rst_n_c), .I(pci_sys_rst_n));
 
- // PCIe XDMA Core Top Level Wrapper
+    // PCIe XDMA Core Top Level Wrapper
 
-  xdma_8g2 xdma_id7028_i
-     (
-      //---------------------------------------------------------------------------------------//
-      //  PCI Express (pci_exp) Interface                                                      //
-      //---------------------------------------------------------------------------------------//
-      .sys_rst_n       ( pci_sys_rst_n_c ),
-      .sys_clk         ( pci_sys_clk ),
+    xdma_8g2 xdma_id7028_i
+    (
+        //---------------------------------------------------------------------------------------//
+        //  PCI Express (pci_exp) Interface                                                      //
+        //---------------------------------------------------------------------------------------//
+        .sys_rst_n       ( pci_sys_rst_n_c ),
+        .sys_clk         ( pci_sys_clk ),
 
-      // Tx
-      .pci_exp_txn     ( pci_exp_txn ),
-      .pci_exp_txp     ( pci_exp_txp ),
+        // Tx
+        .pci_exp_txn     ( pci_exp_txn ),
+        .pci_exp_txp     ( pci_exp_txp ),
 
-      // Rx
-      .pci_exp_rxn     ( pci_exp_rxn ),
-      .pci_exp_rxp     ( pci_exp_rxp ),
+        // Rx
+        .pci_exp_rxn     ( pci_exp_rxn ),
+        .pci_exp_rxp     ( pci_exp_rxp ),
 
-      // AXI streaming ports
-      .s_axis_c2h_tdata_0(s_axis_c2h_tdata_0),
-      .s_axis_c2h_tlast_0(s_axis_c2h_tlast_0),
-      .s_axis_c2h_tvalid_0(s_axis_c2h_tvalid_0),
-      .s_axis_c2h_tready_0(s_axis_c2h_tready_0), // O
-      .s_axis_c2h_tkeep_0(s_axis_c2h_tkeep_0),
-      .m_axis_h2c_tdata_0(m_axis_h2c_tdata_0),
-      .m_axis_h2c_tlast_0(m_axis_h2c_tlast_0),
-      .m_axis_h2c_tvalid_0(m_axis_h2c_tvalid_0),
-      .m_axis_h2c_tready_0(m_axis_h2c_tready_0),
-      .m_axis_h2c_tkeep_0(m_axis_h2c_tkeep_0),
-     // LITE interface
-      //-- AXI Master Write Address Channel
-      .m_axil_awaddr    (m_axil_awaddr),
-      .m_axil_awprot    (m_axil_awprot),
-      .m_axil_awvalid   (m_axil_awvalid),
-      .m_axil_awready   (m_axil_awready),
-      //-- AXI Master Write Data Channel
-      .m_axil_wdata     (m_axil_wdata),
-      .m_axil_wstrb     (m_axil_wstrb),
-      .m_axil_wvalid    (m_axil_wvalid),
-      .m_axil_wready    (m_axil_wready),
-      //-- AXI Master Write Response Channel
-      .m_axil_bvalid    (m_axil_bvalid),
-      .m_axil_bresp     (m_axil_bresp),
-      .m_axil_bready    (m_axil_bready),
-      //-- AXI Master Read Address Channel
-      .m_axil_araddr    (m_axil_araddr),
-      .m_axil_arprot    (m_axil_arprot),
-      .m_axil_arvalid   (m_axil_arvalid),
-      .m_axil_arready   (m_axil_arready),
-      .m_axil_rdata     (m_axil_rdata),
-      //-- AXI Master Read Data Channel
-      .m_axil_rresp     (m_axil_rresp),
-      .m_axil_rvalid    (m_axil_rvalid),
-      .m_axil_rready    (m_axil_rready),
+        // AXI streaming ports
+        .s_axis_c2h_tdata_0(s_axis_c2h_tdata_0),
+        .s_axis_c2h_tlast_0(s_axis_c2h_tlast_0),
+        .s_axis_c2h_tvalid_0(s_axis_c2h_tvalid_0),
+        .s_axis_c2h_tready_0(s_axis_c2h_tready_0), // O
+        .s_axis_c2h_tkeep_0(s_axis_c2h_tkeep_0),
+        .m_axis_h2c_tdata_0(m_axis_h2c_tdata_0),
+        .m_axis_h2c_tlast_0(m_axis_h2c_tlast_0),
+        .m_axis_h2c_tvalid_0(m_axis_h2c_tvalid_0),
+        .m_axis_h2c_tready_0(m_axis_h2c_tready_0),
+        .m_axis_h2c_tkeep_0(m_axis_h2c_tkeep_0),
+        // LITE interface
+        //-- AXI Master Write Address Channel
+        .m_axil_awaddr    (m_axil_awaddr),
+        .m_axil_awprot    (m_axil_awprot),
+        .m_axil_awvalid   (m_axil_awvalid),
+        .m_axil_awready   (m_axil_awready),
+        //-- AXI Master Write Data Channel
+        .m_axil_wdata     (m_axil_wdata),
+        .m_axil_wstrb     (m_axil_wstrb),
+        .m_axil_wvalid    (m_axil_wvalid),
+        .m_axil_wready    (m_axil_wready),
+        //-- AXI Master Write Response Channel
+        .m_axil_bvalid    (m_axil_bvalid),
+        .m_axil_bresp     (m_axil_bresp),
+        .m_axil_bready    (m_axil_bready),
+        //-- AXI Master Read Address Channel
+        .m_axil_araddr    (m_axil_araddr),
+        .m_axil_arprot    (m_axil_arprot),
+        .m_axil_arvalid   (m_axil_arvalid),
+        .m_axil_arready   (m_axil_arready),
+        .m_axil_rdata     (m_axil_rdata),
+        //-- AXI Master Read Data Channel
+        .m_axil_rresp     (m_axil_rresp),
+        .m_axil_rvalid    (m_axil_rvalid),
+        .m_axil_rready    (m_axil_rready),
 
+        .usr_irq_req       (usr_irq_req),
+        .usr_irq_ack       (usr_irq_ack),
+        .msi_enable        (msi_enable),
+        .msi_vector_width  (msi_vector_width),
 
-      .usr_irq_req       (usr_irq_req),
-      .usr_irq_ack       (usr_irq_ack),
-      .msi_enable        (msi_enable),
-      .msi_vector_width  (msi_vector_width),
+        //-- AXI Global
+        .axi_aclk        ( pci_user_clk ),
+        .axi_aresetn   (pci_user_resetn),
 
-      //-- AXI Global
-      .axi_aclk        ( pci_user_clk ),
-      .axi_aresetn   (pci_user_resetn),
-
-      .user_lnk_up     ( pci_user_lnk_up )
+        .user_lnk_up     ( pci_user_lnk_up )
     );
 
 
@@ -503,16 +505,19 @@ module system_top #
         .spi_sdo_o (spi_mosi)
     );
 
-    // BAR0 register Space 8-bit address, 32-bit Data
+    //-- BAR0 register Space 8-bit address, 32-bit Data
     (* keep = "true" *) reg  acq_on_r, acq_on_q;
-    wire almost_full_axis, almost_empty_axis; //, prog_full, prog_empty;
+    wire almost_full_axis, almost_empty_axis, prog_full, prog_empty;
     //wire [31:0] control_reg_i;
 
     wire [15:0] rd_data_count;
+
     wire prog_empty_axis_pre;
     wire [31:0] status_reg_i = {rd_data_count,
         detect_pls_i,
+        //    3'h0, acq_on_r,      almost_full_axis, almost_empty_axis, prog_full, prog_empty};
         3'h0, acq_on_r,      almost_full_axis, almost_empty_axis, 1'b0, prog_empty_axis_pre}; //, prog_full, prog_empty};
+
 
     shapi_regs_v1 # (
         .C_S_AXI_DATA_WIDTH(32),
@@ -591,7 +596,7 @@ module system_top #
         .detect_pls (detect_pls_i)  // o
     );
 
-    // AXI streaming ports
+    //-- AXI streaming ports
 
     reg [14:0] s_axis_c2h_cnt = 15'h00; // 15'h3FF;
 
@@ -603,19 +608,19 @@ module system_top #
 
     assign s_axis_c2h_tlast_0 = (s_axis_c2h_cnt ==15'h3FF)? 1'b1:1'b0;// m_axis_h2c_tlast_0;
 
-    //-- H2C data dump
+    //-- H2C dump
     assign m_axis_h2c_tready_0 = 1'b1; // H2C data discarded
 
     wire almost_full_axis_pre;
 
     reg [15:0] adc_cnt = 'h00;
     wire [31:0] adc_data3  = adc_data[3];
-    wire [C_S_AXI_DATA_WIDTH-1:0] adc_data_all = {adc_cnt[15:3], almost_empty_axis, almost_full_axis, almost_full_axis_pre, adc_data3[15:0], adc_data[2], adc_data[1], adc_data[0]};
+    wire [C_S_AXI_DATA_WIDTH-1:0] adc_data_all = {adc_cnt[15:2], almost_full_axis, almost_full_axis_pre, adc_data3[15:0], adc_data[2], adc_data[1], adc_data[0]};
     wire  adc_dma_tvalid = adc_enable[0]; // && detect_0_i; //&& adc_valid[0] Write DMA FIFO only after trigger 0
 
     reg [1:0] acq_soft_trig_dly, acq_hard_trig_dly;
 
-    // -- Trigger generation
+    //-- Trigger generation
     always @(posedge pci_user_clk or negedge acq_en_i) begin
         if (!acq_en_i)
         begin
@@ -632,7 +637,6 @@ module system_top #
                 acq_on_r <= #TCQ  1'b1;
         end
     end
-
     wire s_axis_tready_pre;
     always @(posedge rx_clk or posedge sys_rst)
         if (sys_rst)
@@ -647,30 +651,28 @@ module system_top #
         else
             acq_on_rx_r <= acq_on_r;
 
-    wire   m_axis_tready_main = s_axis_c2h_tready_0 || (!acq_on_r ) ;// && prog_full); // Flush MAIN buffer on ACQ OFF
+    wire   m_axis_tready_main = s_axis_c2h_tready_0 || (!acq_on_r );  // && prog_full); // Flush MAIN buffer on ACQ disable
     wire   m_axis_tvalid_main;
-    assign s_axis_c2h_tvalid_0 = m_axis_tvalid_main &&  acq_on_r ; // Stream only with ACQ ON
+    assign s_axis_c2h_tvalid_0 = m_axis_tvalid_main &&  acq_on_r;     // Stream only with ACQ enable
+
+    wire s_axis_tready_main;
+    wire m_axis_tready_pre = (acq_on_r)? s_axis_tready_main :
+                                         !prog_empty_axis_pre; // on ACQ disable, empty PRE  buffer when almost_full ( keep pre-trigger samples)
+    // almost_full_axis_pre; // on ACQ disable, empty PRE  buffer when almost_full ( keep pre-trigger samples)
+    wire m_axis_tvalid_pre;
+    wire s_axis_tvalid_main = m_axis_tvalid_pre &&  acq_on_r; // Fill Main only with ACQ enable
 
     wire [127:0] m_axis_tdata_pre;
-    wire s_axis_tready_main;
-
-    //wire m_axis_tready_pre = s_axis_tready_main || ( (!acq_on_r) && (!prog_empty_axis_pre) ) ; // on ACQ disable, fill  PRE  buffer up to  almost_full
-    //    wire m_axis_tready_pre = s_axis_tready_main || ( (!acq_on_r) && almost_full_axis_pre ) ; // on ACQ disable, fill  PRE  buffer up to  almost_full
-    wire m_axis_tready_pre = (acq_on_r)? s_axis_tready_main :
-                                         almost_full_axis_pre; // on ACQ disable, empty PRE  buffer when almost_full ( keep pre-trigger samples)
-                                         //  !prog_empty_axis_pre;  
-    wire m_axis_tvalid_pre;
-    wire s_axis_tvalid_main = m_axis_tvalid_pre &&  acq_on_rx_r ; // Fill Main only with ACQ ON
-
     xpm_fifo_axis #(
         .CDC_SYNC_STAGES(3),            // DECIMAL Range: 2 - 8. Default value = 2.
         .CLOCKING_MODE("independent_clock"), // String
-        //.CLOCKING_MODE("common_clock"), // String
-        .ECC_MODE("no_ecc"),            // String
+        //.CLOCKING_MODE("common_clock"),
+        .ECC_MODE("no_ecc"),
+        //  .FIFO_DEPTH(16384),              // DECIMAL 131072 65536  32768 16384   ~0.131 ms pre-trigger ACQ
         .FIFO_DEPTH(32768),              // DECIMAL    ~0.25 ms pre-trigger ACQ
-        .FIFO_MEMORY_TYPE("auto"),      // String
-        .PACKET_FIFO("false"),          // String
-        .PROG_EMPTY_THRESH(32760),         // DECIMAL 
+        .FIFO_MEMORY_TYPE("auto"),
+        .PACKET_FIFO("false"),
+        .PROG_EMPTY_THRESH(32760),      // DECIMAL
         .PROG_FULL_THRESH(32760),       // DECIMAL 8- 32763 // Not used
         //.RD_DATA_COUNT_WIDTH(14),        // DECIMAL
         .RELATED_CLOCKS(0),             // DECIMAL
@@ -679,10 +681,11 @@ module system_top #
         .TDEST_WIDTH(1),                // DECIMAL
         .TID_WIDTH(1),                  // DECIMAL
         .TUSER_WIDTH(1),                // DECIMAL
-        .USE_ADV_FEATURES("0208")      // String  [3] enables almost_full flag; 
-                                        //         [9]  to 1 enables prog_empty flag; 
+        .USE_ADV_FEATURES("0208") //,      // String  [3] enables almost_full flag; 
+        //         [9] enables prog_empty flag; 
         //.WR_DATA_COUNT_WIDTH(15)         // DECIMAL log2(32768) + 1 = 16
-    ) xpm_fifo_axis_pre_trigg_i (
+    )
+    xpm_fifo_axis_pre_trigg_i (
         .almost_empty_axis(),   // 1-bit output: Almost Empty : When asserted, this signal
         // indicates that only one more user_clkread can be performed before the
         // FIFO goes to empty.
@@ -765,8 +768,7 @@ module system_top #
         .injectsbiterr_axis(1'b0), // 1-bit input: Single Bit Error Injection- Injects a single bit
         // error if the ECC feature is used.
 
-        //.m_aclk(),                         // 1-bit input: Master Interface Clock:
-        .m_aclk(pci_user_clk),                         // 1-bit input: Master Interface Clock:
+        .m_aclk(pci_user_clk),                         // 1-bit input: Master Interface Clock
 
         .m_axis_tready(m_axis_tready_pre),           // 1-bit input: TREADY: Indicates that the slave can accept a 
         // transfer in the current cycle.
@@ -817,7 +819,7 @@ module system_top #
 
     xpm_fifo_axis #(
         .CDC_SYNC_STAGES(3),            // DECIMAL Range: 2 - 8. Default value = 2.
-        //.CLOCKING_MODE("independent_clock"), 
+        //.CLOCKING_MODE("independent_clock"),
         .CLOCKING_MODE("common_clock"), // String
         .ECC_MODE("no_ecc"),            // String
         .FIFO_DEPTH(32768),              // DECIMAL 131072 65536  32768 (65536 Max 4194304 bit?) ~0.5 ms ACQ
@@ -833,14 +835,10 @@ module system_top #
         .TID_WIDTH(1),                  // DECIMAL
         .TUSER_WIDTH(1),                // DECIMAL
         //      .USE_ADV_FEATURES("0202"),      // String
-
-        // |   Setting USE_ADV_FEATURES[3]  to 1 enables almost_full flag;  Default value of this bit is 0                       |
-        // |   Setting USE_ADV_FEATURES[11] to 1 enables almost_empty flag; Default value of this bit is 0               
-        .USE_ADV_FEATURES("0808"),      // String
-
-        //.USE_ADV_FEATURES("0E0A"),      // String
+        .USE_ADV_FEATURES("0E0A"),      // String
         .WR_DATA_COUNT_WIDTH(16)         // DECIMAL
-    ) xpm_fifo_axis_c2h0_i (
+    )
+    xpm_fifo_axis_c2h0_i (
         .almost_empty_axis(almost_empty_axis),   // 1-bit output: Almost Empty : When asserted, this signal
         // indicates that only one more user_clkread can be performed before the
         // FIFO goes to empty.
@@ -892,13 +890,13 @@ module system_top #
         // valid transfer. A transfer takes place when both TVALID and
         // TREADY are asserted
 
-        .prog_empty_axis(),       // 1-bit output: Programmable Empty- This signal is asserted
+        .prog_empty_axis(prog_empty),       // 1-bit output: Programmable Empty- This signal is asserted
         // when the number of words in the FIFO is less than or equal to
         // the programmable empty threshold value. It is de-asserted
         // when the number of words in the FIFO exceeds the programmable
         // empty threshold value.
 
-        .prog_full_axis(),         // 1-bit output: Programmable Full: This signal is asserted when
+        .prog_full_axis(prog_full),         // 1-bit output: Programmable Full: This signal is asserted when
         // the number of words in the FIFO is greater than or equal to
         // the programmable full threshold value. It is de-asserted when
         // the number of words in the FIFO is less than the programmable
@@ -923,16 +921,14 @@ module system_top #
         .injectsbiterr_axis(1'b0), // 1-bit input: Single Bit Error Injection- Injects a single bit
         // error if the ECC feature is used.
 
-        //.m_aclk(pci_user_clk),                         // 1-bit input: Master Interface Clock:
-        .m_aclk(),                         // 1-bit input: Master Interface Clock: All signals on slave clock
+        .m_aclk(),                         // 1-bit input: Master Interface Clock:
         // interface are sampled on the rising edge of this clock.
 
         .m_axis_tready(m_axis_tready_main),           // 1-bit input: TREADY: Indicates that the slave can accept a m_axis128_tvalid
         // transfer in the current cycle.
 
-        //.s_aclk(rx_clk),                         // 1-bit input: Slave Interface Clock: All signals on slave clock
-        .s_aclk(pci_user_clk),                         // 1-bit input: Slave Interface Clock: All signals on slave clock
-        // interface are sampled on the rising edge of this clock.
+        .s_aclk(pci_user_clk),                         // 1-bit input:
+        //--    "common_clock"- Common clocking; clock both write and read domain s_aclk
 
         .s_aresetn(pci_user_resetn),                   // 1-bit input: Active low asynchronous reset.
         .s_axis_tdata(m_axis_tdata_pre),             // TDATA_WIDTH-bit input: TDATA: The primary payload that is
@@ -1099,5 +1095,3 @@ endmodule
 // |---------------------------------------------------------------------------------------------------------------------|
 // | Specifies the width of wr_data_count_axis. To reflect the correct value, the width should be log2(FIFO_DEPTH)+1.    |
 // +---------------------------------------------------------------------------------------------------------------------+
-
-// ***************************************************************************

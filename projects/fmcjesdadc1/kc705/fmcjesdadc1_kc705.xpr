@@ -335,6 +335,21 @@
     <MsgAttr Name="StringsToMatch" Val="PCW_UIPARAM_DDR_DQS_TO_CLK_DELAY"/>
   </MsgRule>
   <MsgRule>
+    <MsgAttr Name="RuleType" Val="0"/>
+    <MsgAttr Name="Limit" Val="-1"/>
+    <MsgAttr Name="NewSeverity" Val="ANY"/>
+    <MsgAttr Name="Id" Val="Common 17-1649"/>
+    <MsgAttr Name="Severity" Val="ANY"/>
+    <MsgAttr Name="ShowRule" Val="1"/>
+    <MsgAttr Name="RuleSource" Val="8"/>
+    <MsgAttr Name="StringIsRegExp" Val="0"/>
+    <MsgAttr Name="RuleId" Val="12"/>
+    <MsgAttr Name="Note" Val=""/>
+    <MsgAttr Name="Author" Val=""/>
+    <MsgAttr Name="CreatedTimestamp" Val=""/>
+    <MsgAttr Name="StringsToMatch" Val="CRITICAL WARNING: [Common 17-1649] The Vivado message database &apos;/home/esther/FPGA/vivado/2019.1/ad-ipfn-hdl/projects/fmcjesdadc1/kc705/fmcjesdadc1_kc705.runs/synth_1/vivado.pb&apos; contains 32070 messages. Restoring all messages from this message database will impact Vivado performance, so only WARNING, CRITICAL WARNING, and ERROR messages will be restored. To restore all messages from this file use the tcl command &apos;set_param messaging.loadPbLimit 32071&apos; and re-open the project."/>
+  </MsgRule>
+  <MsgRule>
     <MsgAttr Name="RuleType" Val="1"/>
     <MsgAttr Name="Limit" Val="-1"/>
     <MsgAttr Name="NewSeverity" Val="WARNING"/>
