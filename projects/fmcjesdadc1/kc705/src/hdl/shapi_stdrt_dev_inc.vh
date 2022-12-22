@@ -49,13 +49,13 @@
     `define DEV_FW_VENDOR    16'h1570       //offset_addr 0x0c
     `define DEV_FW_ID        16'h0032
 
-    `define DEV_FW_PATCH     16'h0002       //offset_addr 0x10
+    `define DEV_FW_PATCH     16'h0003       //offset_addr 0x10
     `define DEV_FW_MINOR        8'h01
     `define DEV_FW_MAJOR        8'h01
 
     // Use Linux command: date +%s; date  to get UNIX timestamp
-    `define DEV_TSTAMP      32'd1671199743
-    //TS Fri 16 Dec 2022 02:09:03 PM WET
+    `define DEV_TSTAMP      32'd1671719731
+    //TS Thu 22 Dec 2022 02:35:31 PM WET
 
     `define DEV_NAME1         "1cdA" // first char right
     `define DEV_NAME2         "girT"

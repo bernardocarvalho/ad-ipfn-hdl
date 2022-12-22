@@ -18,7 +18,7 @@
 ###############################################################################
 #
 #########################################################################################################################
-# User Constraintshttps://www.zomato.com/pt/grande-lisboa/masala-kraft-alvalade-lisboa
+# User Constraints
 #########################################################################################################################
 
 # Replaces userclk2
@@ -36,7 +36,7 @@
 # User Time Names / User Time Groups / Time Specs
 ###############################################################################
 create_clock -period 10.000 -name pci_sys_clk [get_ports pci_sys_clk_p]
-set_false_path -from [get_ports pci_sys_rst_n]
+
 #set_false_path -through [get_pins xdma_0_i/inst/pcie3_ip_i/inst/pcie_top_i/pcie_7vx_i/PCIE_3_0_i/CFGMAX*]
 #set_false_path -through [get_nets xdma_0_i/inst/cfg_max*]
 
@@ -56,7 +56,9 @@ set_false_path -from [get_ports pci_sys_rst_n]
 set_property LOC G25 [get_ports pci_sys_rst_n]
 set_property PULLUP true [get_ports pci_sys_rst_n]
 set_property IOSTANDARD LVCMOS25 [get_ports pci_sys_rst_n]
+set_false_path -from [get_ports pci_sys_rst_n]
 
+set_false_path -from [get_ports sys_rst]
 ###############################################################################
 # Physical Constraints
 ###############################################################################
@@ -78,18 +80,30 @@ set_property IOSTANDARD LVCMOS25 [get_ports user_sma_clk_*]
 #user_sma_clk_p SMA J11
 set_property PACKAGE_PIN L25 [get_ports user_sma_clk_p]
 set_property PACKAGE_PIN K25 [get_ports user_sma_clk_n]
+set_false_path -to [get_ports user_sma_clk_p]
+set_false_path -to [get_ports user_sma_clk_n]
+#set_output_delay -clock atca_clk10 -max 2.0 [get_ports user_sma_clk_p]
+#set_output_delay -clock atca_clk10 -min 1.0 [get_ports user_sma_clk_n]
 
 set_property IOSTANDARD LVCMOS25 [get_ports user_sma_gpio_*]
 set_property PACKAGE_PIN Y23 [get_ports user_sma_gpio_p]
 set_property PACKAGE_PIN Y24 [get_ports user_sma_gpio_n]
+set_false_path -to [get_ports user_sma_gpio_p]
+set_false_path -to [get_ports user_sma_gpio_n]
 
 # These regs are stable during Acquisition
-set_false_path -from [get_pins {shapi_regs_v1_inst/trig0_r_reg[*]}] 
-set_false_path -from [get_pins {shapi_regs_v1_inst/trig1_r_reg[*]}] 
-set_false_path -from [get_pins {shapi_regs_v1_inst/trig2_r_reg[*]}] 
-set_false_path -from [get_pins {shapi_regs_v1_inst/param_mul_r_reg[*]}] 
-set_false_path -from [get_pins {shapi_regs_v1_inst/param_off_r_reg[*]}] 
-set_false_path -from [get_pins {shapi_regs_v1_inst/param_init_delay_r_reg[*]}] 
-# [get_pins {shapi_regs_inst/control_r_reg[*]}]
+set_false_path -from [get_pins {shapi_regs_v1_inst/control_r_reg[*]/C}]
+set_false_path -from [get_pins {shapi_regs_v1_inst/trig0_r_reg[*]/C}] 
+set_false_path -from [get_pins {shapi_regs_v1_inst/trig1_r_reg[*]/C}] 
+set_false_path -from [get_pins {shapi_regs_v1_inst/trig2_r_reg[*]/C}] 
+set_false_path -from [get_pins {shapi_regs_v1_inst/param_mul_r_reg[*]/C}] 
+set_false_path -from [get_pins {shapi_regs_v1_inst/param_off_r_reg[*]/C}] 
+set_false_path -from [get_pins {shapi_regs_v1_inst/param_init_delay_r_reg[*]/C}] 
+
+set_false_path -from [get_pins {trigger_gen_i/pulse_delay_r_reg[*]/C}] 
+set_false_path -from [get_pins {trigger_gen_i/detect_pls_r_reg[*]/C}] 
+set_false_path -from [get_pins {acq_on_r_reg/C}] 
+# Used just for debug ...
+set_false_path -from [get_pins {xpm_fifo_axis_c2h0_i/xpm_fifo_base_inst/gen_pntr_flags_cc.gaf_cc.ram_afull_i_reg/C}]
 
 set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]

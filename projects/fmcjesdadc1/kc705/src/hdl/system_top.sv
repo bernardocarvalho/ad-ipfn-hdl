@@ -660,7 +660,7 @@ module system_top #
                                          !prog_empty_axis_pre; // on ACQ disable, empty PRE  buffer when almost_full ( keep pre-trigger samples)
     // almost_full_axis_pre; // on ACQ disable, empty PRE  buffer when almost_full ( keep pre-trigger samples)
     wire m_axis_tvalid_pre;
-    wire s_axis_tvalid_main = m_axis_tvalid_pre &&  acq_on_r; // Fill Main only with ACQ enable
+    wire s_axis_tvalid_main = (acq_on_r)?  m_axis_tvalid_pre : 1'b0; // Fill Main only with ACQ enable
 
     wire [127:0] m_axis_tdata_pre;
     xpm_fifo_axis #(
@@ -672,7 +672,7 @@ module system_top #
         .FIFO_DEPTH(32768),              // DECIMAL    ~0.25 ms pre-trigger ACQ
         .FIFO_MEMORY_TYPE("auto"),
         .PACKET_FIFO("false"),
-        .PROG_EMPTY_THRESH(32760),      // DECIMAL
+        .PROG_EMPTY_THRESH(32750),      // DECIMAL
         .PROG_FULL_THRESH(32760),       // DECIMAL 8- 32763 // Not used
         //.RD_DATA_COUNT_WIDTH(14),        // DECIMAL
         .RELATED_CLOCKS(0),             // DECIMAL
