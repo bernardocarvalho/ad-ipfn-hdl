@@ -35,9 +35,21 @@
 `timescale 1ns/100ps
 
 module system_top #(
-    parameter PL_LINK_CAP_MAX_LINK_WIDTH  = 4,            // 1- X1; 2 - X2; 4 - X4; 8 - X8
-    parameter PL_LINK_CAP_MAX_LINK_SPEED  = 2,             // 1- GEN1; 2 - GEN2; 4 - GEN3
-    
+// From xdma_id0034 Example Design  
+   parameter PL_LINK_CAP_MAX_LINK_WIDTH          = 4,            // 1- X1; 2 - X2; 4 - X4; 8 - X8
+   parameter PL_SIM_FAST_LINK_TRAINING           = "FALSE",      // Simulation Speedup
+   parameter PL_LINK_CAP_MAX_LINK_SPEED          = 2,             // 1- GEN1; 2 - GEN2; 4 - GEN3
+   parameter C_DATA_WIDTH                        = 128 ,
+   parameter EXT_PIPE_SIM                        = "FALSE",  // This Parameter has effect on selecting Enable External PIPE Interface in GUI.
+   parameter C_ROOT_PORT                         = "FALSE",      // PCIe block is in root port mode
+   parameter C_DEVICE_NUMBER                     = 0,            // Device number for Root Port configurations only
+   parameter AXIS_CCIX_RX_TDATA_WIDTH     = 256, 
+   parameter AXIS_CCIX_TX_TDATA_WIDTH     = 256,
+   parameter AXIS_CCIX_RX_TUSER_WIDTH     = 46,
+   parameter AXIS_CCIX_TX_TUSER_WIDTH     = 46,
+       
+	parameter ADC_CHANNELS = 4,           // Maximum 48, Must be even  
+	   
     parameter ADC_DATA_WIDTH   = 18,
     parameter N_ADC_CHANNELS   = 4
 )
@@ -62,15 +74,14 @@ module system_top #(
   output adc_sck_p,
   output adc_sdi_n,
   output adc_sdi_p,
-  input [N_ADC_CHANNELS-1 :0]adc_sdo_cha_n,
-  input [N_ADC_CHANNELS-1 :0]adc_sdo_cha_p,
-  input [N_ADC_CHANNELS-1 :0]adc_sdo_chb_n,
-  input [N_ADC_CHANNELS-1 :0]adc_sdo_chb_p,
+  input [N_ADC_CHANNELS-1 :0] adc_sdo_cha_n,
+  input [N_ADC_CHANNELS-1 :0] adc_sdo_cha_p,
+  input [N_ADC_CHANNELS-1 :0] adc_sdo_chb_n,
+  input [N_ADC_CHANNELS-1 :0] adc_sdo_chb_p,
 
     output    fan_en_b
 );
 
-   localparam C_DATA_WIDTH       = 128;
    
    //  AXI_LITE_DATA_WIDTH
    localparam C_M_AXI_LITE_DATA_WIDTH = 32;  
@@ -152,6 +163,10 @@ module system_top #(
     (* keep = "true" *) wire s_axis_c2h_tvalid_0, s_axis_c2h_tvalid_1;
     (* keep = "true" *) wire s_axis_c2h_tready_0, s_axis_c2h_tready_1;
     wire [C_DATA_WIDTH/8-1:0] s_axis_c2h_tkeep_0, s_axis_c2h_tkeep_1;
+ 
+// 80Mhz,  80Mhz but delayed for 47nsec
+    wire  adc_spi_clk, adc_read_clk;     
+    wire [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_a_data_arr_i, adc_b_data_arr_i;
 
     assign m_axis_h2c_tready_0 = 1'b1; // Allways Flush H2C data
 
@@ -271,8 +286,8 @@ module system_top #(
 
    system_clocks system_clocks_inst (
        // Clock out ports
-    .clk_out1(clk_out1),     // output clk_out1 80MHz 0º
-    .clk_out2(clk_out2),     // output clk_out2 80MHz 180º
+    .clk_out1(adc_spi_clk),     // output 80Mhz 80MHz 0º
+    .clk_out2(adc_read_clk),     // output 80Mhz but delayed for 47nsec 80MHz 180º
     // Status and control signals
     .reset(!axi_aresetn), // input sys_reset? 
     .locked(mmcm_200_locked_i),       // output 
@@ -280,16 +295,32 @@ module system_top #(
     .clk_in1(pl_clk0_i)      // input clk_in1
    );
 
+   wire reader_en_sync;
    ad4003_deserializer ad4003_deserializer_inst (
     .rst(), // i
-    .adc_spi_clk(),    // i
-    .adc_read_clk(),   // i
+    .adc_spi_clk(adc_spi_clk),    // i
+    .adc_read_clk(adc_read_clk),   // i
     .force_read(),     // i
     .force_write(),    // i
-    .reader_en_sync(), // o
+    .reader_en_sync(reader_en_sync), // o
     .cnvst(),          // o
     .sdi(),            // o
     .sck()             // o
+   );
+   
+   adc_block adc_block_inst (
+    .rst(), // i
+    .adc_sdo_cha_p(adc_sdo_cha_p), // i
+    .adc_sdo_cha_n(adc_sdo_cha_n), // i
+    .adc_sdo_chb_p(adc_sdo_chb_p), // i
+    .adc_sdo_chb_n(adc_sdo_chb_n), // i
+   
+    .adc_read_clk(adc_read_clk),   // i
+    
+    .reader_en_sync(reader_en_sync),  // i
+
+    .adc_a_data_arr(adc_a_data_arr_i), // o
+    .adc_b_data_arr(adc_b_data_arr_i) // o
    );
 
 endmodule

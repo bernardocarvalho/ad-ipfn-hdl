@@ -39,7 +39,7 @@
 `timescale 1ns/1ps
 
 module adc_block #( 
-		parameter ADC_CHANNELS = 4,           // Maximum 24, Must be even 
+		parameter ADC_CHANNELS = 4,           // Maximum 48, Must be even 
     // Do not override parameters below this line
 		parameter ADC_DATA_WIDTH = 18,
 		parameter TCQ        = 1		
@@ -48,8 +48,10 @@ module adc_block #(
     input rst,
     //input adc_spi_clk, // 80Mhz
     input adc_read_clk, // 80Mhz but delayed for 47nsec
-    input [ADC_CHANNELS-1 :0] adc_sdo_cha,
-    input [ADC_CHANNELS-1 :0] adc_sdo_chb,
+    input [ADC_CHANNELS-1 :0] adc_sdo_cha_p,
+    input [ADC_CHANNELS-1 :0] adc_sdo_cha_n,
+    input [ADC_CHANNELS-1 :0] adc_sdo_chb_p,
+    input [ADC_CHANNELS-1 :0] adc_sdo_chb_n,
     // input [24:1]adc_sdo_chb,
     // input force_read,
     // input force_write,
@@ -65,11 +67,12 @@ module adc_block #(
 	genvar k;
     wire [ADC_DATA_WIDTH-1:0] adc_a_data[ADC_CHANNELS-1:0];	
     wire [ADC_DATA_WIDTH-1:0] adc_b_data[ADC_CHANNELS-1:0];	
+    wire [ADC_DATA_WIDTH-1:0] adc_sdo_cha, adc_sdo_chb;	
 	generate
 		for (k = 0; k < ADC_CHANNELS; k = k + 1)
 		begin: ADCs
-        adc_chan_i 
-			adc_ad4003_sr (	
+        adc_ad4003_sr 
+			adc_ad4003_sr_i (	
                 .rst(rst), // i
                 .adc_read_clk(adc_read_clk),   // i			
                 .reader_en_sync(reader_en_sync),    // i
@@ -90,8 +93,19 @@ module adc_block #(
 			assign adc_a_data_arr[(ADC_DATA_WIDTH*(k + 1) - 1) -: ADC_DATA_WIDTH] = adc_a_data[k];
 			assign adc_b_data_arr[ADC_DATA_WIDTH*k  +: ADC_DATA_WIDTH] = adc_b_data[k];
 //			assign adc_all_data_i[(`ADC_DATA_WIDTH * (k + 1) - 1):(`ADC_DATA_WIDTH * k) ] = adc_p_data[k];
+
+            IBUFDS IBUFDS_cha (
+              .O(adc_sdo_cha[k]),   // 1-bit output: Buffer output
+              .I(adc_sdo_cha_p[k]),   // 1-bit input: Diff_p buffer input (connect directly to top-level port)
+              .IB(adc_sdo_cha_n[k])  // 1-bit input: Diff_n buffer input (connect directly to top-level port)
+            );
+                        IBUFDS IBUFDS_chb (
+              .O(adc_sdo_chb[k]),   // 1-bit output: Buffer output
+              .I(adc_sdo_chb_p[k]),   // 1-bit input: Diff_p buffer input (connect directly to top-level port)
+              .IB(adc_sdo_chb_n[k])  // 1-bit input: Diff_n buffer input (connect directly to top-level port)
+            );
+
 		end
 	endgenerate
-
 
 endmodule
