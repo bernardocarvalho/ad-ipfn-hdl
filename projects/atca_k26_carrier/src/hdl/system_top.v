@@ -143,10 +143,8 @@ module system_top #(
     assign m_axis_h2c_tready_0 = 1'b1; // Allways Flush H2C data
 
    // PCIEe Ref clock buffer
-   IBUFDS_GTE2 refclk_ibuf (.O(sys_clk), .ODIV2(), .I(sys_clk_p), .CEB(1'b0), .IB(sys_clk_n));
+   IBUFDS_GTE4 refclk_ibuf (.O(sys_clk), .ODIV2(), .I(sys_clk_p), .CEB(1'b0), .IB(sys_clk_n));
      
-
-
   // PCIe Reset buffer
      IBUF atca_rx_3a_buf ( .O(sys_rst_n_c), .I(sys_rst_n ) ); // atca_3a_r
 
@@ -249,7 +247,7 @@ module system_top #(
            .control_reg(control_reg_i), // o
            .eo_offset(eo_offset_i),  // o
            .wo_offset(wo_offset_i),  // o
-           .ilck_param(ilck_param_i),  // o
+          // .ilck_param(ilck_param_i),  // o
            .chopp_period(chopp_period_i),  // o
            .channel_mask(channel_mask_i)  // o
     );
