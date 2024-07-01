@@ -41,13 +41,14 @@ module system_clocks #(
     parameter TCQ        = 1
 )
     (
+      // Status and control signals
+  input         reset,
+  input         clk_in,
+  output        locked,
+
   // Clock out ports
   output        clk_out1,
-  output        clk_out2,
-  // Status and control signals
-  input         reset,
-  output        locked,
-  input         clk_in
+  output        clk_out2
  );
   // Input buffering
   //------------------------------------

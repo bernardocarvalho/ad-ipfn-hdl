@@ -285,15 +285,16 @@ module system_top #(
     );
 
    system_clocks system_clocks_inst (
-       // Clock out ports
-    .clk_out1(adc_spi_clk),     // output 80Mhz 80MHz 0º
-    .clk_out2(adc_read_clk),     // output 80Mhz but delayed for 47nsec 80MHz 180º
+
     // Status and control signals
     .reset(!axi_aresetn), // input sys_reset? 
     .locked(mmcm_200_locked_i),       // output 
    // Clock in ports
-    .clk_in1(pl_clk0_i)      // input clk_in1
-   );
+    .clk_in(pl_clk0_i),      // input clk_in1
+       // Clock out ports
+    .clk_out1(adc_spi_clk),     // output 80Mhz 80MHz 0º
+    .clk_out2(adc_read_clk)     // output 80Mhz but delayed for 47nsec 80MHz 180º
+    );
 
    wire reader_en_sync;
    ad4003_deserializer ad4003_deserializer_inst (
