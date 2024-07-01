@@ -1,5 +1,4 @@
 // ***************************************************************************
-// ***************************************************************************
 // Copyright (C) 2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
@@ -40,7 +39,7 @@ module system_top #(
     parameter PL_LINK_CAP_MAX_LINK_SPEED  = 2,             // 1- GEN1; 2 - GEN2; 4 - GEN3
     
     parameter ADC_DATA_WIDTH   = 18,
-    parameter N_ADC_CHANNELS   = 1
+    parameter N_ADC_CHANNELS   = 4
 )
 (
    // PCIEe
@@ -54,7 +53,19 @@ module system_top #(
     //input  sys_rst_n  // This board uses ATCA RX3 signal
     
     input sys_rst_n,
-
+    
+  output acq_clk_n,
+  output acq_clk_p,
+  output adc_cnvst_n,
+  output adc_cnvst_p,
+  output adc_sck_n,
+  output adc_sck_p,
+  output adc_sdi_n,
+  output adc_sdi_p,
+  input [N_ADC_CHANNELS-1 :0]adc_sdo_cha_n,
+  input [N_ADC_CHANNELS-1 :0]adc_sdo_cha_p,
+  input [N_ADC_CHANNELS-1 :0]adc_sdo_chb_n,
+  input [N_ADC_CHANNELS-1 :0]adc_sdo_chb_p,
 
     output    fan_en_b
 );
@@ -93,6 +104,8 @@ module system_top #(
      reg              usr_irq_req = 0;
      wire             usr_irq_ack;
 
+     wire     pl_clk0_i;
+     wire mmcm_200_locked_i;
 //----------------------------------------------------------------------------------------------------------------//
 //     AXI LITE Master
 //----------------------------------------------------------------------------------------------------------------//
@@ -148,6 +161,10 @@ module system_top #(
   // PCIe Reset buffer
      IBUF atca_rx_3a_buf ( .O(sys_rst_n_c), .I(sys_rst_n ) ); // atca_3a_r
 
+    OBUFDS sdi_obuf ( .O(sdi_p), .OB(sdi_n), .I(sdi));
+    OBUFDS sck_obuf ( .O(sck_p), .OB(sck_n), .I(sck));
+    OBUFDS cnvst_obuf ( .O(cnvst_p), .OB(cnvst_n), .I(cnvst));
+    OBUFDS acq_clk_obuf ( .O(acq_clk_p), .OB(acq_clk_n), .I(acq_clk));
 
   assign gpio_i[94:1] = gpio_o[94:1];
 
@@ -158,7 +175,7 @@ module system_top #(
     .gpio_i (gpio_i),
     .gpio_o (gpio_o),
     .gpio_t (),
-
+    .pl_clk0(pl_clk0_i),
     .spi0_csn (),
     .spi0_miso (1'b0),
     .spi0_mosi (),
@@ -252,5 +269,27 @@ module system_top #(
            .channel_mask(channel_mask_i)  // o
     );
 
+   system_clocks system_clocks_inst (
+       // Clock out ports
+    .clk_out1(clk_out1),     // output clk_out1 80MHz 0º
+    .clk_out2(clk_out2),     // output clk_out2 80MHz 180º
+    // Status and control signals
+    .reset(!axi_aresetn), // input sys_reset? 
+    .locked(mmcm_200_locked_i),       // output 
+   // Clock in ports
+    .clk_in1(pl_clk0_i)      // input clk_in1
+   );
+
+   ad4003_deserializer ad4003_deserializer_inst (
+    .rst(), // i
+    .adc_spi_clk(),    // i
+    .adc_read_clk(),   // i
+    .force_read(),     // i
+    .force_write(),    // i
+    .reader_en_sync(), // o
+    .cnvst(),          // o
+    .sdi(),            // o
+    .sck()             // o
+   );
 
 endmodule
