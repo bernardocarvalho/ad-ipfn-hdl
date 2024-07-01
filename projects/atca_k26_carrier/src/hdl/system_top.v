@@ -45,9 +45,9 @@ module system_top #(
 (
    // PCIEe
     output [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pci_exp_txp,
-    output [(PL_LINK_CAP_MAX_LINK_WIDTH - 1) : 0] pci_exp_txn,
-    input [(PL_LINK_CAP_MAX_LINK_WIDTH - 1) : 0]  pci_exp_rxp,
-    input [(PL_LINK_CAP_MAX_LINK_WIDTH - 1) : 0]  pci_exp_rxn,
+    output [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pci_exp_txn,
+    input [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0]  pci_exp_rxp,
+    input [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0]  pci_exp_rxn,
 
     input    sys_clk_p,
     input    sys_clk_n,
