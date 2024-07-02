@@ -89,6 +89,28 @@ set_property CONFIG_VOLTAGE 1.8 [current_design]
 set_property LOC [get_package_pins -of_objects [get_bels [get_sites -filter {NAME =~ *COMMON*} -of_objects [get_iobanks -of_objects [get_sites GTHE4_CHANNEL_X0Y7]]]/REFCLK0P]] [get_ports sys_clk_p]
 set_property LOC [get_package_pins -of_objects [get_bels [get_sites -filter {NAME =~ *COMMON*} -of_objects [get_iobanks -of_objects [get_sites GTHE4_CHANNEL_X0Y7]]]/REFCLK0N]] [get_ports sys_clk_n]
 #
+# MGT 0 interface pins
+# set_property PACKAGE_PIN Y5 [get_ports gth_ref_clk0_n]
+# set_property PACKAGE_PIN Y6 [get_ports gth_ref_clk0_p]
+# set_property PACKAGE_PIN V5 [get_ports gth_ref_clk1_n]
+# set_property PACKAGE_PIN V6 [get_ports gth_ref_clk1_p]
+set_property PACKAGE_PIN Y1 [get_ports {pcie_mgt_0_rxn[0]}]
+set_property PACKAGE_PIN V1 [get_ports {pcie_mgt_0_rxn[1]}]
+set_property PACKAGE_PIN T1 [get_ports {pcie_mgt_0_rxn[2]}]
+set_property PACKAGE_PIN P1 [get_ports {pcie_mgt_0_rxn[3]}]
+set_property PACKAGE_PIN Y2 [get_ports {pcie_mgt_0_rxp[0]}]
+set_property PACKAGE_PIN V2 [get_ports {pcie_mgt_0_rxp[1]}]
+set_property PACKAGE_PIN T2 [get_ports {pcie_mgt_0_rxp[2]}]
+set_property PACKAGE_PIN P2 [get_ports {pcie_mgt_0_rxp[3]}]
+set_property PACKAGE_PIN W3 [get_ports {pcie_mgt_0_txn[0]}]
+set_property PACKAGE_PIN U3 [get_ports {pcie_mgt_0_txn[1]}]
+set_property PACKAGE_PIN R3 [get_ports {pcie_mgt_0_txn[2]}]
+set_property PACKAGE_PIN N3 [get_ports {pcie_mgt_0_txn[3]}]
+set_property PACKAGE_PIN W4 [get_ports {pcie_mgt_0_txp[0]}]
+set_property PACKAGE_PIN U4 [get_ports {pcie_mgt_0_txp[1]}]
+set_property PACKAGE_PIN R4 [get_ports {pcie_mgt_0_txp[2]}]
+set_property PACKAGE_PIN N4 [get_ports {pcie_mgt_0_txp[3]}]
+
 #############################################################################################################
 #############################################################################################################
 #

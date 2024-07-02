@@ -49,16 +49,19 @@ module system_top #(
    parameter AXIS_CCIX_TX_TUSER_WIDTH     = 46,
        
 	parameter ADC_CHANNELS = 4,           // Maximum 48, Must be even  
-	   
+
+    // Do not override parameters below this line
+    parameter ADC_MODULES =  ADC_CHANNELS / 2,     	   
     parameter ADC_DATA_WIDTH   = 18,
-    parameter N_ADC_CHANNELS   = 4
+    parameter TCQ        = 1
+
 )
 (
    // PCIEe
-    output [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pci_exp_txp,
-    output [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pci_exp_txn,
-    input [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0]  pci_exp_rxp,
-    input [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0]  pci_exp_rxn,
+    output [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pcie_mgt_0_txp,
+    output [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pcie_mgt_0_txn,
+    input  [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pcie_mgt_0_rxp,
+    input  [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pcie_mgt_0_rxn,
 
     input    sys_clk_p,
     input    sys_clk_n,
@@ -74,10 +77,10 @@ module system_top #(
   output adc_sck_p,
   output adc_sdi_n,
   output adc_sdi_p,
-  input [N_ADC_CHANNELS-1 :0] adc_sdo_cha_n,
-  input [N_ADC_CHANNELS-1 :0] adc_sdo_cha_p,
-  input [N_ADC_CHANNELS-1 :0] adc_sdo_chb_n,
-  input [N_ADC_CHANNELS-1 :0] adc_sdo_chb_p,
+  input [ADC_MODULES-1 :0] adc_sdo_cha_n,
+  input [ADC_MODULES-1 :0] adc_sdo_cha_p,
+  input [ADC_MODULES-1 :0] adc_sdo_chb_n,
+  input [ADC_MODULES-1 :0] adc_sdo_chb_p,
 
     output    fan_en_b
 );
@@ -115,8 +118,9 @@ module system_top #(
      reg              usr_irq_req = 0;
      wire             usr_irq_ack;
 
-     wire     pl_clk0_i;
+     wire pl_clk0_i, ps_periph_aresetn_i, ps_periph_reset_i;
      wire mmcm_200_locked_i;
+
 //----------------------------------------------------------------------------------------------------------------//
 //     AXI LITE Master
 //----------------------------------------------------------------------------------------------------------------//
@@ -191,6 +195,8 @@ module system_top #(
     .gpio_o (gpio_o),
     .gpio_t (),
     .pl_clk0(pl_clk0_i),
+    .periph_aresetn(ps_periph_aresetn_i),
+    .periph_reset(ps_periph_reset_i),
     .spi0_csn (),
     .spi0_miso (1'b0),
     .spi0_mosi (),
@@ -202,10 +208,10 @@ module system_top #(
   .sys_clk_gt(sys_clk_gt),                    // input wire sys_clk_gt
   .sys_rst_n(sys_rst_n),                      // input wire sys_rst_n
   .user_lnk_up(user_lnk_up),                  // output wire user_lnk_up
-  .pci_exp_txp(pci_exp_txp),                  // output wire [3 : 0] pci_exp_txp
-  .pci_exp_txn(pci_exp_txn),                  // output wire [3 : 0] pci_exp_txn
-  .pci_exp_rxp(pci_exp_rxp),                  // input wire [3 : 0] pci_exp_rxp
-  .pci_exp_rxn(pci_exp_rxn),                  // input wire [3 : 0] pci_exp_rxn
+  .pci_exp_txp(pcie_mgt_0_txp),                  // output wire [3 : 0] pci_exp_txp
+  .pci_exp_txn(pcie_mgt_0_txn),                  // output wire [3 : 0] pci_exp_txn
+  .pci_exp_rxp(pcie_mgt_0_rxp),                  // input wire [3 : 0] pci_exp_rxp
+  .pci_exp_rxn(pcie_mgt_0_rxn),                  // input wire [3 : 0] pci_exp_rxn
   .axi_aclk(axi_aclk),                        // output wire axi_aclk
   .axi_aresetn(axi_aresetn),                  // output wire axi_aresetn
   .usr_irq_req(usr_irq_req),                  // input wire [0 : 0] usr_irq_req
@@ -309,8 +315,9 @@ module system_top #(
     .sck()             // o
    );
    
-   adc_block adc_block_inst (
-    .rst(), // i
+   adc_block #(.ADC_CHANNELS ( ADC_CHANNELS )) 
+    adc_block_inst (
+    .rstn(ps_periph_aresetn_i), // i
     .adc_sdo_cha_p(adc_sdo_cha_p), // i
     .adc_sdo_cha_n(adc_sdo_cha_n), // i
     .adc_sdo_chb_p(adc_sdo_chb_p), // i

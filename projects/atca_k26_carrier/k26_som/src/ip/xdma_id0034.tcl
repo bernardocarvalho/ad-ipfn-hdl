@@ -37,7 +37,8 @@ set_property -dict [list CONFIG.Component_Name {$ip_name} \
     CONFIG.xdma_axi_intf_mm {AXI_Stream} CONFIG.pf0_msix_cap_table_bir {BAR_1} \
     CONFIG.pf0_msix_cap_pba_bir {BAR_1} CONFIG.cfg_mgmt_if {false} \
     CONFIG.PF0_DEVICE_ID_mqdma {9024} CONFIG.PF2_DEVICE_ID_mqdma {9024} \
-    CONFIG.PF3_DEVICE_ID_mqdma {9024}] [get_ips $ip_name]
+    CONFIG.PF3_DEVICE_ID_mqdma {9024} CONFIG.disable_gt_loc {true}] [get_ips $ip_name]
+     
 
 
 generate_target all [get_ips]
