@@ -160,7 +160,8 @@ module system_top #(
 
    wire [14:10] fifos_status_i;
    wire [4:0] fifos_status_cdc;
-
+   wire  adc_spi_clk, adc_read_clk;
+    
    // xpm_cdc_array_single: Single-bit Array Synchronizer
    // Xilinx Parameterized Macro, version 2019.2
     xpm_cdc_array_single #(
@@ -186,7 +187,7 @@ module system_top #(
 //            rtm_r8_i, atca_master, msi_enable, idelay_rdy_w,  // bits 23:20
 //                            1'b0, atca_clk_locked_i, te0741_clk_100_locked_i, rtm_clk10_locked_i, // bits 19:16
 //        i2C_reg0[7:0]}; // bits 7:0 atca slot_id 
-
+    reg  acq_on_r, acq_on_q;
     wire [C_M_AXI_LITE_ADDR_WIDTH-1 :0] status_reg_i = {8'h00,  // bits 31:24
             2'b00, msi_enable, 1'b0,  // bits 23:20
             3'b000, mmcm_100_locked_i, // bits 19:16
@@ -207,7 +208,7 @@ module system_top #(
     wire [C_DATA_WIDTH/8-1:0] s_axis_c2h_tkeep_0, s_axis_c2h_tkeep_1;
 
 // 80Mhz,  80Mhz but delayed for 47nsec
-    wire  adc_spi_clk, adc_read_clk;
+
     wire  adc_cnvst;
     wire [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_a_data_arr_i, adc_b_data_arr_i;
 
@@ -233,13 +234,29 @@ module system_top #(
   assign gpio_i[94:1] = gpio_o[94:1];
 
   assign fan_en_b = gpio_o[0];
-   reg  acq_on_r, acq_on_q;
- /* Synch signal with PCIe clk */
+
+ /* Synch signal with PCIe clk 
     always @(posedge axi_aclk) begin
 //        user_reset_q  <= user_reset;
 //        user_lnk_up_q <= user_lnk_up;
         acq_on_q <= acq_on_r;
     end
+*/
+
+// required for crossing clock domains between the acqusition clock and the read clock.
+ xpm_cdc_single #(
+.DEST_SYNC_FF(2),   // DECIMAL; range: 2-10
+.INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+.SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+.SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
+    )
+    acq_on_cdc (
+        .dest_out(acq_on_q), // 1-bit output: src_in synchronized to the destination clock domain. This output is
+        // registered.
+        .dest_clk(axi_aclk),   // 1-bit input: Clock signal for the destination clock domain.
+        .src_clk(adc_read_clk),     // 1-bit input: optional; required when SRC_INPUT_REG = 1
+        .src_in(acq_on_r)         // 1-bit input: Input signal to be synchronized to dest_clk domain.
+    );
 
     reg [1:0] soft_trig_dly;
     reg [1:0] hard_trig_dly;

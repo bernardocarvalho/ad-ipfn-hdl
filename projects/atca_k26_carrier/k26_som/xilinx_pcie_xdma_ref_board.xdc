@@ -94,6 +94,7 @@ set_property LOC [get_package_pins -of_objects [get_bels [get_sites -filter {NAM
 # set_property PACKAGE_PIN Y6 [get_ports gth_ref_clk0_p]
 # set_property PACKAGE_PIN V5 [get_ports gth_ref_clk1_n]
 # set_property PACKAGE_PIN V6 [get_ports gth_ref_clk1_p]
+
 set_property PACKAGE_PIN Y1 [get_ports {pcie_mgt_0_rxn[0]}]
 set_property PACKAGE_PIN V1 [get_ports {pcie_mgt_0_rxn[1]}]
 set_property PACKAGE_PIN T1 [get_ports {pcie_mgt_0_rxn[2]}]
