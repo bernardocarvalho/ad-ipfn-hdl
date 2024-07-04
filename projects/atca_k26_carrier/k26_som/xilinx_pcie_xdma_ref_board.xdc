@@ -90,8 +90,8 @@ set_property LOC [get_package_pins -of_objects [get_bels [get_sites -filter {NAM
 set_property LOC [get_package_pins -of_objects [get_bels [get_sites -filter {NAME =~ *COMMON*} -of_objects [get_iobanks -of_objects [get_sites GTHE4_CHANNEL_X0Y7]]]/REFCLK0N]] [get_ports sys_clk_n]
 #
 # MGT 0 interface pins
-# set_property PACKAGE_PIN Y5 [get_ports gth_ref_clk0_n]
-# set_property PACKAGE_PIN Y6 [get_ports gth_ref_clk0_p]
+# set_property PACKAGE_PIN Y5 [get_ports sys_clk_n] FIXED
+# set_property PACKAGE_PIN Y6 [get_ports sys_clk_p]
 # set_property PACKAGE_PIN V5 [get_ports gth_ref_clk1_n]
 # set_property PACKAGE_PIN V6 [get_ports gth_ref_clk1_p]
 
