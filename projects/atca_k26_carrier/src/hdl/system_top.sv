@@ -33,6 +33,8 @@
 // ***************************************************************************
 
 `timescale 1ns/100ps
+`include "atca_k26_config.vh"
+`include "control_word_bits.vh"
 
 module system_top #(
 // From xdma_id0034 Example Design  
@@ -48,7 +50,7 @@ module system_top #(
    parameter AXIS_CCIX_RX_TUSER_WIDTH     = 46,
    parameter AXIS_CCIX_TX_TUSER_WIDTH     = 46,
        
-	parameter ADC_CHANNELS = 4,           // Maximum 48, Must be even  
+	parameter ADC_CHANNELS = 8,           // Maximum 48, Must be even  
 
     // Do not override parameters below this line
     parameter ADC_MODULES =  ADC_CHANNELS / 2,     	   
@@ -65,9 +67,8 @@ module system_top #(
 
     input    sys_clk_p,
     input    sys_clk_n,
-    //input  sys_rst_n  // This board uses ATCA RX3 signal
+    input  sys_rst_n,  // This board uses ATCA RX3 signal
     
-    input sys_rst_n,
     
   output acq_clk_n,
   output acq_clk_p,
@@ -81,8 +82,8 @@ module system_top #(
   input [ADC_MODULES-1 :0] adc_sdo_cha_p,
   input [ADC_MODULES-1 :0] adc_sdo_chb_n,
   input [ADC_MODULES-1 :0] adc_sdo_chb_p,
-
-    output    fan_en_b
+  output [3 :0] carrier_led,
+  output    fan_en_b
 );
 
    
@@ -95,6 +96,7 @@ module system_top #(
   wire    [94:0]  gpio_i;
   wire    [94:0]  gpio_o;
 
+  assign carrier_led =  4'b0101; 
 
    //----------PCIEe------------------------------------------------------------------------------------------------------//
    //  AXI Interface                                                                                                 //
@@ -119,7 +121,7 @@ module system_top #(
      wire             usr_irq_ack;
 
      wire pl_clk0_i, ps_periph_aresetn_i, ps_periph_reset_i;
-     wire mmcm_200_locked_i;
+     wire mmcm_100_locked_i;
 
 //----------------------------------------------------------------------------------------------------------------//
 //     AXI LITE Master
@@ -154,6 +156,42 @@ module system_top #(
 
     wire [2:0]    msi_vector_width;
     wire          msi_enable;
+    wire  [C_M_AXI_LITE_ADDR_WIDTH-1:0] control_reg_i, chopp_period_i, channel_mask_i; 
+
+   wire [14:10] fifos_status_i;
+   wire [4:0] fifos_status_cdc;
+
+   // xpm_cdc_array_single: Single-bit Array Synchronizer
+   // Xilinx Parameterized Macro, version 2019.2
+    xpm_cdc_array_single #(
+      .DEST_SYNC_FF(4),   // DECIMAL; range: 2-10
+      .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+      .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+      .SRC_INPUT_REG(1),  // DECIMAL; 0=do not register input, 1=register input
+      .WIDTH(5)           // DECIMAL; range: 1-1024
+   )
+   xpm_cdc_array_single_cdc (
+      .dest_out(fifos_status_cdc), // WIDTH-bit output: src_in synchronized to the destination clock domain. This
+                           // output is registered.
+
+      .dest_clk(axi_aclk), // 1-bit input: Clock signal for the destination clock domain.
+      .src_clk(adc_read_clk),   // 1-bit input: optional; required when SRC_INPUT_REG = 1
+      .src_in(fifos_status_i)      // WIDTH-bit input: Input single-bit array to be synchronized to destination clock
+                           // domain. It is assumed that each bit of the array is unrelated to the others. This
+                           // is reflected in the constraints applied to this macro. To transfer a binary value
+                           // losslessly across the two clock domains, use the XPM_CDC_GRAY macro instead.
+   );
+
+
+//            rtm_r8_i, atca_master, msi_enable, idelay_rdy_w,  // bits 23:20
+//                            1'b0, atca_clk_locked_i, te0741_clk_100_locked_i, rtm_clk10_locked_i, // bits 19:16
+//        i2C_reg0[7:0]}; // bits 7:0 atca slot_id 
+
+    wire [C_M_AXI_LITE_ADDR_WIDTH-1 :0] status_reg_i = {8'h00,  // bits 31:24
+            2'b00, msi_enable, 1'b0,  // bits 23:20
+            3'b000, mmcm_100_locked_i, // bits 19:16
+            1'b0, fifos_status_cdc, acq_on_q, 1'b0,    // bits 15:8
+            8'h00}; // bits 7:0 atca slot_id 
 
     //-- AXI streaming ports 1 * H2C, 2 * C2H
     wire [C_DATA_WIDTH-1:0] m_axis_h2c_tdata_0;
@@ -167,34 +205,70 @@ module system_top #(
     (* keep = "true" *) wire s_axis_c2h_tvalid_0, s_axis_c2h_tvalid_1;
     (* keep = "true" *) wire s_axis_c2h_tready_0, s_axis_c2h_tready_1;
     wire [C_DATA_WIDTH/8-1:0] s_axis_c2h_tkeep_0, s_axis_c2h_tkeep_1;
- 
+
 // 80Mhz,  80Mhz but delayed for 47nsec
-    wire  adc_spi_clk, adc_read_clk;     
+    wire  adc_spi_clk, adc_read_clk;
+    wire  adc_cnvst;
     wire [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_a_data_arr_i, adc_b_data_arr_i;
 
-    assign m_axis_h2c_tready_0 = 1'b1; // Allways Flush H2C data
+    assign m_axis_h2c_tready_0 = 1'b1; // Allways Flush H2C data, for now
 
    // PCIEe Ref clock buffer
-   IBUFDS_GTE4 refclk_ibuf (.O(sys_clk), .ODIV2(), .I(sys_clk_p), .CEB(1'b0), .IB(sys_clk_n));
+    // Ref clock buffer
+
+  IBUFDS_GTE4 # (.REFCLK_HROW_CK_SEL(2'b00)) refclk_ibuf (.O(sys_clk_gt), .ODIV2(sys_clk), .I(sys_clk_p), .CEB(1'b0), .IB(sys_clk_n));
+  // Reset buffer
+  IBUF   sys_reset_n_ibuf (.O(sys_rst_n_c), .I(sys_rst_n));
+     
+   //IBUFDS_GTE4 refclk_ibuf (.O(sys_clk), .ODIV2(), .I(sys_clk_p), .CEB(1'b0), .IB(sys_clk_n));
      
   // PCIe Reset buffer
-     IBUF atca_rx_3a_buf ( .O(sys_rst_n_c), .I(sys_rst_n ) ); // atca_3a_r
+  //    IBUF atca_rx_3a_buf ( .O(sys_rst_n_c), .I(sys_rst_n ) ); // atca_3a_r
 
-    OBUFDS sdi_obuf ( .O(sdi_p), .OB(sdi_n), .I(sdi));
-    OBUFDS sck_obuf ( .O(sck_p), .OB(sck_n), .I(sck));
-    OBUFDS cnvst_obuf ( .O(cnvst_p), .OB(cnvst_n), .I(cnvst));
+    OBUFDS sdi_obuf ( .O(adc_sdi_p), .OB(adc_sdi_n), .I(adc_sdi));
+    OBUFDS sck_obuf ( .O(adc_sck_p), .OB(adc_sck_n), .I(adc_sck));
+    OBUFDS cnvst_obuf ( .O(adc_cnvst_p), .OB(adc_cnvst_n), .I(adc_cnvst));
     OBUFDS acq_clk_obuf ( .O(acq_clk_p), .OB(acq_clk_n), .I(acq_clk));
 
   assign gpio_i[94:1] = gpio_o[94:1];
 
   assign fan_en_b = gpio_o[0];
+   reg  acq_on_r, acq_on_q;
+ /* Synch signal with PCIe clk */
+    always @(posedge axi_aclk) begin
+//        user_reset_q  <= user_reset;
+//        user_lnk_up_q <= user_lnk_up;
+        acq_on_q <= acq_on_r;
+    end
+
+    reg [1:0] soft_trig_dly;
+    reg [1:0] hard_trig_dly;
+
+// ---------------- Trigger generation -------------------------------//
+    always @(posedge adc_read_clk or negedge control_reg_i[`ACQE_BIT]) begin
+        if (!control_reg_i[`ACQE_BIT])
+        begin
+            acq_on_r <= #TCQ  1'b0;
+            soft_trig_dly <=  #TCQ 2'b11;
+            hard_trig_dly <=  #TCQ 2'b00;
+        end
+        else
+        begin
+            soft_trig_dly <=  #TCQ  {soft_trig_dly[0], control_reg_i[`STRG_BIT]}; // delay pipe
+            hard_trig_dly <=  #TCQ  {hard_trig_dly[0], 1'b0};         // delay pipe
+            //hard_trig_dly <=  #TCQ  {hard_trig_dly[0], atca_hard_trig_rcv};         // delay pipe
+
+            if ((soft_trig_dly == 2'b01) || (hard_trig_dly == 2'b10)) // detect rising / falling edge
+                acq_on_r <= #TCQ  1'b1;
+        end
+    end
 
   // instantiations
   system_wrapper i_system_wrapper (
     .gpio_i (gpio_i),
     .gpio_o (gpio_o),
     .gpio_t (),
-    .pl_clk0(pl_clk0_i),
+    .pl_clk0(pl_clk0_i), // o
     .periph_aresetn(ps_periph_aresetn_i),
     .periph_reset(ps_periph_reset_i),
     .spi0_csn (),
@@ -206,7 +280,7 @@ module system_top #(
   xdma_id0034 xdma_id0034_i (
   .sys_clk(sys_clk),                          // input wire sys_clk
   .sys_clk_gt(sys_clk_gt),                    // input wire sys_clk_gt
-  .sys_rst_n(sys_rst_n),                      // input wire sys_rst_n
+  .sys_rst_n(sys_rst_n_c),                      // input wire sys_rst_n
   .user_lnk_up(user_lnk_up),                  // output wire user_lnk_up
   .pci_exp_txp(pcie_mgt_0_txp),                  // output wire [3 : 0] pci_exp_txp
   .pci_exp_txn(pcie_mgt_0_txn),                  // output wire [3 : 0] pci_exp_txn
@@ -259,7 +333,7 @@ module system_top #(
         .C_S_AXI_ADDR_WIDTH(C_S_AXI_LITE_ADDR_WIDTH)
     ) shapi_regs_inst (
            .S_AXI_ACLK(axi_aclk),
-          .S_AXI_ARESETN(axi_aresetn),
+          .S_AXI_ARESETN(axi_aresetn), //i
           .S_AXI_AWADDR(m_axil_awaddr[C_S_AXI_LITE_ADDR_WIDTH-1 :0]),
           //.S_AXI_AWPROT(s_axil_awprot), // Not used
           .S_AXI_AWVALID(m_axil_awvalid),
@@ -291,28 +365,29 @@ module system_top #(
     );
 
    system_clocks system_clocks_inst (
-
     // Status and control signals
     .reset(!axi_aresetn), // input sys_reset? 
-    .locked(mmcm_200_locked_i),       // output 
+    .locked(mmcm_100_locked_i),       // output 
    // Clock in ports
     .clk_in(pl_clk0_i),      // input clk_in1
        // Clock out ports
     .clk_out1(adc_spi_clk),     // output 80Mhz 80MHz 0º
     .clk_out2(adc_read_clk)     // output 80Mhz but delayed for 47nsec 80MHz 180º
     );
-
+    
+   wire [5:0] adc_spi_clk_count_i;
    wire reader_en_sync;
    ad4003_deserializer ad4003_deserializer_inst (
-    .rst(), // i
+    .rst(!ps_periph_aresetn_i), // i CHECK This
     .adc_spi_clk(adc_spi_clk),    // i
     .adc_read_clk(adc_read_clk),   // i
-    .force_read(),     // i
-    .force_write(),    // i
+    .force_read(1'b0),     // i CHECK This
+    .force_write(1'b0),    // i
+    .adc_spi_clk_count(adc_spi_clk_count_i),  // o [5:0]
     .reader_en_sync(reader_en_sync), // o
-    .cnvst(),          // o
-    .sdi(),            // o
-    .sck()             // o
+    .cnvst(adc_cnvst),          // o
+    .sdi(adc_sdi),            // o
+    .sck(adc_sck)             // o
    );
    
    adc_block #(.ADC_CHANNELS ( ADC_CHANNELS )) 
@@ -330,5 +405,34 @@ module system_top #(
     .adc_a_data_arr(adc_a_data_arr_i), // o
     .adc_b_data_arr(adc_b_data_arr_i) // o
    );
+// ---            ADC data acquisition and packeting ---------
+  xdma_data_producer #(
+    .C_S_AXI_DATA_WIDTH(C_M_AXI_LITE_DATA_WIDTH),
+    .C_STREAM_DATA_WIDTH(C_DATA_WIDTH)
+  ) xdma_data_producer_inst (
+      .axi_aclk(axi_aclk),
+      .axi_aresetn(axi_aresetn),
+
+      .adc_data_clk(adc_read_clk),  // i
+      .adc_clk_cnt(adc_spi_clk_count_i),  // i [5:0]
+       
+       .control_reg(control_reg_i),
+      //.channel_mask(channel_mask_i),
+      .acq_on(acq_on_r),
+      .fifos_status(fifos_status_i),  // o [14:10]
+
+      // AXI streaming ports
+      .m_axis_tdata_0(s_axis_c2h_tdata_0),
+      .m_axis_tlast_0(s_axis_c2h_tlast_0),
+      .m_axis_tvalid_0(s_axis_c2h_tvalid_0),
+      .m_axis_tready_0(s_axis_c2h_tready_0),
+      .m_axis_tkeep_0(s_axis_c2h_tkeep_0),
+
+      .m_axis_tdata_1(s_axis_c2h_tdata_1),
+      .m_axis_tlast_1(s_axis_c2h_tlast_1),
+      .m_axis_tvalid_1(s_axis_c2h_tvalid_1),
+      .m_axis_tkeep_1(s_axis_c2h_tkeep_1),
+      .m_axis_tready_1(s_axis_c2h_tready_1)
+  );
 
 endmodule

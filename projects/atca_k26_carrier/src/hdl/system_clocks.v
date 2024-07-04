@@ -52,17 +52,17 @@ module system_clocks #(
  );
   // Input buffering
   //------------------------------------
-wire clk_in1_clk_wiz_0;
+wire clk_in_clk_wiz;
 //wire clk_in2_clk_wiz_0;
-wire        clk_out1_clk_wiz_0;
-wire        clk_out2_clk_wiz_0;
+wire        clk_out1_clk_wiz;
+wire        clk_out2_clk_wiz;
 
 wire        locked_int;
-wire        clkfbout_clk_wiz_0;
+wire        clkfbout_clk_wiz;
 
   IBUF clkin1_ibuf
-   (.O (clk_in1_clk_wiz_0),
-    .I (clk_in1));
+   (.O (clk_in_clk_wiz),
+    .I (clk_in));
 
  // Generated with Vivado 2023.1 Clock wizard
  MMCME4_ADV
@@ -84,10 +84,10 @@ wire        clkfbout_clk_wiz_0;
  mmcme4_adv_inst
     // Output clocks
    (
-    .CLKFBOUT            (clkfbout_clk_wiz_0),
+    .CLKFBOUT            (clkfbout_clk_wiz),
     .CLKFBOUTB           (),
-    .CLKOUT0             (clk_out1_clk_wiz_0),
-    .CLKOUT0B            (clk_out2_clk_wiz_0),
+    .CLKOUT0             (clk_out1_clk_wiz),
+    .CLKOUT0B            (clk_out2_clk_wiz),
     .CLKOUT1             (),
     .CLKOUT1B            (),
     .CLKOUT2             (),
@@ -98,8 +98,8 @@ wire        clkfbout_clk_wiz_0;
     .CLKOUT5             (),
     .CLKOUT6             (),
      // Input clock control
-    .CLKFBIN             (clkfbout_clk_wiz_0),
-    .CLKIN1              (clk_in1_clk_wiz_0),
+    .CLKFBIN             (clkfbout_clk_wiz),
+    .CLKIN1              (clk_in_clk_wiz),
     .CLKIN2              (1'b0),
      // Tied to always select the primary input clock
     .CLKINSEL            (1'b1),
@@ -133,12 +133,12 @@ wire        clkfbout_clk_wiz_0;
 
   BUFG clkout1_buf
    (.O   (clk_out1),
-    .I   (clk_out1_clk_wiz_0));
+    .I   (clk_out1_clk_wiz));
 
 
   BUFG clkout2_buf
    (.O   (clk_out2),
-    .I   (clk_out2_clk_wiz_0));
+    .I   (clk_out2_clk_wiz));
         
 endmodule // system_clocks
 // vim: set ts=8 sw=4 tw=0 et :

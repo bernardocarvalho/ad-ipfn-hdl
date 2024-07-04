@@ -19,6 +19,7 @@ adi_project_files atca_k26_carrier_kv260 [list \
   "../src/hdl/ad4003_deserializer.v" \
   "../src/hdl/adc_ad4003_sr.v" \
   "../src/hdl/adc_block.v" \
+  "../src/hdl/xdma_data_producer.sv" \
   "src/ip/xdma_id0034/xdma_id0034.xci" \
   "xilinx_pcie_xdma_ref_board.xdc" \
   "system_constr.xdc" ]

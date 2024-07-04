@@ -35,7 +35,7 @@
 // permissions and limitations under the Licence.
 //
 // ***************************************************************************
-// ***************************************************************************
+
 `timescale 1ns/1ps
 
 module ad4003_deserializer (
@@ -46,6 +46,8 @@ module ad4003_deserializer (
     // input [24:1]adc_sdo_chb,
     input force_read,
     input force_write,
+
+    output [5:0] adc_spi_clk_count,
     output reader_en_sync,
     output cnvst,
     output sdi,
@@ -66,14 +68,15 @@ parameter   RESET=4'd0,
 
 reg [5:0] cyc_cntr;
 initial cyc_cntr=5'd0;
-reg [3:0] cyc_state,next_state;
+assign adc_spi_clk_count = cyc_cntr; 
+reg [3:0] cyc_state, next_state;
     initial cyc_state=RESET;
-    reg [15:0] sdi_reg;
-initial sdi_reg=16'hffff;
+ reg [15:0] sdi_reg;
+initial sdi_reg = 16'hffff;
 reg data_written;
-    initial data_written=1'b0;
+initial data_written=1'b0;
 
-    wire reader_en;
+wire reader_en;
 
 always @(*) begin
 
@@ -117,14 +120,14 @@ always @(negedge adc_spi_clk) begin
 end
 
 always @(posedge adc_spi_clk) begin //clk and cnvst generation
-    if (cyc_cntr==40)
-        cyc_cntr<=6'd0;
+    if (cyc_cntr == 6'd39)
+        cyc_cntr <= 6'd0;
     else
-        cyc_cntr<=cyc_cntr+1;
+        cyc_cntr<=cyc_cntr + 1'b1;
     cyc_state <= next_state;
 end
 
-assign reader_en = cyc_cntr>6'd18 && cyc_cntr<6'd36 && cyc_state!=IDLE && cyc_state!=RESET ? 1'b1 : 1'b0;  // synchronizer adds 2 cycles of latency
+assign reader_en = cyc_cntr > 6'd18 && cyc_cntr < 6'd36 && cyc_state!=IDLE && cyc_state != RESET ? 1'b1 : 1'b0;  // synchronizer adds 2 cycles of latency
 
 
 // required for crossing clock domains between the acqusition clock and the read clock.
