@@ -42,7 +42,7 @@
 
 module xdma_data_producer #(
     //parameter PKT_SAMPLES_WIDTH = 12,
-    parameter DMA_FIFO_DEPTH = 16384, // 32768,   // Max Value 32768
+    parameter DMA_FIFO_DEPTH = 32768, // 32768,   // Max Value 32768
 
     //    parameter RT_PKT_DECIM = 200,
     parameter C_S_AXI_DATA_WIDTH    = 32,    // AXI Lite Master  data width
@@ -128,7 +128,28 @@ module xdma_data_producer #(
     reg [4:0] status_data_r = 5'b00000;
     assign fifos_status = status_data_r;
     wire [14:0] wr_data_count, rd_data_count;
-    wire big_endian = control_reg[`ENDIAN_DMA_BIT];
+    reg [C_S_AXI_DATA_WIDTH-1 :0] cdc_control_reg;
+    wire big_endian = cdc_control_reg[`ENDIAN_DMA_BIT];
+    
+   xpm_cdc_array_single #(
+      .DEST_SYNC_FF(4),   // DECIMAL; range: 2-10
+      .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+      .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+      .SRC_INPUT_REG(0),  // DECIMAL; 0=do not register input, 1=register input
+      .WIDTH(C_S_AXI_DATA_WIDTH)           // DECIMAL; range: 1-1024
+   )
+   xpm_cdc_array_single_ (
+      .dest_out(cdc_control_reg), // WIDTH-bit output: src_in synchronized to the destination clock domain. This
+                            // output is registered.
+
+      .dest_clk(adc_data_clk), // 1-bit input: Clock signal for the destination clock domain.
+      .src_clk(axi_aclk),   // 1-bit input: optional; required when SRC_INPUT_REG = 1
+      .src_in(control_reg)  // WIDTH-bit input: Input single-bit array to be synchronized to destination clock
+                            // domain. It is assumed that each bit of the array is unrelated to the others. This
+                            // is reflected in the constraints applied to this macro. To transfer a binary value
+                            // losslessly across the two clock domains, use the XPM_CDC_GRAY macro instead.
+
+   );
     
     wire [ADC_DATA_WIDTH-1 : 0] adc_18_data[0: ADC_CHANNELS-1];
 
@@ -196,6 +217,13 @@ module xdma_data_producer #(
         endcase
     end // always
 
+
+   //cross fifo signals
+   wire fifo_axis_tlast,fifo_axis_tready,fifo_axis_tvalid;
+   wire [C_STREAM_DATA_WIDTH-1:0] fifo_axis_tdata;
+   wire [KEEP_WIDTH-1:0] fifo_axis_tkeep;
+
+
  /***
 
 *  AXI FIFO
@@ -219,10 +247,10 @@ module xdma_data_producer #(
 // UPSTREAM 32k sample FIFO 
    xpm_fifo_axis #(
       //.CDC_SYNC_STAGES(3),            // DECIMAL Range: 2 - 8. Default value = 2.
-      .CLOCKING_MODE("independent_clock"), // String
+      .CLOCKING_MODE("common_clock"), // String
       .ECC_MODE("no_ecc"),            // String
       .FIFO_DEPTH(DMA_FIFO_DEPTH),              // DECIMAL 32768 (Max DEPTH* num of Bits= 4194304 bit)
-      .FIFO_MEMORY_TYPE("auto"),      // String
+      .FIFO_MEMORY_TYPE("ultra"),      // String
       .PACKET_FIFO("false"),          // String
        //.PROG_EMPTY_THRESH(32736),         // DECIMAL
       .PROG_FULL_THRESH(FIFO_PROG_FULL_THRESH),       // DECIMAL 8- 32763 32736
@@ -250,7 +278,7 @@ module xdma_data_producer #(
                                                // decoder detected a double-bit error and data in the FIFO core
                                                // is corrupted.
 
-      .m_axis_tdata(m_axis_tdata_0),             // TDATA_WIDTH-bit output: TDATA: The primary payload that is
+      .m_axis_tdata(fifo_axis_tdata),             // TDATA_WIDTH-bit output: TDATA: The primary payload that is
                                                // used to provide the data that is passing across the
                                                // interface. The width of the data payload is an integer number
                                                // of bytes.
@@ -261,7 +289,7 @@ module xdma_data_producer #(
       .m_axis_tid(),                 // TID_WIDTH-bit output: TID: The data stream identifier that
                                                // indicates different streams of data.
 
-      .m_axis_tkeep(m_axis_tkeep_0),             // TDATA_WIDTH/8-bit output: TKEEP: The byte qualifier that
+      .m_axis_tkeep(fifo_axis_tkeep),             // TDATA_WIDTH/8-bit output: TKEEP: The byte qualifier that
                                                // indicates whether the content of the associated byte of TDATA
                                                // is processed as part of the data stream. Associated bytes
                                                // that have the TKEEP byte qualifier deasserted are null bytes
@@ -271,7 +299,7 @@ module xdma_data_producer #(
                                                // KEEP[0] = 1b, DATA[7:0] is not a NULL byte KEEP[7] = 0b,
                                                // DATA[63:56] is a NULL byte
 
-      .m_axis_tlast(m_axis_tlast_0),             // 1-bit output: TLAST: Indicates the boundary of a packet.
+      .m_axis_tlast(fifo_axis_tlast),             // 1-bit output: TLAST: Indicates the boundary of a packet.
       .m_axis_tstrb(),             // TDATA_WIDTH/8-bit output: TSTRB: The byte qualifier that
                                                // indicates whether the content of the associated byte of TDATA
                                                // is processed as a data byte or a position byte. For a 64-bit
@@ -285,7 +313,7 @@ module xdma_data_producer #(
                                                // information that can be transmitted alongside the data
                                                // stream.
 
-      .m_axis_tvalid(m_axis_tvalid_0),         // 1-bit output: TVALID: Indicates that the master is driving a
+      .m_axis_tvalid(fifo_axis_tvalid),         // 1-bit output: TVALID: Indicates that the master is driving a
                                                // valid transfer. A transfer takes place when both TVALID and
                                                // TREADY are asserted
 
@@ -320,10 +348,10 @@ module xdma_data_producer #(
       .injectsbiterr_axis(1'b0), // 1-bit input: Single Bit Error Injection- Injects a single bit
                                                // error if the ECC feature is used.
 
-      .m_aclk(axi_aclk),                         // 1-bit input: Master Interface Clock: All signals on master
+      .m_aclk(),                         // 1-bit input: Master Interface Clock: All signals on master
                                                // interface are sampled on the rising edge of this clock.
 
-      .m_axis_tready(m_axis_tready_0),           //  1-bit input: TREADY: Indicates that the slave can accept a
+      .m_axis_tready(fifo_axis_tready),           //  1-bit input: TREADY: Indicates that the slave can accept a
                                                // transfer in the current cycle.
 
       .s_aclk(adc_data_clk),                         // 1-bit input: Slave Interface Clock: All signals on slave
@@ -372,4 +400,62 @@ module xdma_data_producer #(
 
    );
    // End of xpm_fifo_axis_inst instantiation
+   
+
+   
+   
+   xpm_fifo_axis #(
+      //.CDC_SYNC_STAGES(3),            // DECIMAL Range: 2 - 8. Default value = 2.
+      .CLOCKING_MODE("independent_clock"), // String
+      .ECC_MODE("no_ecc"),            // String
+      .FIFO_DEPTH(512),              // DECIMAL 32768 (Max DEPTH* num of Bits= 4194304 bit)
+      .FIFO_MEMORY_TYPE("bram"),      // String
+      .PACKET_FIFO("false"),          // String
+       //.PROG_EMPTY_THRESH(32736),         // DECIMAL
+      .PROG_FULL_THRESH(FIFO_PROG_FULL_THRESH),       // DECIMAL 8- 32763 32736
+       //.RD_DATA_COUNT_WIDTH(16),        // DECIMAL
+      .RELATED_CLOCKS(0),             // DECIMAL
+      .SIM_ASSERT_CHK(0),             // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+      .TDATA_WIDTH(C_STREAM_DATA_WIDTH),               // DECIMAL Defines the width of the TDATA port, s_axis_tdata and m_axis_tdata
+      .TDEST_WIDTH(1),                 // DECIMAL
+      .TID_WIDTH(1),                   // DECIMAL
+      .TUSER_WIDTH(1),                 // DECIMAL
+       .USE_ADV_FEATURES("0000"),      // String USE_ADV_FEATURES[1] to 1 enables prog_full flag;
+                                       // USE_ADV_FEATURES[2]  to 1 enables wr_data_count;
+      .WR_DATA_COUNT_WIDTH(15)         // DECIMAL
+   )
+   xpm_fifo_axis_cdc_adc (
+      .almost_empty_axis(),                 // 1-bit output
+      .almost_full_axis(),                  // 1-bit output 
+      .dbiterr_axis(),                      // 1-bit output
+      .m_axis_tdata(m_axis_tdata_0),        // TDATA_WIDTH-bit output
+      .m_axis_tdest(),                      // TDEST_WIDTH-bit output
+      .m_axis_tid(),                        // TID_WIDTH-bit output
+      .m_axis_tkeep(m_axis_tkeep_0),        // TDATA_WIDTH/8-bit output
+      .m_axis_tlast(m_axis_tlast_0),        // 1-bit output:
+      .m_axis_tstrb(),                      // TDATA_WIDTH/8-bit output
+      .m_axis_tuser(),                      // TUSER_WIDTH-bit output
+      .m_axis_tvalid(m_axis_tvalid_0),      // 1-bit output
+      .prog_empty_axis(),                   // 1-bit output:
+      .prog_full_axis(),                    // 1-bit output.
+      .rd_data_count_axis(),                // RD_DATA_COUNT_WIDTH-bit output
+      .s_axis_tready(fifo_axis_tready),     // 1-bit output: TREADY
+      .sbiterr_axis(),                      // 1-bit output
+      .wr_data_count_axis(),                // WR_DATA_COUNT_WIDTH-bit output
+      .injectdbiterr_axis(1'b0),            // 1-bit input
+      .injectsbiterr_axis(1'b0),            // 1-bit input
+      .m_aclk(axi_aclk),                    // 1-bit input
+      .m_axis_tready(m_axis_tready_0),      //  1-bit input
+      .s_aclk(adc_data_clk),                // 1-bit input
+      .s_aresetn(axi_aresetn),              // 1-bit input
+      .s_axis_tdata(fifo_axis_tdata),      // TDATA_WIDTH-bit input
+      .s_axis_tdest(1'b0),                  // TDEST_WIDTH-bit input
+      .s_axis_tid(1'b0),                    // TID_WIDTH-bit input
+      .s_axis_tkeep(fifo_axis_tkeep),        // TDATA_WIDTH/8-bit input
+      .s_axis_tlast(fifo_axis_tvalid),        // 1-bit input: TLAST
+      .s_axis_tstrb(),        // TDATA_WIDTH/8-bit input
+      .s_axis_tuser(1'b0),                  // TUSER_WIDTH-bit input
+      .s_axis_tvalid(fifo_axis_tlast)      // 1-bit input
+   );
+   
 endmodule

@@ -94,9 +94,7 @@ module system_top #(
    localparam C_S_AXI_LITE_ADDR_WIDTH = 10;
 
   wire    [94:0]  gpio_i;
-  wire    [94:0]  gpio_o;
-
-  assign carrier_led =  4'b0101; 
+  wire    [94:0]  gpio_o; 
 
    //----------PCIEe------------------------------------------------------------------------------------------------------//
    //  AXI Interface                                                                                                 //
@@ -260,7 +258,24 @@ module system_top #(
 
     reg [1:0] soft_trig_dly;
     reg [1:0] hard_trig_dly;
-
+    reg [31:0] ps_clk_hb=32'd0;
+    reg [31:0] pci_clk_hb=32'd0;
+    
+    always @(posedge axi_aclk) begin
+        if(pci_clk_hb == 32'd124999999)
+            pci_clk_hb <= 32'd0;
+        else
+            pci_clk_hb <= pci_clk_hb+32'd1; 
+    end
+    assign carrier_led[0] = pci_clk_hb > 32'd62499999;
+    
+    always @(posedge pl_clk0_i) begin
+        if(ps_clk_hb == 32'd99999999)
+            ps_clk_hb <= 32'd0;
+        else
+            ps_clk_hb <= ps_clk_hb+32'd1; 
+    end
+    assign carrier_led[1] = ps_clk_hb > 32'd49999999;
 // ---------------- Trigger generation -------------------------------//
     always @(posedge adc_read_clk or negedge control_reg_i[`ACQE_BIT]) begin
         if (!control_reg_i[`ACQE_BIT])

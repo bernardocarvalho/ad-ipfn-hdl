@@ -24,6 +24,7 @@ create_ip -vlnv xilinx.com:ip:xdma:4.1 -module_name $ip_name \
 set_property -dict [list CONFIG.Component_Name {$ip_name} \
     CONFIG.pl_link_cap_max_link_width {X4} CONFIG.pl_link_cap_max_link_speed {5.0_GT/s} \
     CONFIG.axi_data_width {128_bit} CONFIG.axisten_freq {125} \
+	 CONFIG.disable_gt_loc {true} \
     CONFIG.pf0_device_id {0034} CONFIG.pf0_subsystem_id {0035} \
     CONFIG.pf0_base_class_menu {Intelligent_I/O_controllers} \
     CONFIG.pf0_class_code_base {0E} \

@@ -46,7 +46,7 @@ set_property PACKAGE_PIN AD7 [get_ports adc_cnvst_p]
 
 set_property IOSTANDARD LVCMOS33 [get_ports carrier_led[*]]
 set_property DRIVE 12 [get_ports carrier_led[*]]
-set_property SLEW SLOW [get_ports [carrier_led*]]
+set_property SLEW SLOW [get_ports carrier_led[*]]
 
 set_property PACKAGE_PIN AC11 [get_ports carrier_led[0]]
 set_property PACKAGE_PIN AB11 [get_ports carrier_led[1]]
