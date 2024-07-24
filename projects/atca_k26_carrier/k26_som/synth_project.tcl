@@ -7,7 +7,10 @@
 # Running On: kane584, OS: Linux, CPU Frequency: 1200.282 MHz, CPU Physical cores: 6, Host memory: 67039 MB
 #-----------------------------------------------------------
 open_project atca_k26_carrier_kv260
+update_compile_order -fileset sources_1
 reset_run synth_1
-launch_runs synth_1 -jobs 6
+launch_runs synth_1 -jobs 10
 wait_on_run synth_1
+puts "synth_1 completed";
+# launch_runs impl_1 -jobs 10
 # quit
