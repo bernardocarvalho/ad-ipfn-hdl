@@ -156,10 +156,11 @@ module system_top #(
     wire          msi_enable;
     wire  [C_M_AXI_LITE_ADDR_WIDTH-1:0] control_reg_i, chopp_period_i, channel_mask_i; 
 
-   wire [14:10] fifos_status_i;
-   wire [4:0] fifos_status_cdc;
    wire  adc_spi_clk, adc_read_clk;
     
+   //wire [14:10] fifos_status_i;
+   reg [4:0] fifos_status_cdc = 5'b00000;
+   /*
    // xpm_cdc_array_single: Single-bit Array Synchronizer
    // Xilinx Parameterized Macro, version 2019.2
     xpm_cdc_array_single #(
@@ -180,7 +181,7 @@ module system_top #(
                            // is reflected in the constraints applied to this macro. To transfer a binary value
                            // losslessly across the two clock domains, use the XPM_CDC_GRAY macro instead.
    );
-
+*/
 
 //            rtm_r8_i, atca_master, msi_enable, idelay_rdy_w,  // bits 23:20
 //                            1'b0, atca_clk_locked_i, te0741_clk_100_locked_i, rtm_clk10_locked_i, // bits 19:16
@@ -208,7 +209,7 @@ module system_top #(
 // 80Mhz,  80Mhz but delayed for 47nsec
 
     wire  adc_cnvst;
-    wire [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_a_data_arr_i, adc_b_data_arr_i;
+    wire [ADC_DATA_WIDTH*ADC_MODULES-1 :0] adc_a_data_arr_i, adc_b_data_arr_i;
 
     assign m_axis_h2c_tready_0 = 1'b1; // Allways Flush H2C data, for now
 
@@ -425,7 +426,7 @@ module system_top #(
    adc_block #(.ADC_CHANNELS ( ADC_CHANNELS )) 
     adc_block_inst (
     .rstn(ps_periph_aresetn_i), // i
-    .adc_sdo_cha_p(adc_sdo_cha_p), // i
+    .adc_sdo_cha_p(adc_sdo_cha_p), // i [ADC_MODULES-1 :0] 
     .adc_sdo_cha_n(adc_sdo_cha_n), // i
     .adc_sdo_chb_p(adc_sdo_chb_p), // i
     .adc_sdo_chb_n(adc_sdo_chb_n), // i
@@ -434,7 +435,7 @@ module system_top #(
     
     .reader_en_sync(reader_en_sync),  // i
 
-    .adc_a_data_arr(adc_a_data_arr_i), // o
+    .adc_a_data_arr(adc_a_data_arr_i), // o [ADC_DATA_WIDTH*ADC_MODULES-1 :0] 
     .adc_b_data_arr(adc_b_data_arr_i) // o
    );
 // ---            ADC data acquisition and packeting ---------
@@ -451,8 +452,11 @@ module system_top #(
        .control_reg(control_reg_i),
       //.channel_mask(channel_mask_i),
       .acq_on(acq_on_r),
-      .fifos_status(fifos_status_i),  // o [14:10]
+      //.fifos_status(fifos_status_i),  // o [14:10]
 
+        .adc_a_data_arr(adc_a_data_arr_i), // i [ADC_DATA_WIDTH*ADC_MODULES-1 :0] 
+        .adc_b_data_arr(adc_b_data_arr_i),  // i
+    
       // AXI streaming ports
       .m_axis_tdata_0(s_axis_c2h_tdata_0),
       .m_axis_tlast_0(s_axis_c2h_tlast_0),

@@ -58,9 +58,9 @@
     * Patch Value: internal firmware changes with no effect to external interfaces.
    *
 * */
-`define DEV_FW_PATCH     16'h0005       //offset_addr 0x10
-`define DEV_FW_MINOR     8'h03
-`define DEV_FW_MAJOR     8'h02
+`define DEV_FW_PATCH     16'h0001       //offset_addr 0x10
+`define DEV_FW_MINOR     8'h00
+`define DEV_FW_MAJOR     8'h00
 
 // Use Linux command: date +%s to get UNIX timestamp
 `define DEV_TSTAMP      32'd1711623190
@@ -68,7 +68,7 @@
 
 `define DEV_NAME1         "actA" // first char right
 `define DEV_NAME2         "omiM"
-`define DEV_NAME3         "2vdA"
+`define DEV_NAME3         "s26K"
 `define DEV_ENDIAN_CAPAB   1'b1      //offset_addr 0x24
 `define DEV_RTM_CAPAB      1'b0     // TODO: Implement on IPMC
 `define DEV_SOFT_RST_CAPAB 1'b1

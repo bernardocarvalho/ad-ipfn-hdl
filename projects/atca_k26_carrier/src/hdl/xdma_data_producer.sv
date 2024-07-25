@@ -54,6 +54,7 @@ module xdma_data_producer #(
     //parameter N_ADC_CHANNELS   = `N_ADC_MAX_CHANNELS,
 
 	parameter ADC_CHANNELS = 8,           // Maximum 48, Must be even 
+	
     // Do not override parameters below this line
     parameter FIFO_PROG_FULL_THRESH = DMA_FIFO_DEPTH - 32,        // DECIMAL 8- 32763 32736
 
@@ -73,8 +74,8 @@ module xdma_data_producer #(
     // input [N_ADC_CHANNELS-1:0] adc_clk_n,
     // input [N_ADC_CHANNELS-1:0] adc_data_p,
     // input [N_ADC_CHANNELS-1:0] adc_data_n,
-    input  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_a_data_arr,
-    input  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_b_data_arr,
+    input  [ADC_DATA_WIDTH*ADC_MODULES-1 :0] adc_a_data_arr,
+    input  [ADC_DATA_WIDTH*ADC_MODULES-1 :0] adc_b_data_arr,
 
     // input word_sync_n,
 
@@ -86,7 +87,7 @@ module xdma_data_producer #(
     //input [WO_VECT_WIDTH-1:0] wo_offset,
 
     input [C_S_AXI_DATA_WIDTH-1 :0]  control_reg,
-    output [14:10] fifos_status,  // Status of the FIFO and Accumulators
+    //output [14:10] fifos_status,  // Status of the FIFO and Accumulators
 
     // input [N_ADC_CHANNELS-1:0]  channel_mask,
 
@@ -111,6 +112,9 @@ module xdma_data_producer #(
     assign m_axis_tvalid_1 = m_axis_tready_1; // NO second C2H channel for now
     assign m_axis_tdata_1 = {C_STREAM_DATA_WIDTH{1'b0}};
     assign m_axis_tlast_1 = 1'b0;
+    assign m_axis_tkeep_1 = {KEEP_WIDTH{1'b1}};
+
+    assign m_axis_tkeep_0 = {KEEP_WIDTH{1'b1}};
     
     reg  data_vld_c2h_0_r = 1'b0;
     reg [63:0] cnt_sample_c2h0_r;
@@ -120,14 +124,17 @@ module xdma_data_producer #(
 
     //wire [C_DATA_WIDTH-1 : 0] data_c2h_1;
     reg  [C_STREAM_DATA_WIDTH-1 : 0] data_c2h_0_r;
-    wire fifo_prog_full_c2h_0, fifo_prog_full_c2h1_i;
-    reg [KEEP_WIDTH-1:0] s_axis_tkeep_c = {KEEP_WIDTH{1'b1}};
-    reg [KEEP_WIDTH-1:0] s_axis_tstrb_c = {KEEP_WIDTH{1'b0}};
+    wire fifo_ready_c2h_0;
+    wire fifo_prog_full_c2h_0; //, fifo_prog_full_c2h1_i;
+    //reg [KEEP_WIDTH-1:0] s_axis_tkeep_c = {KEEP_WIDTH{1'b1}};
+    //reg [KEEP_WIDTH-1:0] s_axis_tstrb_c = {KEEP_WIDTH{1'b0}};
+    
+
 
     reg s_axis_tlast_r, s_axis_tlast_c2h1_r = 0;
     reg [4:0] status_data_r = 5'b00000;
-    assign fifos_status = status_data_r;
-    wire [14:0] wr_data_count, rd_data_count;
+    //assign fifos_status = status_data_r;
+    wire [31:0] wr_data_count; //, rd_data_count;
     reg [C_S_AXI_DATA_WIDTH-1 :0] cdc_control_reg;
     wire big_endian = cdc_control_reg[`ENDIAN_DMA_BIT];
     
@@ -222,12 +229,30 @@ module xdma_data_producer #(
    wire fifo_axis_tlast,fifo_axis_tready,fifo_axis_tvalid;
    wire [C_STREAM_DATA_WIDTH-1:0] fifo_axis_tdata;
    wire [KEEP_WIDTH-1:0] fifo_axis_tkeep;
+   
+    axis_data_fifo_0 axis_data_fifo_inst (
+      .s_axis_aresetn(axi_aresetn),          // input wire s_axis_aresetn
+      .s_axis_aclk(adc_data_clk),                // input wire s_axis_aclk
+      .s_axis_tvalid(data_vld_c2h_0_r),            // input wire s_axis_tvalid
+      .s_axis_tready(fifo_ready_c2h_0),            // output wire s_axis_tready
+      .s_axis_tdata(data_c2h_0_end_r),              // input wire [127 : 0] s_axis_tdata
+      //.s_axis_tkeep(s_axis_tkeep_c),              // input wire [15 : 0] s_axis_tkeep
+      .s_axis_tlast(s_axis_tlast_r),              // input wire s_axis_tlast
+      
+      .m_axis_aclk(axi_aclk),                // input wire m_axis_aclk
+      .m_axis_tvalid(m_axis_tvalid_0),            // output wire m_axis_tvalid
+      .m_axis_tready(m_axis_tready_0),            // input wire m_axis_tready
+      .m_axis_tdata(m_axis_tdata_0),              // output wire [127 : 0] m_axis_tdata
+      //.m_axis_tkeep(m_axis_tkeep_0),              // output wire [15 : 0] m_axis_tkeep
+      .m_axis_tlast(m_axis_tlast_0),              // output wire m_axis_tlast
+      .axis_wr_data_count(wr_data_count),  // output wire [31 : 0] axis_wr_data_count
+      .prog_full(fifo_prog_full_c2h_0)                    // output wire prog_full
+    );
 
+endmodule
 
  /***
 
-*  AXI FIFO
-*  xpm_fifo_axis: AXI Stream FIFO
    // Xilinx Parameterized Macro, version 2019.2
 ---------------------------------------------------------------------------------------------------------------------+
 // | USE_ADV_FEATURES     | String             | Default value = 1000.                                                   |
@@ -243,7 +268,6 @@ module xdma_data_producer #(
 // |   Setting USE_ADV_FEATURES[11] to 1 enables almost_empty flag; Default value of this bit is 0
 // 8 * 64kB data fifo , Prog full = 20 * 8 B
 //
-*/
 // UPSTREAM 32k sample FIFO 
    xpm_fifo_axis #(
       //.CDC_SYNC_STAGES(3),            // DECIMAL Range: 2 - 8. Default value = 2.
@@ -459,3 +483,4 @@ module xdma_data_producer #(
    );
    
 endmodule
+*/

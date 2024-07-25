@@ -59,8 +59,8 @@ module adc_block #(
     //output cnvst,
     // output sdi,
     // output sck,
-    output  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_a_data_arr,
-    output  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_b_data_arr
+    output  [ADC_DATA_WIDTH*ADC_MODULES-1 :0] adc_a_data_arr,
+    output  [ADC_DATA_WIDTH*ADC_MODULES-1 :0] adc_b_data_arr
 );
 
 
@@ -72,7 +72,7 @@ module adc_block #(
 	generate
 		for (k = 0; k < ADC_MODULES; k = k + 1)
 		begin: ADCs
-        adc_ad4003_sr 
+          adc_ad4003_sr 
 			adc_ad4003_sr_a (	
                 .rstn(rstn), // i
                 .adc_read_clk(adc_read_clk),   // i			
@@ -85,13 +85,14 @@ module adc_block #(
                 //.adc_data_b(adc_b_data[k])  // o
                             
 			);
-			adc_ad4003_sr adc_ad4003_sr_b (	
+		  adc_ad4003_sr 
+			adc_ad4003_sr_b (	
                 .rstn(rstn), // i
                 .adc_read_clk(adc_read_clk),   // i			
                 .reader_en_sync(reader_en_sync),    // i
 
                 .adc_sdo_ch(adc_sdo_chb[k]),  // i
-                .adc_data(adc_a_data[k])  // o [ADC_DATA_WIDTH-1:0]
+                .adc_data(adc_b_data[k])  // o [ADC_DATA_WIDTH-1:0]
 			);
 			// indexed part-select     [<start_bit -: ] // part-select decrements from start-bit
             // logic [31: 0] a_vect;
@@ -99,8 +100,9 @@ module adc_block #(
             //[<start_bit +: ] // part-select increments from start-bit
             // a_vect[ 0 +: 8] // == a_vect[ 7 : 0]
 
-			assign adc_a_data_arr[(ADC_DATA_WIDTH*(k + 1) - 1) -: ADC_DATA_WIDTH] = adc_a_data[k];
-			assign adc_b_data_arr[ADC_DATA_WIDTH*k  +: ADC_DATA_WIDTH] = adc_b_data[k];
+//			assign adc_a_data_arr[(ADC_DATA_WIDTH*(k + 1) - 1) -: ADC_DATA_WIDTH] = adc_a_data[k];
+			assign adc_a_data_arr[ADC_DATA_WIDTH * k  +: ADC_DATA_WIDTH] = adc_a_data[k];
+			assign adc_b_data_arr[ADC_DATA_WIDTH * k  +: ADC_DATA_WIDTH] = adc_b_data[k];
 //			assign adc_all_data_i[(`ADC_DATA_WIDTH * (k + 1) - 1):(`ADC_DATA_WIDTH * k) ] = adc_p_data[k];
 
             IBUFDS IBUFDS_cha (
