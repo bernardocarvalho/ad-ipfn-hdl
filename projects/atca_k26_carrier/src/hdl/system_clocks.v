@@ -41,9 +41,9 @@ module system_clocks #(
     parameter TCQ        = 1
 )
     (
-      // Status and control signals
   input         reset,
   input         clk_in,
+  
   output        locked,
 
   // Clock out ports
@@ -52,18 +52,19 @@ module system_clocks #(
  );
   // Input buffering
   //------------------------------------
-wire clk_in_clk_wiz;
+
 //wire clk_in2_clk_wiz_0;
 wire        clk_out1_clk_wiz;
 wire        clk_out2_clk_wiz;
 
 wire        locked_int;
 wire        clkfbout_clk_wiz;
-
+/*
+wire clk_in_clk_wiz;
   IBUF clkin1_ibuf
    (.O (clk_in_clk_wiz),
     .I (clk_in));
-
+*/
  // Generated with Vivado 2023.1 Clock wizard
  MMCME4_ADV
 
@@ -99,7 +100,7 @@ wire        clkfbout_clk_wiz;
     .CLKOUT6             (),
      // Input clock control
     .CLKFBIN             (clkfbout_clk_wiz),
-    .CLKIN1              (clk_in_clk_wiz),
+    .CLKIN1              (clk_in),
     .CLKIN2              (1'b0),
      // Tied to always select the primary input clock
     .CLKINSEL            (1'b1),

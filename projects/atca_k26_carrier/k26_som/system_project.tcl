@@ -20,11 +20,11 @@ adi_project_files atca_k26_carrier_kv260 [list \
   "../src/hdl/adc_ad4003_sr.v" \
   "../src/hdl/adc_block.v" \
   "../src/hdl/xdma_data_producer.sv" \
+  "../src/ip/axis_data_fifo_0/xis_data_fifo_0.xci" \
   "src/ip/xdma_id0034/xdma_id0034.xci" \
   "xilinx_pcie_xdma_ref_board.xdc" \
   "system_constr.xdc" ]
 
-#   "$ad_hdl_dir/projects/atca_k26_carrier/src/hdl/system_top.v" \
 #  "$ad_hdl_dir/projects/common/kv260/kv260_system_constr.xdc" ]
 
 adi_project_run atca_k26_carrier_kv260

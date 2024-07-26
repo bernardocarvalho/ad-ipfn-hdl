@@ -51,33 +51,24 @@ module xdma_data_producer #(
 
     //parameter FLOAT_WIDTH      = `FLOAT_WIDTH,
 
-    //parameter N_ADC_CHANNELS   = `N_ADC_MAX_CHANNELS,
-
 	parameter ADC_CHANNELS = 8,           // Maximum 48, Must be even 
 	
     // Do not override parameters below this line
-    parameter FIFO_PROG_FULL_THRESH = DMA_FIFO_DEPTH - 32,        // DECIMAL 8- 32763 32736
-
-    parameter ADC_MODULES =  ADC_CHANNELS / 2,     
-	parameter ADC_DATA_WIDTH = 18,
+    parameter FIFO_PROG_FULL_THRESH = (DMA_FIFO_DEPTH - 32),
+    // parameter ADC_MODULES =  ADC_CHANNELS / 2,     
+    parameter ADC_DATA_WIDTH = 18,
     parameter TCQ        = 1
-)(
+) (
     input axi_aclk,
     input axi_aresetn,
 
-    // ADC data clk (50Mhz)
+    // ADC data clk (80Mhz)
     input adc_data_clk,
-    input [5:0] adc_clk_cnt, // counts 0->24 in each adc period for channel mux
+    input [5:0] adc_clk_cnt, // counts 0->39 in each adc period for channel mux
 
-    //ADC module input data/clk
-    // input [N_ADC_CHANNELS-1:0] adc_clk_p,
-    // input [N_ADC_CHANNELS-1:0] adc_clk_n,
-    // input [N_ADC_CHANNELS-1:0] adc_data_p,
-    // input [N_ADC_CHANNELS-1:0] adc_data_n,
-    input  [ADC_DATA_WIDTH*ADC_MODULES-1 :0] adc_a_data_arr,
-    input  [ADC_DATA_WIDTH*ADC_MODULES-1 :0] adc_b_data_arr,
+    //input  [ADC_DATA_WIDTH*ADC_MODULES-1 :0] adc_a_data_arr,
 
-    // input word_sync_n,
+    input  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_data_arr,
 
     //input adc_chop_phase_dly,
 
@@ -142,7 +133,7 @@ module xdma_data_producer #(
       .DEST_SYNC_FF(4),   // DECIMAL; range: 2-10
       .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
       .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
-      .SRC_INPUT_REG(0),  // DECIMAL; 0=do not register input, 1=register input
+      .SRC_INPUT_REG(1),  // DECIMAL; 0=do not register input, 1=register input
       .WIDTH(C_S_AXI_DATA_WIDTH)           // DECIMAL; range: 1-1024
    )
    xpm_cdc_array_single_ (
@@ -157,20 +148,22 @@ module xdma_data_producer #(
                             // losslessly across the two clock domains, use the XPM_CDC_GRAY macro instead.
 
    );
-    
+
+   
     wire [ADC_DATA_WIDTH-1 : 0] adc_18_data[0: ADC_CHANNELS-1];
 
     genvar k;
 	generate
-		for (k = 0; k < ADC_MODULES; k = k + 1)
+		for (k = 0; k < ADC_CHANNELS; k = k + 1)
         begin
-            assign adc_18_data[2*k] = adc_a_data_arr[(ADC_DATA_WIDTH*(k + 1) - 1) -: ADC_DATA_WIDTH];
-            assign adc_18_data[2*k + 1] = adc_b_data_arr[(ADC_DATA_WIDTH*(k + 1) - 1) -: ADC_DATA_WIDTH];
+            //assign adc_18_data[k] = adc_a_data_arr[(ADC_DATA_WIDTH*(k + 1) - 1) -: ADC_DATA_WIDTH];
+            assign adc_18_data[k] = adc_data_arr[ADC_DATA_WIDTH * k  +: ADC_DATA_WIDTH];
+            
+            //assign adc_18_data[2*k + 1] = adc_b_data_arr[(ADC_DATA_WIDTH*(k + 1) - 1) -: ADC_DATA_WIDTH];
            //  (channel_mask_aclk[k])? adc_par_data[k] : {(ADC_DATA_WIDTH+2){1'b0}};
            //                                                  16'h0000;
         end
     endgenerate
-
 
     always @ (posedge adc_data_clk or negedge acq_on)
         if (!acq_on) begin
@@ -187,20 +180,20 @@ module xdma_data_producer #(
                 6'h01: begin
                 // if (data_32bit) begin 
                     // Send 4 channels per word + count data
-                            data_c2h_0_r <= #TCQ {adc_18_data[3], 6'h0, cnt_sample_c2h0_r[31:24],
-                                adc_18_data[2], 6'h0, cnt_sample_c2h0_r[23:16],
-                                adc_18_data[1], 6'h0, cnt_sample_c2h0_r[15:8],
-                                adc_18_data[0], 6'h0, cnt_sample_c2h0_r[7:0]};
+                    data_c2h_0_r <= #TCQ {adc_18_data[3], 2'b00, 4'h3, cnt_sample_c2h0_r[31:24],
+                        adc_18_data[2], 2'b00, 4'h2, cnt_sample_c2h0_r[23:16],
+                        adc_18_data[1],  2'b00, 4'h1, cnt_sample_c2h0_r[15:8],
+                        adc_18_data[0],  2'b00, 4'h0, cnt_sample_c2h0_r[7:0]};
 
             end 
                 6'h02: begin
                       if( fifo_ready_c2h_0 && !fifo_prog_full_c2h_0)
                               data_vld_c2h_0_r      <= #TCQ 1'b1; //Start fifo writing samples
-                      data_c2h_0_r <= #TCQ {adc_18_data[7], 6'h0, cnt_sample_c2h0_r[63:56],
-                                adc_18_data[6], 6'h0, cnt_sample_c2h0_r[55:48],
-                                adc_18_data[5], 6'h0, cnt_sample_c2h0_r[47:40],
-                                adc_18_data[4], 6'h0, cnt_sample_c2h0_r[39:32]};                              
-                    //data_c2h_0_r <= #TCQ 128'h00;
+                      data_c2h_0_r <= #TCQ {adc_18_data[7], 2'b00, 4'h7, cnt_sample_c2h0_r[63:56],
+                                adc_18_data[6],2'b00, 4'h6, cnt_sample_c2h0_r[55:48],
+                                adc_18_data[5], 2'b00, 4'h5, cnt_sample_c2h0_r[47:40],
+                                16'hA5A5, 2'b01,  2'b00, 4'h4, cnt_sample_c2h0_r[39:32]};    // testing                           
+//                                adc_18_data[4], 6'h0, cnt_sample_c2h0_r[39:32]};                              
 
                 end
                 6'h03: begin

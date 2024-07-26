@@ -15,14 +15,23 @@ set_property IOSTANDARD LVDS [get_ports {adc_sdo_chb_p[*]}]
 set_property DIFF_TERM_ADV TERM_100 [get_ports {adc_sdo_cha_p[*]}]
 set_property DIFF_TERM_ADV TERM_100 [get_ports {adc_sdo_chb_p[*]}]
 
-set_property PACKAGE_PIN J5 [get_ports {adc_sdo_cha_p[0]}]
-set_property PACKAGE_PIN H4 [get_ports {adc_sdo_chb_p[0]}]
-set_property PACKAGE_PIN K2 [get_ports {adc_sdo_cha_p[1]}]
-set_property PACKAGE_PIN N7 [get_ports {adc_sdo_chb_p[1]}]
+# testing modules in slots 14/15
+set_property PACKAGE_PIN U8 [get_ports {adc_sdo_cha_p[0]}]
+set_property PACKAGE_PIN W8 [get_ports {adc_sdo_chb_p[0]}]
+set_property PACKAGE_PIN N9 [get_ports {adc_sdo_cha_p[1]}]
+set_property PACKAGE_PIN U9 [get_ports {adc_sdo_chb_p[1]}]
+
+#set_property PACKAGE_PIN J5 [get_ports {adc_sdo_cha_p[0]}]
+#set_property PACKAGE_PIN H4 [get_ports {adc_sdo_chb_p[0]}]
+#set_property PACKAGE_PIN K2 [get_ports {adc_sdo_cha_p[1]}]
+#set_property PACKAGE_PIN N7 [get_ports {adc_sdo_chb_p[1]}]
+
 set_property PACKAGE_PIN L1 [get_ports {adc_sdo_cha_p[2]}]
 set_property PACKAGE_PIN J1 [get_ports {adc_sdo_chb_p[2]}]
 set_property PACKAGE_PIN R8 [get_ports {adc_sdo_cha_p[3]}]
 set_property PACKAGE_PIN J7 [get_ports {adc_sdo_chb_p[3]}]
+
+
 #set_property PACKAGE_PIN AF8 [get_ports {adc_sdo_cha_p[4]}]
 #set_property PACKAGE_PIN H9 [get_ports {adc_sdo_chb_p[4]}]
 #set_property PACKAGE_PIN AD2 [get_ports {adc_sdo_cha_p[5]}]
@@ -31,6 +40,7 @@ set_property PACKAGE_PIN J7 [get_ports {adc_sdo_chb_p[3]}]
 #set_property PACKAGE_PIN AH2 [get_ports {adc_sdo_chb_p[6]}]
 #set_property PACKAGE_PIN AH8 [get_ports {adc_sdo_cha_p[7]}]
 #set_property PACKAGE_PIN AB2 [get_ports {adc_sdo_chb_p[7]}]
+
 
 
 set_property IOSTANDARD LVDS [get_ports adc_sdi_p]
