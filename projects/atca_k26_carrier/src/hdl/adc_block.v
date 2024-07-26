@@ -54,6 +54,7 @@ module adc_block #(
     input [ADC_MODULES-1 :0] adc_sdo_chb_n,
 
     input reader_en_sync,
+    input ila_clk,
 
     //output  [ADC_DATA_WIDTH*ADC_MODULES-1 :0] adc_a_data_arr,
     output  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_data_arr
@@ -116,5 +117,21 @@ module adc_block #(
 
 		end
 	endgenerate
+	
+	ila_0 adc_sr_ila (
+	   .clk(ila_clk), // input wire clk
+
+
+	   .probe0(reader_en_sync), // input wire [0:0]  probe0  
+	   .probe1(adc_a_data[0]), // input wire [17:0]  probe1 
+	   .probe2(adc_sdo_cha[0]), // input wire [0:0]  probe2 
+	   .probe3(adc_b_data[0]), // input wire [17:0]  probe3 
+	   .probe4(adc_sdo_chb[0]), // input wire [0:0]  probe4 
+    	.probe5(adc_a_data[1]), // input wire [17:0]  probe5 
+    	.probe6(adc_sdo_cha[1]), // input wire [0:0]  probe6 
+    	.probe7(adc_b_data[1]), // input wire [17:0]  probe7 
+    	.probe8(adc_sdo_chb[1]), // input wire [0:0]  probe8
+    	.probe9(adc_read_clk)
+    );
 
 endmodule

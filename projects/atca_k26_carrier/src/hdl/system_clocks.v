@@ -48,7 +48,8 @@ module system_clocks #(
 
   // Clock out ports
   output        clk_out1,
-  output        clk_out2
+  output        clk_out2,
+  output        clk_out3
  );
   // Input buffering
   //------------------------------------
@@ -56,6 +57,7 @@ module system_clocks #(
 //wire clk_in2_clk_wiz_0;
 wire        clk_out1_clk_wiz;
 wire        clk_out2_clk_wiz;
+wire        clk_out3_clk_wiz;
 
 wire        locked_int;
 wire        clkfbout_clk_wiz;
@@ -80,6 +82,14 @@ wire clk_in_clk_wiz;
     .CLKOUT0_PHASE        (0.000),
     .CLKOUT0_DUTY_CYCLE   (0.500),
     .CLKOUT0_USE_FINE_PS  ("FALSE"),
+    .CLKOUT1_DIVIDE       (15),
+    .CLKOUT1_PHASE        (90.000),
+    .CLKOUT1_DUTY_CYCLE   (0.500),
+    .CLKOUT1_USE_FINE_PS  ("FALSE"),
+    .CLKOUT2_DIVIDE       (3),
+    .CLKOUT2_PHASE        (0.000),
+    .CLKOUT2_DUTY_CYCLE   (0.500),
+    .CLKOUT2_USE_FINE_PS  ("FALSE"),
     .CLKIN1_PERIOD        (10.000))
 
  mmcme4_adv_inst
@@ -88,10 +98,10 @@ wire clk_in_clk_wiz;
     .CLKFBOUT            (clkfbout_clk_wiz),
     .CLKFBOUTB           (),
     .CLKOUT0             (clk_out1_clk_wiz),
-    .CLKOUT0B            (clk_out2_clk_wiz),
-    .CLKOUT1             (),
+    .CLKOUT0B            (),
+    .CLKOUT1             (clk_out2_clk_wiz),
     .CLKOUT1B            (),
-    .CLKOUT2             (),
+    .CLKOUT2             (clk_out3_clk_wiz),
     .CLKOUT2B            (),
     .CLKOUT3             (),
     .CLKOUT3B            (),
@@ -140,6 +150,10 @@ wire clk_in_clk_wiz;
   BUFG clkout2_buf
    (.O   (clk_out2),
     .I   (clk_out2_clk_wiz));
+    
+  BUFG clkout3_buf
+   (.O   (clk_out3),
+    .I   (clk_out3_clk_wiz));
         
 endmodule // system_clocks
 // vim: set ts=8 sw=4 tw=0 et :

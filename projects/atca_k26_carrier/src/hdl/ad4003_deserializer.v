@@ -129,7 +129,7 @@ always @(posedge adc_spi_clk) begin //clk and cnvst generation
 end
 
 // synchronizer adds 2 cycles of latency
-assign reader_en = (cyc_cntr > 6'd18 && cyc_cntr < 6'd36 && cyc_state != IDLE && cyc_state != RESET)? 1'b1: 1'b0;
+assign reader_en = (cyc_cntr >= 6'd18 && cyc_cntr < 6'd36 && cyc_state != IDLE && cyc_state != RESET)? 1'b1: 1'b0;
 
 // required for crossing clock domains between the acqusition clock and the read clock.
 xpm_cdc_single #(
@@ -147,5 +147,7 @@ xpm_cdc_single #(
     );
 
     //warning this crosses clock domains, read clk delay is set in mmcm IP
+
+
 
 endmodule

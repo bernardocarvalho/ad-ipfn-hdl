@@ -119,6 +119,7 @@ module system_top #(
      wire             usr_irq_ack;
 
      wire pl_clk0_i, ps_periph_aresetn_i, ps_periph_reset_i;
+     wire ila_clk;
      wire mmcm_100_locked_i;
 
 //----------------------------------------------------------------------------------------------------------------//
@@ -406,17 +407,29 @@ module system_top #(
         .clk_in(pl_clk0_i),      // input clk_in1
         // Clock out ports
         .clk_out1(adc_spi_clk),     // output 80Mhz 80MHz 0º
-        .clk_out2(adc_read_clk)     // output 80Mhz but delayed for 47nsec 80MHz 180º
+        .clk_out2(adc_read_clk),     // output 80Mhz but delayed for 47nsec 80MHz 180º
+        .clk_out3(ila_clk)
+        
     );
     
    wire [5:0] adc_spi_clk_count_i;
    wire reader_en_sync;
+   wire adc_force_write,adc_force_read;
+   
+    vio_0 deser_ctl (
+        .clk(adc_spi_clk),                // input wire clk
+        .probe_out0(adc_rst),  // output wire [0 : 0] probe_out0
+        .probe_out1(adc_force_write),  // output wire [0 : 0] probe_out1
+        .probe_out2(adc_force_read)  // output wire [0 : 0] probe_out2
+    );
+   
+   
    ad4003_deserializer ad4003_deserializer_inst (
-       .rst(!ps_periph_aresetn_i), // i CHECK This
+       .rst(adc_rst), // i CHECK This
        .adc_spi_clk(adc_spi_clk),    // i
        .adc_read_clk(adc_read_clk),   // i
-       .force_read(1'b0),     // i CHECK This
-       .force_write(1'b0),    // i
+       .force_read(adc_force_read),     // i CHECK This
+       .force_write(adc_force_write),    // i
        .adc_spi_clk_count(adc_spi_clk_count_i),  // o [5:0]
        .reader_en_sync(reader_en_sync), // o
        .cnvst(adc_cnvst),          // o
@@ -431,6 +444,7 @@ module system_top #(
         .adc_sdo_cha_n(adc_sdo_cha_n), // i
         .adc_sdo_chb_p(adc_sdo_chb_p), // i
         .adc_sdo_chb_n(adc_sdo_chb_n), // i
+        .ila_clk(ila_clk),
 
         .adc_read_clk(adc_read_clk),   // i
 

@@ -58,7 +58,7 @@ module adc_ad4003_sr  #(
 
     always @(posedge adc_read_clk)
         if(reader_en_sync) begin
-            adc_data_sr <= #TCQ {adc_data_sr[ADC_DATA_WIDTH-1 :1], adc_sdo_ch};
+            adc_data_sr <= #TCQ {adc_data_sr[ADC_DATA_WIDTH-2 :0], adc_sdo_ch};
             //adc_data_b_sr <= {adc_data_b_sr[ADC_DATA_WIDTH-1 :1], adc_sdo_chb};
         end
 
