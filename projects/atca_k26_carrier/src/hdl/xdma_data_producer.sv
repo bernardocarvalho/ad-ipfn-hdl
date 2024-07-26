@@ -159,9 +159,6 @@ module xdma_data_producer #(
             //assign adc_18_data[k] = adc_a_data_arr[(ADC_DATA_WIDTH*(k + 1) - 1) -: ADC_DATA_WIDTH];
             assign adc_18_data[k] = adc_data_arr[ADC_DATA_WIDTH * k  +: ADC_DATA_WIDTH];
             
-            //assign adc_18_data[2*k + 1] = adc_b_data_arr[(ADC_DATA_WIDTH*(k + 1) - 1) -: ADC_DATA_WIDTH];
-           //  (channel_mask_aclk[k])? adc_par_data[k] : {(ADC_DATA_WIDTH+2){1'b0}};
-           //                                                  16'h0000;
         end
     endgenerate
 
@@ -171,14 +168,13 @@ module xdma_data_producer #(
             data_c2h_0_end_r   <= #TCQ 'h00;
             cnt_sample_c2h0_r  <= #TCQ 'h00;
             status_data_r      <= #TCQ 'h00;
-            cnt_pckt_c2h0_r    <= #TCQ 'h00;//{PKT_SAMPLES_WIDTH {1'b0}}; // Counts sample num in each packet
+            cnt_pckt_c2h0_r    <= #TCQ 'h00;
             s_axis_tlast_r     <= #TCQ 0;
         end
         else begin
             data_c2h_0_end_r <= #TCQ big_endian_128_f(data_c2h_0_r, big_endian);
             case (adc_clk_cnt) // one cycle per sample. This case may start at clk_80_cnt != 0!
                 6'h01: begin
-                // if (data_32bit) begin 
                     // Send 4 channels per word + count data
                     data_c2h_0_r <= #TCQ {adc_18_data[3], 2'b00, 4'h3, cnt_sample_c2h0_r[31:24],
                         adc_18_data[2], 2'b00, 4'h2, cnt_sample_c2h0_r[23:16],
@@ -192,8 +188,8 @@ module xdma_data_producer #(
                       data_c2h_0_r <= #TCQ {adc_18_data[7], 2'b00, 4'h7, cnt_sample_c2h0_r[63:56],
                                 adc_18_data[6],2'b00, 4'h6, cnt_sample_c2h0_r[55:48],
                                 adc_18_data[5], 2'b00, 4'h5, cnt_sample_c2h0_r[47:40],
-                                16'hA5A5, 2'b01,  2'b00, 4'h4, cnt_sample_c2h0_r[39:32]};    // testing                           
-//                                adc_18_data[4], 6'h0, cnt_sample_c2h0_r[39:32]};                              
+//                                16'hA5A5, 2'b01,  2'b00, 4'h4, cnt_sample_c2h0_r[39:32]};    // testing                           
+                                adc_18_data[4], 2'b00, 4'h4, cnt_sample_c2h0_r[39:32]};                              
 
                 end
                 6'h03: begin

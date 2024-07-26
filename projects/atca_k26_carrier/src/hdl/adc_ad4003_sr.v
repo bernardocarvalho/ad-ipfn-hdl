@@ -43,15 +43,13 @@ module adc_ad4003_sr  #(
 		parameter TCQ        = 1		
     ) 
     (
-    input rstn,
+    //input rstn,
     input adc_read_clk, // 80Mhz but delayed for 47nsec
     input reader_en_sync,
     input adc_sdo_ch,
-//    input adc_sdo_chb,
     
     output [ADC_DATA_WIDTH-1 :0] adc_data
 //    output [ADC_DATA_WIDTH-1 :0] adc_data_b
-    //output reg [863:0] adc_data
 );
 
     reg [ADC_DATA_WIDTH-1 :0] adc_data_sr; //, adc_data_b_sr; 
@@ -60,7 +58,7 @@ module adc_ad4003_sr  #(
 
     always @(posedge adc_read_clk)
         if(reader_en_sync) begin
-            adc_data_sr <= {adc_data_sr[ADC_DATA_WIDTH-1 :1], adc_sdo_ch};
+            adc_data_sr <= #TCQ {adc_data_sr[ADC_DATA_WIDTH-1 :1], adc_sdo_ch};
             //adc_data_b_sr <= {adc_data_b_sr[ADC_DATA_WIDTH-1 :1], adc_sdo_chb};
         end
 

@@ -208,7 +208,6 @@ module system_top #(
     (* keep = "true" *) wire s_axis_c2h_tready_0, s_axis_c2h_tready_1;
     wire [C_DATA_WIDTH/8-1:0] s_axis_c2h_tkeep_0, s_axis_c2h_tkeep_1;
 
-// 80Mhz,  80Mhz but delayed for 47nsec
     wire  adc_cnvst;
     wire [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_data_arr_i; //, adc_b_data_arr_i;
 
@@ -227,8 +226,8 @@ module system_top #(
   // PCIe Reset buffer
   //    IBUF atca_rx_3a_buf ( .O(sys_rst_n_c), .I(sys_rst_n ) ); // atca_3a_r
 
-    OBUFDS sdi_obuf ( .O(adc_sdi_p), .OB(adc_sdi_n), .I(adc_sdi));
-    OBUFDS sck_obuf ( .O(adc_sck_p), .OB(adc_sck_n), .I(adc_sck));
+    OBUFDS adc_sdi_obuf ( .O(adc_sdi_p), .OB(adc_sdi_n), .I(adc_sdi));
+    OBUFDS adc_sck_obuf ( .O(adc_sck_p), .OB(adc_sck_n), .I(adc_sck));
     OBUFDS cnvst_obuf ( .O(adc_cnvst_p), .OB(adc_cnvst_n), .I(adc_cnvst));
     OBUFDS acq_clk_obuf ( .O(acq_clk_p), .OB(acq_clk_n), .I(adc_spi_clk));
 
@@ -427,7 +426,7 @@ module system_top #(
    
    adc_block #(.ADC_CHANNELS(ADC_CHANNELS)) 
     adc_block_inst (
-        .rstn(ps_periph_aresetn_i), // i
+        //.rstn(ps_periph_aresetn_i), // i
         .adc_sdo_cha_p(adc_sdo_cha_p), // i [ADC_MODULES-1 :0] 
         .adc_sdo_cha_n(adc_sdo_cha_n), // i
         .adc_sdo_chb_p(adc_sdo_chb_p), // i

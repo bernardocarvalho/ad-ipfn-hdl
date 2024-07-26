@@ -45,20 +45,16 @@ module adc_block #(
 		parameter TCQ        = 1		
     ) 
     (
-    input rstn,
+    //input rstn,
     //input adc_spi_clk, // 80Mhz
     input adc_read_clk, // 80Mhz but delayed for 47nsec
     input [ADC_MODULES-1 :0] adc_sdo_cha_p,
     input [ADC_MODULES-1 :0] adc_sdo_cha_n,
     input [ADC_MODULES-1 :0] adc_sdo_chb_p,
     input [ADC_MODULES-1 :0] adc_sdo_chb_n,
-    // input [24:1]adc_sdo_chb,
-    // input force_read,
-    // input force_write,
+
     input reader_en_sync,
-    //output cnvst,
-    // output sdi,
-    // output sck,
+
     //output  [ADC_DATA_WIDTH*ADC_MODULES-1 :0] adc_a_data_arr,
     output  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_data_arr
 );
@@ -86,7 +82,7 @@ module adc_block #(
         
           adc_ad4003_sr 
 			adc_ad4003_sr_a (	
-                .rstn(rstn), // i
+                //.rstn(rstn), // i
                 .adc_read_clk(adc_read_clk),   // i			
                 .reader_en_sync(reader_en_sync),    // i
 
@@ -99,7 +95,7 @@ module adc_block #(
 			);
 		  adc_ad4003_sr 
 			adc_ad4003_sr_b (	
-                .rstn(rstn), // i
+                //.rstn(rstn), // i
                 .adc_read_clk(adc_read_clk),   // i			
                 .reader_en_sync(reader_en_sync),    // i
 

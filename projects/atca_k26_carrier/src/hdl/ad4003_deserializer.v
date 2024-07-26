@@ -38,7 +38,8 @@
 
 `timescale 1ns/1ps
 
-module ad4003_deserializer (
+module ad4003_deserializer #(parameter TCQ = 1)  
+(
     input rst,
     input adc_spi_clk, // 80Mhz
     input adc_read_clk, // 80Mhz but delayed for 47nsec
@@ -55,26 +56,26 @@ module ad4003_deserializer (
     //output reg [863:0] adc_data
 );
 
-parameter   RESET=4'd0, 
-    TURBO_QUIET1=4'd1, 
-    TURBO_DATA=4'd2, 
-    TURBO_QUIET2=4'd3,
-    RW_CNVH=4'd4,
-    DATA_R=4'd5,
-    DATA_W=4'd6,
-    IDLE=4'd7,
-    IDLE_CNVH=4'd8,
-    RESET_CNVH=4'd9;
+localparam   RESET = 4'd0, 
+    TURBO_QUIET1   = 4'd1, 
+    TURBO_DATA     = 4'd2, 
+    TURBO_QUIET2   = 4'd3,
+    RW_CNVH        = 4'd4,
+    DATA_R         = 4'd5,
+    DATA_W         = 4'd6,
+    IDLE           = 4'd7,
+    IDLE_CNVH      = 4'd8,
+    RESET_CNVH     = 4'd9;
 
 reg [5:0] cyc_cntr;
 initial cyc_cntr=5'd0;
 assign adc_spi_clk_count = cyc_cntr; 
 reg [3:0] cyc_state, next_state;
     initial cyc_state=RESET;
- reg [15:0] sdi_reg;
+reg [15:0] sdi_reg;
 initial sdi_reg = 16'hffff;
 reg data_written;
-initial data_written=1'b0;
+initial data_written = 1'b0;
 
 wire reader_en;
 
@@ -97,46 +98,46 @@ always @(*) begin
 end
 
 assign cnvst = (cyc_state==TURBO_QUIET1 || cyc_state==RW_CNVH || cyc_state==IDLE_CNVH || cyc_state==RESET_CNVH)? 1'b1:1'b0;
-assign sdi= sdi_reg[15];
-assign sck= (cyc_cntr>6'd17 && cyc_cntr<6'd36) && cyc_state!=IDLE && cyc_state!=RESET ? adc_spi_clk : 0;
+assign sdi = sdi_reg[15];
+assign sck = (cyc_cntr>6'd17 && cyc_cntr<6'd36) && cyc_state!=IDLE && cyc_state!=RESET ? adc_spi_clk : 0;
 
 
 always @(negedge adc_spi_clk) begin
-    if(cyc_cntr==6'd17)
+    if(cyc_cntr == 6'd17)
         case (cyc_state)
             RESET:
-                data_written<=1'b0;
+                data_written <= #TCQ 1'b0;
             DATA_R: 
-                sdi_reg <=16'h54ff;
+                sdi_reg      <= #TCQ 16'h54ff;
             DATA_W: begin 
-            sdi_reg <=16'h1402; 
-            data_written<=1'b1; 
-        end
+                 sdi_reg      <= #TCQ 16'h1402; 
+                 data_written <= #TCQ 1'b1; 
+               end
         default: 
-            sdi_reg <=16'hffff;
+            sdi_reg <= #TCQ 16'hffff;
     endcase
-    if(cyc_cntr>6'd17 && cyc_cntr<6'd34)
-        sdi_reg<={sdi_reg[14:0],1'b1};
+    if(cyc_cntr > 6'd17 && cyc_cntr < 6'd34)
+        sdi_reg <= #TCQ {sdi_reg[14:0], 1'b1};
 end
 
 always @(posedge adc_spi_clk) begin //clk and cnvst generation
     if (cyc_cntr == 6'd39)
-        cyc_cntr <= 6'd0;
+        cyc_cntr <= #TCQ 6'd0;
     else
-        cyc_cntr<=cyc_cntr + 1'b1;
-    cyc_state <= next_state;
+        cyc_cntr <= #TCQ cyc_cntr + 1'b1;
+    cyc_state <= #TCQ next_state;
 end
 
-assign reader_en = cyc_cntr > 6'd18 && cyc_cntr < 6'd36 && cyc_state!=IDLE && cyc_state != RESET ? 1'b1 : 1'b0;  // synchronizer adds 2 cycles of latency
-
+// synchronizer adds 2 cycles of latency
+assign reader_en = (cyc_cntr > 6'd18 && cyc_cntr < 6'd36 && cyc_state != IDLE && cyc_state != RESET)? 1'b1: 1'b0;
 
 // required for crossing clock domains between the acqusition clock and the read clock.
 xpm_cdc_single #(
-.DEST_SYNC_FF(2),   // DECIMAL; range: 2-10
-.INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
-.SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
-.SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
-    )
+    .DEST_SYNC_FF(2),   // DECIMAL; range: 2-10
+    .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+    .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+    .SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
+ )
     reader_en_syncro (
         .dest_out(reader_en_sync), // 1-bit output: src_in synchronized to the destination clock domain. This output is
         // registered.
