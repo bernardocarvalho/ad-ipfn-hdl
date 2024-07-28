@@ -47,6 +47,10 @@
 `define ILCK_QF_OUT_EN_BIT      14 //
 //`define INT_CALC            = 14; // Output Integral Values
 `define DMA_DATA_32_BIT       15  // 0 : 16 bit , 1:32 Bit data
+
+`define FORCE_WRITE           16
+`define FORCE_READ            17
+
 //`define FWUSTAR_BIT 19
 //`define STREAME_BIT     20 // Streaming enable
 `define ACQE_BIT 		23

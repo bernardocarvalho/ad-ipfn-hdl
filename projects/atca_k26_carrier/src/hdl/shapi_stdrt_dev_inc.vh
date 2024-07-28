@@ -63,8 +63,8 @@
 `define DEV_FW_MAJOR     8'h00
 
 // Use Linux command: date +%s to get UNIX timestamp
-`define DEV_TSTAMP      32'd1721985207
-//TS Fri 26 Jul 2024 10:13:27 AM WEST
+`define DEV_TSTAMP      32'd1722208449
+//TS Mon 29 Jul 2024 12:14:09 AM WEST
 
 `define DEV_NAME1         "actA" // first char right
 `define DEV_NAME2         "omiM"

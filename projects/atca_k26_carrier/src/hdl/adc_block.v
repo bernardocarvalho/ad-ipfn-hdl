@@ -117,7 +117,7 @@ module adc_block #(
 
 		end
 	endgenerate
-	
+/*	
 	ila_0 adc_sr_ila (
 	   .clk(ila_clk), // input wire clk
 
@@ -133,5 +133,5 @@ module adc_block #(
     	.probe8(adc_sdo_chb[1]), // input wire [0:0]  probe8
     	.probe9(adc_read_clk)
     );
-
+*/
 endmodule

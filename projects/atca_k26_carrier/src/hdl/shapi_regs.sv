@@ -124,7 +124,11 @@ module shapi_regs #
         input       [C_S_AXI_DATA_WIDTH-1 :0]  status_reg,
         output      [C_S_AXI_DATA_WIDTH-1 :0]  control_reg,
 
-        
+        input       [C_S_AXI_DATA_WIDTH-1 :0]  debug_0,
+        input       [C_S_AXI_DATA_WIDTH-1 :0]  debug_1,
+        input       [C_S_AXI_DATA_WIDTH-1 :0]  debug_2,
+        input       [C_S_AXI_DATA_WIDTH-1 :0]  debug_3,
+                                
         output             dev_hard_reset,
 
 
@@ -645,6 +649,11 @@ module shapi_regs #
             (`MOD_ACQ_REG_OFF + 8'h14): reg_data_out = `MOD_ACQ_TLP_PAYLOAD; // ro
             (`MOD_ACQ_REG_OFF + 8'h15): reg_data_out = channel_mask_r;       // rw     ADDR 0x94
 
+            (`MOD_ACQ_REG_OFF + 8'h16): reg_data_out = debug_0;              // r0     ADDR 0x98
+            (`MOD_ACQ_REG_OFF + 8'h17): reg_data_out = debug_1;              // r0     ADDR 0x9C
+            (`MOD_ACQ_REG_OFF + 8'h18): reg_data_out = debug_2;              // r0     ADDR 0xA0
+            (`MOD_ACQ_REG_OFF + 8'h19): reg_data_out = debug_3;              // r0     ADDR 0xA4
+                                    
             //(`MOD_ACQ_REG_OFF + 8'h1C): reg_data_out <= #TCQ i2C_reg1_r;  // rw     ADDR 0xB0
 /*
             (`MOD_ACQ_REG_OFF + 8'h1D): reg_data_out <= #TCQ  //  Not implemented

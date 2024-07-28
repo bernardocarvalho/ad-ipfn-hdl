@@ -381,7 +381,7 @@ module system_top #(
         .S_AXI_BVALID(m_axil_bvalid),
         .S_AXI_BREADY(m_axil_bready),
         .S_AXI_ARADDR(m_axil_araddr[9:0]),
-        //.S_AXI_ARPROT(s_axil_arprot), // Not used
+
         .S_AXI_ARVALID(m_axil_arvalid),
         .S_AXI_ARREADY(m_axil_arready),
         .S_AXI_RDATA(m_axil_rdata),
@@ -394,9 +394,12 @@ module system_top #(
         .control_reg(control_reg_i), // o
         .eo_offset(eo_offset_i),  // o
         .wo_offset(wo_offset_i),  // o
-        // .ilck_param(ilck_param_i),  // o
+        
+        .debug_0(32'hAABBCCDD),   // i
+        .debug_1(32'hAABB0011),   // i
+        
         .chopp_period(chopp_period_i),  // o
-        .channel_mask(channel_mask_i)  // o
+        .channel_mask(channel_mask_i)   // o
     );
 
    system_clocks system_clocks_inst (
@@ -414,22 +417,23 @@ module system_top #(
     
    wire [5:0] adc_spi_clk_count_i;
    wire reader_en_sync;
-   wire adc_force_write,adc_force_read;
+   //wire adc_force_write,adc_force_read;
    
+   /*
     vio_0 deser_ctl (
         .clk(adc_spi_clk),                // input wire clk
         .probe_out0(adc_rst),  // output wire [0 : 0] probe_out0
         .probe_out1(adc_force_write),  // output wire [0 : 0] probe_out1
         .probe_out2(adc_force_read)  // output wire [0 : 0] probe_out2
     );
-   
+   */
    
    ad4003_deserializer ad4003_deserializer_inst (
        .rst(adc_rst), // i CHECK This
        .adc_spi_clk(adc_spi_clk),    // i
-       .adc_read_clk(adc_read_clk),   // i
-       .force_read(adc_force_read),     // i CHECK This
-       .force_write(adc_force_write),    // i
+       .adc_read_clk(adc_read_clk),   // i  
+       .force_read(control_reg_i[`FORCE_READ]),     // i
+       .force_write(control_reg_i[`FORCE_WRITE]),    // i
        .adc_spi_clk_count(adc_spi_clk_count_i),  // o [5:0]
        .reader_en_sync(reader_en_sync), // o
        .cnvst(adc_cnvst),          // o
