@@ -41,10 +41,8 @@
 module ad4003_deserializer #(parameter TCQ = 1)  
 (
     input rst,
-    input adc_spi_clk, // 80Mhz
+    input adc_spi_clk,  // 80Mhz
     input adc_read_clk, // 80Mhz but delayed for 47nsec
-    // input [24:1]adc_sdo_cha,
-    // input [24:1]adc_sdo_chb,
     input force_read,
     input force_write,
 
@@ -53,7 +51,6 @@ module ad4003_deserializer #(parameter TCQ = 1)
     output cnvst,
     output sdi,
     output sck
-    //output reg [863:0] adc_data
 );
 
 localparam   RESET = 4'd0, 
@@ -79,27 +76,49 @@ initial data_written = 1'b0;
 
 wire reader_en;
 
+reg cnvst_r = 1'b0;
+assign cnvst = cnvst_r;
+ 
 always @(*) begin
 
     case(cyc_state) // state transition table
         RESET:          next_state = cyc_cntr==6'd0  ? (rst==1) ? RESET_CNVH : RW_CNVH : RESET;
         RESET_CNVH :    next_state = cyc_cntr==6'd16 ? RESET: RESET_CNVH;
-        TURBO_QUIET1:   next_state = (rst==1)? RESET: cyc_cntr==6'd16 ? TURBO_DATA : TURBO_QUIET1;
-        TURBO_DATA:     next_state = (rst==1)? RESET: cyc_cntr==6'd34 ? TURBO_QUIET2 : TURBO_DATA;
-        TURBO_QUIET2:   next_state = (rst==1)? RESET: cyc_cntr==6'd0  ? TURBO_QUIET1 : TURBO_QUIET2;
-        RW_CNVH:        next_state = (rst==1)? RESET: cyc_cntr==6'd16 ? force_read ? DATA_R : force_write ? DATA_W : data_written ? DATA_R : DATA_W : RW_CNVH;
-        DATA_R:         next_state = (rst==1)? RESET: cyc_cntr==6'd0  ? force_read || force_write ? RW_CNVH : TURBO_QUIET1 : DATA_R;
-        DATA_W:         next_state = (rst==1)? RESET: cyc_cntr==6'd0  ? force_read || force_write ? IDLE_CNVH : RW_CNVH : DATA_W;
-        IDLE_CNVH:      next_state = (rst==1)? RESET: cyc_cntr==6'd16 ? IDLE: IDLE_CNVH;
-        IDLE:           next_state = (rst==1)? RESET: cyc_cntr==6'd0  ? IDLE_CNVH: IDLE;
+        TURBO_QUIET1:   next_state = cyc_cntr==6'd16 ? TURBO_DATA : TURBO_QUIET1;
+        TURBO_DATA:     next_state = cyc_cntr==6'd34 ? TURBO_QUIET2 : TURBO_DATA;
+        TURBO_QUIET2:   next_state = cyc_cntr==6'd0  ? TURBO_QUIET1 : TURBO_QUIET2;
+
+        RW_CNVH:        if (cyc_cntr==6'd16) 
+                            if (force_read) 
+                                next_state = DATA_R;
+                            else if (force_write)
+                                    next_state = DATA_W;
+                            else if (data_written)
+                                next_state = DATA_R;
+                            else
+                                next_state = DATA_W;
+                        else
+                            next_state = RW_CNVH;
+        DATA_R:         next_state = cyc_cntr==6'd0  ? ((force_read || force_write )? RW_CNVH : TURBO_QUIET1) : DATA_R;
+        DATA_W:         next_state = cyc_cntr==6'd0  ? ((force_read || force_write) ? IDLE_CNVH : RW_CNVH )   : DATA_W;
+        IDLE_CNVH:      next_state = cyc_cntr==6'd16 ? IDLE: IDLE_CNVH;
+        IDLE:           next_state = cyc_cntr==6'd0  ? IDLE_CNVH: IDLE;
         default:        next_state = RESET; 
     endcase
 
 end
 
-assign cnvst = (cyc_state==TURBO_QUIET1 || cyc_state==RW_CNVH || cyc_state==IDLE_CNVH || cyc_state==RESET_CNVH)? 1'b1:1'b0;
+always @(*) 
+    case(cyc_state) // state transition table
+        TURBO_QUIET1: cnvst_r = 1'b1;
+        RW_CNVH:      cnvst_r = 1'b1;
+        IDLE_CNVH:    cnvst_r = 1'b1;
+        RESET_CNVH:   cnvst_r = 1'b1;
+        default:        cnvst_r = 1'b0;
+    endcase
+// assign cnvst = (cyc_state==TURBO_QUIET1 || cyc_state==RW_CNVH || cyc_state==IDLE_CNVH || cyc_state==RESET_CNVH)? 1'b1:1'b0;
 assign sdi = sdi_reg[15];
-assign sck = (cyc_cntr>6'd17 && cyc_cntr<6'd36) && cyc_state!=IDLE && cyc_state!=RESET ? adc_spi_clk : 0;
+assign sck = (cyc_cntr>6'd17 && cyc_cntr<6'd36 && cyc_state!=IDLE && cyc_state!=RESET )? adc_spi_clk : 0;
 
 
 always @(negedge adc_spi_clk) begin
@@ -116,16 +135,22 @@ always @(negedge adc_spi_clk) begin
         default: 
             sdi_reg <= #TCQ 16'hffff;
     endcase
-    if(cyc_cntr > 6'd17 && cyc_cntr < 6'd34)
+//     if(cyc_cntr > 6'd17 && cyc_cntr < 6'd34) redundant ?
         sdi_reg <= #TCQ {sdi_reg[14:0], 1'b1};
 end
 
-always @(posedge adc_spi_clk) begin //clk and cnvst generation
-    if (cyc_cntr == 6'd39)
-        cyc_cntr <= #TCQ 6'd0;
-    else
-        cyc_cntr <= #TCQ cyc_cntr + 1'b1;
-    cyc_state <= #TCQ next_state;
+always @(posedge adc_spi_clk or posedge rst) begin //clk and cnvst generation
+    if (rst) begin
+        cyc_state <= #TCQ RESET;
+        cyc_cntr  <= #TCQ 6'd0;
+    end 
+    else begin 
+        if (cyc_cntr == 6'd39)
+            cyc_cntr <= #TCQ 6'd0;
+        else
+            cyc_cntr <= #TCQ cyc_cntr + 1'b1;
+        cyc_state <= #TCQ next_state;
+    end
 end
 
 // synchronizer adds 2 cycles of latency
