@@ -50,6 +50,7 @@
 
 `define FORCE_WRITE           16
 `define FORCE_READ            17
+`define ADC_RST               18
 
 //`define FWUSTAR_BIT 19
 //`define STREAME_BIT     20 // Streaming enable

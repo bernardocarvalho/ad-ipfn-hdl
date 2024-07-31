@@ -127,26 +127,21 @@ module xdma_data_producer #(
     //assign fifos_status = status_data_r;
     wire [31:0] wr_data_count; //, rd_data_count;
     reg [C_S_AXI_DATA_WIDTH-1 :0] cdc_control_reg;
-    wire big_endian = cdc_control_reg[`ENDIAN_DMA_BIT];
+    wire big_endian;
     
-   xpm_cdc_array_single #(
+   xpm_cdc_single #(
       .DEST_SYNC_FF(4),   // DECIMAL; range: 2-10
       .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
       .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
-      .SRC_INPUT_REG(1),  // DECIMAL; 0=do not register input, 1=register input
-      .WIDTH(C_S_AXI_DATA_WIDTH)           // DECIMAL; range: 1-1024
+      .SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
    )
-   xpm_cdc_array_single_ (
-      .dest_out(cdc_control_reg), // WIDTH-bit output: src_in synchronized to the destination clock domain. This
-                            // output is registered.
+   xpm_cdc_single_inst (
+      .dest_out(big_endian), // 1-bit output: src_in synchronized to the destination clock domain. This output is
+                           // registered.
 
       .dest_clk(adc_data_clk), // 1-bit input: Clock signal for the destination clock domain.
       .src_clk(axi_aclk),   // 1-bit input: optional; required when SRC_INPUT_REG = 1
-      .src_in(control_reg)  // WIDTH-bit input: Input single-bit array to be synchronized to destination clock
-                            // domain. It is assumed that each bit of the array is unrelated to the others. This
-                            // is reflected in the constraints applied to this macro. To transfer a binary value
-                            // losslessly across the two clock domains, use the XPM_CDC_GRAY macro instead.
-
+      .src_in(cdc_control_reg[`ENDIAN_DMA_BIT])      // 1-bit input: Input signal to be synchronized to dest_clk domain.
    );
 
    

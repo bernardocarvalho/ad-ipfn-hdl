@@ -236,14 +236,6 @@ module system_top #(
 
     assign fan_en_b = gpio_o[0];
 
- /* Synch signal with PCIe clk 
-    always @(posedge axi_aclk) begin
-//        user_reset_q  <= user_reset;
-//        user_lnk_up_q <= user_lnk_up;
-        acq_on_q <= acq_on_r;
-    end
-*/
-
 // required for crossing clock domains between the acqusition clock and the read clock.
     xpm_cdc_single #(
         .DEST_SYNC_FF(2),   // DECIMAL; range: 2-10
@@ -279,9 +271,44 @@ module system_top #(
             ps_clk_hb <= ps_clk_hb+32'd1; 
     end
     assign carrier_led[1] = ps_clk_hb > 32'd49999999;
+    assign carrier_led[2] = adc_spi_clk;
+    assign carrier_led[3] = adc_read_clk;
+    
+    wire strg_sync;
+    xpm_cdc_single #(
+        .DEST_SYNC_FF(3),   // DECIMAL; range: 2-10
+        .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+        .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+        .SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
+    )
+    strg_cdc (
+        .dest_out(strg_sync), // 1-bit output: src_in synchronized to the destination clock domain. This output is
+        // registered.
+        .dest_clk(adc_spi_clk),   // 1-bit input: Clock signal for the destination clock domain.
+        .src_clk(axi_aclk),     // 1-bit input: optional; required when SRC_INPUT_REG = 1
+        .src_in(control_reg_i[`STRG_BIT])         // 1-bit input: Input signal to be synchronized to dest_clk domain.
+    );
+    
+   wire acqe_arst_sync;
+   xpm_cdc_async_rst #(
+      .DEST_SYNC_FF(4),    // DECIMAL; range: 2-10
+      .INIT_SYNC_FF(0),    // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+      .RST_ACTIVE_HIGH(0)  // DECIMAL; 0=active low reset, 1=active high reset
+   )
+   xpm_cdc_async_rst_inst (
+      .dest_arst(acqe_arst_sync), // 1-bit output: src_arst asynchronous reset signal synchronized to destination
+                             // clock domain. This output is registered. NOTE: Signal asserts asynchronously
+                             // but deasserts synchronously to dest_clk. Width of the reset signal is at least
+                             // (DEST_SYNC_FF*dest_clk) period.
+
+      .dest_clk(adc_read_clk),   // 1-bit input: Destination clock.
+      .src_arst(control_reg_i[`ACQE_BIT])    // 1-bit input: Source asynchronous reset signal.
+   );
+   
+    
 // ---------------- Trigger generation -------------------------------//
-    always @(posedge adc_read_clk or negedge control_reg_i[`ACQE_BIT]) begin
-        if (!control_reg_i[`ACQE_BIT])
+    always @(posedge adc_read_clk or negedge acqe_arst_sync) begin
+        if (!acqe_arst_sync)
         begin
             acq_on_r <= #TCQ  1'b0;
             soft_trig_dly <=  #TCQ 2'b11;
@@ -289,7 +316,7 @@ module system_top #(
         end
         else
         begin
-            soft_trig_dly <=  #TCQ  {soft_trig_dly[0], control_reg_i[`STRG_BIT]}; // delay pipe
+            soft_trig_dly <=  #TCQ  {soft_trig_dly[0], strg_sync}; // delay pipe
             hard_trig_dly <=  #TCQ  {hard_trig_dly[0], 1'b0};         // delay pipe
             //hard_trig_dly <=  #TCQ  {hard_trig_dly[0], atca_hard_trig_rcv};         // delay pipe
 
@@ -409,54 +436,47 @@ module system_top #(
     // Clock in ports
         .clk_in(pl_clk0_i),      // input clk_in1
         // Clock out ports
-        .clk_out1(adc_spi_clk),     // output 80Mhz 80MHz 0º
-        .clk_out2(adc_read_clk),     // output 80Mhz but delayed for 47nsec 80MHz 180º
-        .clk_out3(ila_clk)
+        .clk_out2(adc_spi_clk),     // output 80Mhz 80MHz 0º
+        .clk_out3(adc_read_clk),     // output 80Mhz but delayed for 47nsec 80MHz 180º
+        .clk_out1(ila_clk)
         
     );
     
    wire [5:0] adc_spi_clk_count_i;
    wire reader_en_sync;
-   //wire adc_force_write,adc_force_read;
    
-   /*
-    vio_0 deser_ctl (
-        .clk(adc_spi_clk),                // input wire clk
-        .probe_out0(adc_rst),  // output wire [0 : 0] probe_out0
-        .probe_out1(adc_force_write),  // output wire [0 : 0] probe_out1
-        .probe_out2(adc_force_read)  // output wire [0 : 0] probe_out2
+   wire adc_rst_sync;   
+   xpm_cdc_single #(
+        .DEST_SYNC_FF(3),   // DECIMAL; range: 2-10
+        .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+        .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+        .SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
+    )
+    adc_rst_cdc (
+        .dest_out(adc_rst_sync), // 1-bit output: src_in synchronized to the destination clock domain. This output is
+        // registered.
+        .dest_clk(adc_spi_clk),   // 1-bit input: Clock signal for the destination clock domain.
+        .src_clk(axi_aclk),     // 1-bit input: optional; required when SRC_INPUT_REG = 1
+        .src_in(control_reg_i[`ADC_RST])         // 1-bit input: Input signal to be synchronized to dest_clk domain.
     );
-   */
    
-   ad4003_deserializer ad4003_deserializer_inst (
-       .rst(adc_rst), // i CHECK This
+   ad4003_deserializer #(.ADC_CHANNELS(ADC_CHANNELS)) 
+    ad4003_deserializer_inst (
+       .ila_clk(ila_clk),
+       .rst(adc_rst_sync), // i CHECK This
        .adc_spi_clk(adc_spi_clk),    // i
        .adc_read_clk(adc_read_clk),   // i  
-       .force_read(control_reg_i[`FORCE_READ]),     // i
-       .force_write(control_reg_i[`FORCE_WRITE]),    // i
        .adc_spi_clk_count(adc_spi_clk_count_i),  // o [5:0]
-       .reader_en_sync(reader_en_sync), // o
        .cnvst(adc_cnvst),          // o
-       .sdi(adc_sdi),            // o
-       .sck(adc_sck)             // o
+       .sdi(adc_sdi),              // o
+       .sck(adc_sck),              // o
+       .adc_sdo_cha_p(adc_sdo_cha_p), // i [ADC_MODULES-1 :0] 
+       .adc_sdo_cha_n(adc_sdo_cha_n), // i
+       .adc_sdo_chb_p(adc_sdo_chb_p), // i
+       .adc_sdo_chb_n(adc_sdo_chb_n), // i 
+       .adc_data_arr(adc_data_arr_i)  // o
    );
    
-   adc_block #(.ADC_CHANNELS(ADC_CHANNELS)) 
-    adc_block_inst (
-        //.rstn(ps_periph_aresetn_i), // i
-        .adc_sdo_cha_p(adc_sdo_cha_p), // i [ADC_MODULES-1 :0] 
-        .adc_sdo_cha_n(adc_sdo_cha_n), // i
-        .adc_sdo_chb_p(adc_sdo_chb_p), // i
-        .adc_sdo_chb_n(adc_sdo_chb_n), // i
-        .ila_clk(ila_clk),
-
-        .adc_read_clk(adc_read_clk),   // i
-
-        .reader_en_sync(reader_en_sync),  // i
-
-        //.adc_a_data_arr(adc_a_data_arr_i), // o [ADC_DATA_WIDTH*ADC_MODULES-1 :0] 
-        .adc_data_arr(adc_data_arr_i) // o  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0]  
-   );
 // ---            ADC data acquisition and packeting ---------
   xdma_data_producer #(
     .C_S_AXI_DATA_WIDTH(C_M_AXI_LITE_DATA_WIDTH),

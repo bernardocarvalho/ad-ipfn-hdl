@@ -32,13 +32,10 @@ module ad4003_deserializer_tb;
         .rst(rst),
         .adc_spi_clk(adc_spi_clk),
         .adc_read_clk(adc_read_clk),
-        .force_read(1'b0),
-        .force_write(1'b0),
         .adc_spi_clk_count(adc_spi_clk_count),  // o [5:0]
-        .reader_en_sync(reader_en_sync), // o
         .cnvst(cnvst),
-//        .adc_sdo_cha(adc_sdo_cha),
-//        .adc_sdo_chb(adc_sdo_chb),
+        .adc_sdo_cha(adc_sdo_cha),
+        .adc_sdo_chb(adc_sdo_chb),
         .sdi(sdi),
         .sck(sck)
        // .adc_data(adc_data),
