@@ -82,6 +82,7 @@ module system_top #(
   input [ADC_MODULES-1 :0] adc_sdo_cha_p,
   input [ADC_MODULES-1 :0] adc_sdo_chb_n,
   input [ADC_MODULES-1 :0] adc_sdo_chb_p,
+  output  adc_chop, 
   output [3 :0] carrier_led,
   output    fan_en_b
 );
@@ -160,7 +161,14 @@ module system_top #(
     wire  [1023:0] wo_offset_i; 
     
    wire  adc_spi_clk, adc_read_clk;
-    
+   
+   wire  adc_chop_i; 
+   
+   OBUF OBUF_chop (
+      .O(adc_chop),
+      .I(adc_chop_i)
+   );
+
    //wire [14:10] fifos_status_i;
    reg [4:0] fifos_status_cdc = 5'b00000;
    /*
@@ -444,7 +452,19 @@ module system_top #(
     
    wire [5:0] adc_spi_clk_count_i;
    wire reader_en_sync;
-   
+
+   chop_gen chop_gen_inst (
+        .adc_data_clk(adc_spi_clk), // i
+        .adc_clk_cnt(adc_spi_clk_count_i),  // i [5:0]
+        //         .reset_n(commandREG[STREAME]),  TODO : sync chop...
+        .chop_en(control_reg_i[`CHOP_ON_BIT]), // i
+        .max_count(chopp_period_i[31:16]),     // i
+        .change_count(chopp_period_i[15:0]),   // i for duty cycle
+        .chop_o(adc_chop_i),                   // o
+        .chop_dly_o(),  //adc_chop_phase_dly_i),  // o
+        .data_hold_o()  //adc_data_hold_i)  // o
+    );
+     
    wire adc_rst_sync;   
    xpm_cdc_single #(
         .DEST_SYNC_FF(3),   // DECIMAL; range: 2-10

@@ -39,7 +39,7 @@
 `define N_ADC_MAX_CHANNELS 32
 `define ADC_DATA_WIDTH 18
 `define FLOAT_WIDTH    32
-`define N_INT_CHANNELS  8
+//`define N_INT_CHANNELS  8
 
 //`define MASTER_ATCA_ADDR  8'h45  // Upper slot on IPFN 4 slot ATCA
 //`define MASTER_ATCA_ADDR  8'hCE  //  ATCA board slot on Garching/Greifswald Lab ATCA crates

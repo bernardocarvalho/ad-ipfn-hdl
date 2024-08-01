@@ -48,7 +48,7 @@ module shapi_regs #
         parameter FLOAT_WIDTH      = `FLOAT_WIDTH,
 
         parameter N_ADC_CHANNELS   = `N_ADC_MAX_CHANNELS,
-        parameter N_INT_CHANNELS   = `N_INT_CHANNELS,
+        //parameter N_INT_CHANNELS   = `N_INT_CHANNELS,
 
         // User parameters ends
         // Do not modify the parameters beyond this line
@@ -58,7 +58,6 @@ module shapi_regs #
         // Width of S_AXI address bus
         parameter integer C_S_AXI_ADDR_WIDTH    = 10,
 
-        parameter N_ILOCK_PARAMS   =  N_INT_CHANNELS + 2,
         //parameter EO_WIDTH   = ADC_DATA_WIDTH;
         parameter EO_VECT_WIDTH   = ADC_DATA_WIDTH * N_ADC_CHANNELS,
         parameter WO_VECT_WIDTH   = FLOAT_WIDTH    * N_ADC_CHANNELS,
