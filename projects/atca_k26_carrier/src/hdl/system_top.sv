@@ -69,22 +69,27 @@ module system_top #(
     input    sys_clk_n,
     input  sys_rst_n,  // This board uses ATCA RX3 signal
     
-    
-  output acq_clk_n,
-  output acq_clk_p,
-  output adc_cnvst_n,
-  output adc_cnvst_p,
-  output adc_sck_n,
-  output adc_sck_p,
-  output adc_sdi_n,
-  output adc_sdi_p,
-  input [ADC_MODULES-1 :0] adc_sdo_cha_n,
-  input [ADC_MODULES-1 :0] adc_sdo_cha_p,
-  input [ADC_MODULES-1 :0] adc_sdo_chb_n,
-  input [ADC_MODULES-1 :0] adc_sdo_chb_p,
-  output  adc_chop, 
-  output [3 :0] carrier_led,
-  output    fan_en_b
+   // PLL Interface 
+    inout pll_sdio,
+    output pll_reset,
+    output pll_nCS,
+    output pll_sclk,
+
+    output acq_clk_n,
+    output acq_clk_p,
+    output adc_cnvst_n,
+    output adc_cnvst_p,
+    output adc_sck_n,
+    output adc_sck_p,
+    output adc_sdi_n,
+    output adc_sdi_p,
+    input [ADC_MODULES-1 :0] adc_sdo_cha_n,
+    input [ADC_MODULES-1 :0] adc_sdo_cha_p,
+    input [ADC_MODULES-1 :0] adc_sdo_chb_n,
+    input [ADC_MODULES-1 :0] adc_sdo_chb_p,
+    output  adc_chop, 
+    output [3 :0] carrier_led,
+    output    fan_en_b
 );
 
    
@@ -198,9 +203,11 @@ module system_top #(
 //                            1'b0, atca_clk_locked_i, te0741_clk_100_locked_i, rtm_clk10_locked_i, // bits 19:16
 //        i2C_reg0[7:0]}; // bits 7:0 atca slot_id 
     reg  acq_on_r, acq_on_q;
+    wire pll_config_done;
+
     wire [C_M_AXI_LITE_ADDR_WIDTH-1 :0] status_reg_i = {8'h00,  // bits 31:24
             2'b00, msi_enable, 1'b0,  // bits 23:20
-            3'b000, mmcm_100_locked_i, // bits 19:16
+            2'b00, pll_config_done, mmcm_100_locked_i, // bits 19:16
             1'b0, fifos_status_cdc, acq_on_q, 1'b0,    // bits 15:8
             8'h00}; // bits 7:0 atca slot_id 
 
@@ -339,8 +346,8 @@ module system_top #(
       .gpio_o (gpio_o),
       .gpio_t (),
       .pl_clk0(pl_clk0_i), // o
-      .periph_aresetn(ps_periph_aresetn_i),
-      .periph_reset(ps_periph_reset_i),
+      .periph_aresetn(ps_periph_aresetn_i), // o
+      .periph_reset(ps_periph_reset_i), // o
       .spi0_csn (),
       .spi0_miso (1'b0),
       .spi0_mosi (),
@@ -442,7 +449,7 @@ module system_top #(
         .reset(!axi_aresetn), // input sys_reset? 
         .locked(mmcm_100_locked_i),       // output 
     // Clock in ports
-        .clk_in(pl_clk0_i),      // input clk_in1
+        .clk_in(pl_clk0_i),      // input clk_in1 1000 Mhz
         // Clock out ports
         .clk_out2(adc_spi_clk),     // output 80Mhz 80MHz 0º
         .clk_out3(adc_read_clk),     // output 80Mhz but delayed for 47nsec 80MHz 180º
@@ -465,6 +472,51 @@ module system_top #(
         .data_hold_o()  //adc_data_hold_i)  // o
     );
      
+    wire [9:0] pll_rom_addr_i;
+    wire [15:0] pll_rom_data_i;
+   wire pll_write, pll_read;
+   wire [7:0] pll_rw_addr, pll_write_data, pll_read_data;
+
+    wire pll_sdo_i, pll_sdi_i, pll_in_en_i;
+
+    /* IOBUF #(
+      .DRIVE(12), // Specify the output drive strength
+      .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
+      .IOSTANDARD("DEFAULT"), // Specify the I/O standard
+      .SLEW("SLOW") // Specify the output slew rate
+   ) BUF_inst (
+       */
+    IOBUF IOBUF_pll_inst (
+      .O(pll_sdi_i),     // Buffer output
+      .IO(pll_sdio),   // Buffer inout port (connect directly to top-level port)
+      .I(pll_sdo_i),     // Buffer input
+      .T(pll_in_en_i)      // 3-state enable input, high=input, low=output
+      );
+
+      pll_config_rom pll_config_rom_inst (
+        .a(pll_rom_addr_i),      // input wire [9 : 0] 
+        .spo(pll_rom_data_i)  // output wire [15 : 0] 
+        );
+
+      si53xx_spi_interface si53xx_inst (
+          .clk(pl_clk0_i),  // i 100 MHz
+          .reset(ps_periph_reset_i),  // i
+          .read(pll_read),      // i
+          .write(pll_write),    // i 
+          .rw_addr(pll_rw_addr), //  [7:0] i
+          .write_data(pll_write_data),  // [7:0] i
+          .rom_data(pll_rom_data_i),  // [15:0] i
+          .sdi(pll_sdi_i),    // i
+          .in_en(pll_in_en_i),
+          .nCS(pll_nCS),     // o
+          .rom_addr(pll_rom_addr_i),     // [9:0]  o
+          .sdo(pll_sdo_i),    // o 
+          .sclk(pll_sclk), // o
+          .read_data(pll_read_data),  // [7:0] o
+          .done(pll_config_done)     // o
+        );
+
+
    wire adc_rst_sync;   
    xpm_cdc_single #(
         .DEST_SYNC_FF(3),   // DECIMAL; range: 2-10

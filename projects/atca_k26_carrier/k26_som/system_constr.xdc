@@ -10,6 +10,17 @@ set_property  -dict {PACKAGE_PIN A12 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4}  [ge
 set_property  -dict {PACKAGE_PIN AE10 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4}  [get_ports adc_chop];
 
 # K26_SOM
+# PLL interface
+#
+set_property  -dict {PACKAGE_PIN AG11 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4}  [get_ports pll_sdio];
+set_property  -dict {PACKAGE_PIN AH11 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4 PULLUP true}  [get_ports pll_reset];
+set_property  -dict {PACKAGE_PIN AF11 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4}  [get_ports pll_nCS];
+set_property IOSTANDARD LVCMOS33 [get_ports pll_sclk]
+set_property PACKAGE_PIN AH10 [get_ports pll_sclk]
+
+set_property DRIVE 4 [get_ports pll_sclk]
+set_property SLEW SLOW [get_ports pll_sclk]
+
 # Common rules
 
 set_property IOSTANDARD LVDS [get_ports {adc_sdo_cha_p[*]}]

@@ -16,11 +16,12 @@ adi_project_files atca_k26_carrier_kv260 [list \
   "../src/hdl/system_top.sv" \
   "../src/hdl/shapi_regs.sv" \
   "../src/hdl/system_clocks.v" \
+  "../src/hdl/chop_gen.v" \
   "../src/hdl/ad4003_deserializer.v" \
-  "../src/hdl/adc_ad4003_sr.v" \
-  "../src/hdl/adc_block.v" \
   "../src/hdl/xdma_data_producer.sv" \
+  "../src/hdl/si5396a_spi_interface.v" \
   "../src/ip/axis_data_fifo_0/xis_data_fifo_0.xci" \
+  "../src/ip/pll_config_rom/pll_config_rom.xci" \
   "src/ip/xdma_id0034/xdma_id0034.xci" \
   "xilinx_pcie_xdma_ref_board.xdc" \
   "system_constr.xdc" ]

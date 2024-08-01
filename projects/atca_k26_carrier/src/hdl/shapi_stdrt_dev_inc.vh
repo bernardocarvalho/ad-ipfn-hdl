@@ -59,12 +59,12 @@
    *
 * */
 `define DEV_FW_PATCH     16'h0001       //offset_addr 0x10
-`define DEV_FW_MINOR     8'h00
+`define DEV_FW_MINOR     8'h01
 `define DEV_FW_MAJOR     8'h00
 
 // Use Linux command: date +%s to get UNIX timestamp
-`define DEV_TSTAMP      32'd1722506273
-//TS Thu 01 Aug 2024 10:57:53 AM WEST
+`define DEV_TSTAMP      32'd1722554225
+//TS Fri 02 Aug 2024 12:17:05 AM WEST
 
 `define DEV_NAME1         "actA" // first char right
 `define DEV_NAME2         "omiM"

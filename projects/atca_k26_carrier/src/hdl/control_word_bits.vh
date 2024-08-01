@@ -39,20 +39,15 @@
 
 /* ************ CONTROL  REG BITS definitions **************** */
 `define ENDIAN_DMA_BIT          0 //Endianness of DMA data words  (0:little , 1: Big Endian)
-/* Only bits 10-24 are used in control reg*/
 `define CHOP_ON_BIT             10 // State of Chop, if equals 1 chop is ON if 0 it is OFF
 `define CHOP_DEFAULT_BIT        11 // Value of Chop case CHOP_STATE is 0
 `define CHOP_RECONSTRUCT_BIT    12 // State of Chop Recontruction, if equals 1 chop is ON if 0 it is OFF
-`define ILCK_F_OUT_EN_BIT       13 //
-`define ILCK_QF_OUT_EN_BIT      14 //
-//`define INT_CALC            = 14; // Output Integral Values
 `define DMA_DATA_32_BIT       15  // 0 : 16 bit , 1:32 Bit data
 
 `define FORCE_WRITE           16
 `define FORCE_READ            17
 `define ADC_RST               18
 
-//`define FWUSTAR_BIT 19
 //`define STREAME_BIT     20 // Streaming enable
 `define ACQE_BIT 		23
 `define STRG_BIT 		24 // Soft Trigger
