@@ -80,7 +80,7 @@ set_false_path -from [get_ports sys_rst_n]
 set_property PULLUP true [get_ports sys_rst_n]
 set_property IOSTANDARD LVCMOS18 [get_ports sys_rst_n]
 #
-set_property LOC [get_package_pins -filter {PIN_FUNC =~ *_PERSTN0_65}] [get_ports sys_rst_n]
+set_property LOC [get_package_pins -filter {PIN_FUNC =~ *L6P_*_44}] [get_ports sys_rst_n]
 #set_property PACKAGE_PIN AV27 [get_ports sys_rst_n]
 #
 # set_property CONFIG_VOLTAGE 1.8 [current_design]

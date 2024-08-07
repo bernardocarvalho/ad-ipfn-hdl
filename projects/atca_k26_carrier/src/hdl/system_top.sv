@@ -67,7 +67,7 @@ module system_top #(
 
     input    sys_clk_p,
     input    sys_clk_n,
-    input  sys_rst_n,  // This board uses ATCA RX3 signal
+    input    sys_rst_n,  // This board uses ATCA RX3 signal
     
     
   output acq_clk_n,
@@ -439,7 +439,7 @@ module system_top #(
 
    system_clocks system_clocks_inst (
     // Status and control signals
-        .reset(!axi_aresetn), // input sys_reset? 
+        .reset(ps_periph_reset_i), // input sys_reset? 
         .locked(mmcm_100_locked_i),       // output 
     // Clock in ports
         .clk_in(pl_clk0_i),      // input clk_in1
@@ -483,7 +483,7 @@ module system_top #(
    ad4003_deserializer #(.ADC_CHANNELS(ADC_CHANNELS)) 
     ad4003_deserializer_inst (
        .ila_clk(ila_clk),
-       .rst(adc_rst_sync), // i CHECK This
+       .rst(1'b0), // i CHECK This
        .adc_spi_clk(adc_spi_clk),    // i
        .adc_read_clk(adc_read_clk),   // i  
        .adc_spi_clk_count(adc_spi_clk_count_i),  // o [5:0]
@@ -494,7 +494,7 @@ module system_top #(
        .adc_sdo_cha_n(adc_sdo_cha_n), // i
        .adc_sdo_chb_p(adc_sdo_chb_p), // i
        .adc_sdo_chb_n(adc_sdo_chb_n), // i 
-       .adc_data_arr(adc_data_arr_i)  // o
+       .adc_data_arr(adc_data_arr_i),  // o
    );
    
 // ---            ADC data acquisition and packeting ---------

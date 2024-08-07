@@ -87,7 +87,7 @@ wire clk_in_clk_wiz;
     .CLKOUT1_DUTY_CYCLE   (0.500),
     .CLKOUT1_USE_FINE_PS  ("FALSE"),
     .CLKOUT2_DIVIDE       (15),
-    .CLKOUT2_PHASE        (72.000),
+    .CLKOUT2_PHASE        (72),
     .CLKOUT2_DUTY_CYCLE   (0.500),
     .CLKOUT2_USE_FINE_PS  ("FALSE"),
     .CLKIN1_PERIOD        (10.000))

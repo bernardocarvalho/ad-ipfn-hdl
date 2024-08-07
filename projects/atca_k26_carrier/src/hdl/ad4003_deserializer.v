@@ -63,59 +63,55 @@ module ad4003_deserializer #(
     output sck,
     //output reg [863:0] adc_data
     
-    output  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_data_arr, 
+    output  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_data_arr,
     
-    output [ADC_CHANNELS*8-1:0] cfg_readback
+    output reg [ADC_CHANNELS*8-1:0] cfg_readback
 );
 
-    localparam  RESET          = 4'd0, 
-                TURBO_QUIET1   = 4'd1, 
-                TURBO_DATA     = 4'd2, 
-                RW_CNVH        = 4'd4,
-                DATA_R         = 4'd5,
-                DATA_W         = 4'd6,
-                RESET_CNVH     = 4'd9;
+    localparam  RESET          = 3'b000, 
+                TURBO_DATA     = 3'b001, 
+                DATA_R         = 3'b010,
+                DATA_W         = 3'b100;
     
     reg [5:0] cyc_cntr;
     initial cyc_cntr=5'd0;
     assign adc_spi_clk_count = cyc_cntr;
     
-    reg [3:0] cyc_state, next_state;
-     initial cyc_state=RESET;
+    reg [2:0] state, next_state;
+     initial state=RESET;
     reg [15:0] sdi_reg;
      initial sdi_reg = 16'hffff;
     reg data_written;
      initial data_written = 1'b0;
     
     wire reader_en,reader_en_sync;
+    wire cfg_store_done_sync,cfg_store_req_sync;
+    reg cfg_store_req,cfg_store_done;
+    
+    wire forceread,viorst;
     
     always @* begin
     
-        case(cyc_state) // state transition table
-            RESET:          next_state = cyc_cntr==6'd39  ? ( rst ? RESET_CNVH : RW_CNVH) : RESET;
-            RESET_CNVH :    next_state = cyc_cntr==6'd16 ? RESET: RESET_CNVH;
-            TURBO_QUIET1:   next_state = rst ? RESET: cyc_cntr==6'd16 ? TURBO_DATA   : TURBO_QUIET1;
-            TURBO_DATA:     next_state = rst ? RESET: cyc_cntr==6'd39 ? TURBO_QUIET1 : TURBO_DATA;
-            RW_CNVH:        next_state = rst ? RESET: cyc_cntr==6'd16 ? (data_written ? DATA_R : DATA_W) : RW_CNVH;
-            DATA_R:         next_state = rst ? RESET: cyc_cntr==6'd39  ? TURBO_QUIET1 : DATA_R;
-            DATA_W:         next_state = rst ? RESET: cyc_cntr==6'd39  ? RW_CNVH      : DATA_W;
+        case(state) // state transition table
+            RESET:          next_state = rst || viorst ? RESET: DATA_W;
+            TURBO_DATA:     next_state = rst || viorst ? RESET: TURBO_DATA;
+            DATA_R:         next_state = rst || viorst ? RESET: cyc_cntr==6'd39  ? (forceread ? DATA_R : TURBO_DATA ) :DATA_R;
+            DATA_W:         next_state = rst || viorst ? RESET: cyc_cntr==6'd39  ? DATA_R     : DATA_W;
             default:        next_state = RESET; 
         endcase
     
     end
     
-    assign cnvst =  cyc_state==TURBO_QUIET1 ||
-                    cyc_state==RW_CNVH      || 
-                    cyc_state==RESET_CNVH;
+    assign cnvst = cyc_cntr<6'd17;
                     
     assign sdi = sdi_reg[15];
-    assign sck = (cyc_cntr>6'd17 && cyc_cntr<6'd36) && cyc_state!=RESET ? adc_spi_clk : 0;
+    assign sck = (cyc_cntr>6'd17 && cyc_cntr<6'd36) && state!=RESET ? adc_spi_clk : 0;
     
     // sdi is sampled by adc at pos edge of sck(same phase as adc_spi_clk) 
     // so its best to update it at the negative edge of the clock
     always @(negedge adc_spi_clk) begin
         if(cyc_cntr == 6'd17)
-            case (cyc_state)
+            case (state)
                 RESET:
                     data_written <= #TCQ  1'b0;
                 DATA_R: 
@@ -132,18 +128,30 @@ module ad4003_deserializer #(
     end
     
     always @(posedge adc_spi_clk) begin //clk and cnvst generation
+        case (state)
+            RESET: begin
+                cfg_store_req <=1'b0;
+            end
+            DATA_R:begin
+                if(cyc_cntr==6'd39)
+                    cfg_store_req<=1'b1;
+            end
+            default: begin
+                if(cfg_store_done_sync)
+                    cfg_store_req<=1'b0;
+            end
+        endcase
         if (cyc_cntr == 6'd39)
             cyc_cntr <= #TCQ 6'd0;
         else
             cyc_cntr <= #TCQ cyc_cntr + 1'b1;
-        cyc_state <= #TCQ next_state;
+        state <= #TCQ next_state;
     end
     
     // synchronizer adds 2 cycles of latency
     // adc_read_clk is 90o delayed phase, at 12.5nsec per clock period total delay is ... 
-    assign reader_en = (cyc_cntr >= 6'd18 && cyc_cntr < 6'd36 && cyc_state != RESET)? 1'b1: 1'b0;
-
-    // required for crossing clock domains between the acqusition clock and the read clock.
+    assign reader_en = (cyc_cntr >= 6'd18 && cyc_cntr < 6'd36 && state != RESET)? 1'b1: 1'b0;
+    
     xpm_cdc_single #(
         .DEST_SYNC_FF(2),   // DECIMAL; range: 2-10
         .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
@@ -156,6 +164,37 @@ module ad4003_deserializer #(
         .dest_clk(adc_read_clk),   // 1-bit input: Clock signal for the destination clock domain.
         .src_clk(adc_spi_clk),     // 1-bit input: optional; required when SRC_INPUT_REG = 1
         .src_in(reader_en)         // 1-bit input: Input signal to be synchronized to dest_clk domain.
+    );
+    
+    
+
+    // required for crossing clock domains between the acqusition clock and the read clock.
+    xpm_cdc_single #(
+        .DEST_SYNC_FF(2),   // DECIMAL; range: 2-10
+        .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+        .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+        .SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
+    )
+    cfg_store_req_syncro (
+        .dest_out(cfg_store_req_sync), // 1-bit output: src_in synchronized to the destination clock domain. This output is
+        // registered.
+        .dest_clk(adc_read_clk),   // 1-bit input: Clock signal for the destination clock domain.
+        .src_clk(adc_spi_clk),     // 1-bit input: optional; required when SRC_INPUT_REG = 1
+        .src_in(cfg_store_req)         // 1-bit input: Input signal to be synchronized to dest_clk domain.
+    );
+    
+    xpm_cdc_single #(
+        .DEST_SYNC_FF(2),   // DECIMAL; range: 2-10
+        .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+        .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+        .SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
+    )
+    cfg_store_done_syncro (
+        .dest_out(cfg_store_done_sync), // 1-bit output: src_in synchronized to the destination clock domain. This output is
+        // registered.
+        .dest_clk(adc_spi_clk),   // 1-bit input: Clock signal for the destination clock domain.
+        .src_clk(adc_read_clk),     // 1-bit input: optional; required when SRC_INPUT_REG = 1
+        .src_in(cfg_store_done)         // 1-bit input: Input signal to be synchronized to dest_clk domain.
     );
     
     // IBUFDS for adc sdo
@@ -177,7 +216,6 @@ module ad4003_deserializer #(
         end
     endgenerate
     
-    
     reg [ADC_DATA_WIDTH-1 :0] adc_a_data[ADC_MODULES-1 :0];
     reg [ADC_DATA_WIDTH-1 :0] adc_b_data[ADC_MODULES-1 :0];
     
@@ -190,7 +228,16 @@ module ad4003_deserializer #(
                 adc_a_data[i] <= #TCQ {adc_a_data[i][ADC_DATA_WIDTH-2 :0], adc_sdo_cha[i]};
                 adc_b_data[i] <= #TCQ {adc_b_data[i][ADC_DATA_WIDTH-2 :0], adc_sdo_chb[i]};
             end
-        end    
+        end
+        for (i = 0; i < ADC_MODULES; i = i + 1) begin
+            if(cfg_store_req_sync) begin
+                cfg_readback[ 2*i   *8+:8]<=adc_a_data[i][9:2];
+                cfg_readback[(2*i+1)*8+:8]<=adc_b_data[i][9:2];
+                cfg_store_done <= 1'b1;
+            end else begin
+                cfg_store_done <= 1'b0;
+            end
+        end         
     end
     
     // adc data mapping from shift registers to data output
@@ -202,7 +249,7 @@ module ad4003_deserializer #(
         end
     endgenerate
     
-    /*
+/*    
     ila_0 adc_ila (
        .clk(ila_clk), // input wire clk
     
@@ -220,9 +267,9 @@ module ad4003_deserializer #(
        .probe10(adc_sdo_chb), // input wire [3:0]  probe10 
        .probe11(adc_a_data[0]), // input wire [17:0]  probe11 
        .probe12(adc_b_data[0]), // input wire [17:0]  probe12 
-	   .probe13(adc_a_data[1]), // input wire [17:0]  probe13 
-	   .probe14(adc_b_data[1]) // input wire [17:0]  probe14
+   	 .probe13(adc_a_data[1]), // input wire [17:0]  probe13 
+	    .probe14(adc_b_data[1]) // input wire [17:0]  probe14
     );
-    */
+*/    
     
 endmodule
