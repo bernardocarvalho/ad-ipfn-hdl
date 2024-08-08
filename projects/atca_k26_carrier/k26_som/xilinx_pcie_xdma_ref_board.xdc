@@ -1,3 +1,193 @@
+set_false_path -to [get_pins [list {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].cdr_ctrl_on_eidle_i/sync_gen34/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].cdr_ctrl_on_eidle_i/sync_gen34_eios_det/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].cdr_ctrl_on_eidle_i/sync_rxcdrreset_in/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].cdr_ctrl_on_eidle_i/sync_rxelecidle/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_ctrl/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_ctrl/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_lffs/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_lffs/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_lffs/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_lffs/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_lffs/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_lffs/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_preset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_preset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_preset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_txcoeff/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_txcoeff/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_txcoeff/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_txcoeff/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_txcoeff/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_txcoeff/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_txpreset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_txpreset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_txpreset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_rxeq_i/sync_txpreset/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_coeff/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_coeff/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_coeff/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_coeff/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_coeff/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_coeff/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_ctrl/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_ctrl/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_preset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_preset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_preset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].phy_txeq_i/sync_preset/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].receiver_detect_termination_i/sync_mac_in_detect/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].receiver_detect_termination_i/sync_rxelecidle/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[0].sync_cdrhold/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].cdr_ctrl_on_eidle_i/sync_gen34/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].cdr_ctrl_on_eidle_i/sync_gen34_eios_det/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].cdr_ctrl_on_eidle_i/sync_rxcdrreset_in/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].cdr_ctrl_on_eidle_i/sync_rxelecidle/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_ctrl/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_ctrl/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_lffs/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_lffs/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_lffs/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_lffs/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_lffs/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_lffs/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_preset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_preset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_preset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_txcoeff/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_txcoeff/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_txcoeff/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_txcoeff/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_txcoeff/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_txcoeff/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_txpreset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_txpreset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_txpreset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_rxeq_i/sync_txpreset/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_coeff/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_coeff/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_coeff/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_coeff/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_coeff/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_coeff/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_ctrl/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_ctrl/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_preset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_preset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_preset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].phy_txeq_i/sync_preset/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].receiver_detect_termination_i/sync_mac_in_detect/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].receiver_detect_termination_i/sync_rxelecidle/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[1].sync_cdrhold/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].cdr_ctrl_on_eidle_i/sync_gen34/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].cdr_ctrl_on_eidle_i/sync_gen34_eios_det/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].cdr_ctrl_on_eidle_i/sync_rxcdrreset_in/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].cdr_ctrl_on_eidle_i/sync_rxelecidle/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_ctrl/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_ctrl/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_lffs/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_lffs/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_lffs/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_lffs/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_lffs/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_lffs/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_preset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_preset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_preset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_txcoeff/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_txcoeff/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_txcoeff/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_txcoeff/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_txcoeff/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_txcoeff/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_txpreset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_txpreset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_txpreset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_rxeq_i/sync_txpreset/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_coeff/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_coeff/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_coeff/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_coeff/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_coeff/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_coeff/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_ctrl/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_ctrl/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_preset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_preset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_preset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].phy_txeq_i/sync_preset/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].receiver_detect_termination_i/sync_mac_in_detect/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].receiver_detect_termination_i/sync_rxelecidle/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[2].sync_cdrhold/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].cdr_ctrl_on_eidle_i/sync_gen34/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].cdr_ctrl_on_eidle_i/sync_gen34_eios_det/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].cdr_ctrl_on_eidle_i/sync_rxcdrreset_in/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].cdr_ctrl_on_eidle_i/sync_rxelecidle/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_ctrl/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_ctrl/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_lffs/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_lffs/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_lffs/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_lffs/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_lffs/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_lffs/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_preset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_preset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_preset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_txcoeff/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_txcoeff/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_txcoeff/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_txcoeff/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_txcoeff/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_txcoeff/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_txpreset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_txpreset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_txpreset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_rxeq_i/sync_txpreset/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_coeff/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_coeff/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_coeff/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_coeff/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_coeff/sync_vec[4].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_coeff/sync_vec[5].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_ctrl/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_ctrl/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_preset/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_preset/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_preset/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].phy_txeq_i/sync_preset/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].receiver_detect_termination_i/sync_mac_in_detect/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].receiver_detect_termination_i/sync_rxelecidle/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_lane[3].sync_cdrhold/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_cplllock/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_cplllock/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_cplllock/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_cplllock/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_gtpowergood/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_gtpowergood/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_gtpowergood/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_gtpowergood/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_phystatus/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_phystatus/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_phystatus/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_phystatus/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_qpll0lock/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_qpll1lock/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_rxresetdone/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_rxresetdone/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_rxresetdone/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_rxresetdone/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txprogdivresetdone/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txprogdivresetdone/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txprogdivresetdone/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txprogdivresetdone/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txresetdone/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txresetdone/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txresetdone/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txresetdone/sync_vec[3].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txsync_done/sync_vec[0].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txsync_done/sync_vec[1].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txsync_done/sync_vec[2].sync_cell_i/sync_reg[0]/D} \
+          {xdma_id0034_i/inst/pcie4_ip_i/inst/xdma_id0034_pcie4_ip_gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_rst_i/sync_txsync_done/sync_vec[3].sync_cell_i/sync_reg[0]/D}]]
 ##-----------------------------------------------------------------------------
 ##
 ## (c) Copyright 2012-2012 Xilinx, Inc. All rights reserved.
@@ -48,7 +238,7 @@
 ##
 ##-----------------------------------------------------------------------------
 ##
-## Project    : The Xilinx PCI Express DMA 
+## Project    : The Xilinx PCI Express DMA
 ## File       : xilinx_pcie_xdma_ref_board.xdc
 ## Version    : 4.1
 ##-----------------------------------------------------------------------------
@@ -73,21 +263,21 @@
 ## Free Running Clock is Required for IBERT/DRP operations.
 ##
 #############################################################################################################
-create_clock -name sys_clk -period 10 [get_ports sys_clk_p]
+create_clock -period 10.000 -name sys_clk [get_ports sys_clk_p]
 #
 #############################################################################################################
 set_false_path -from [get_ports sys_rst_n]
 set_property PULLUP true [get_ports sys_rst_n]
 set_property IOSTANDARD LVCMOS18 [get_ports sys_rst_n]
 #
-set_property LOC [get_package_pins -filter {PIN_FUNC =~ *L6P_*_44}] [get_ports sys_rst_n]
+set_property PACKAGE_PIN AC14 [get_ports sys_rst_n]
 #set_property PACKAGE_PIN AV27 [get_ports sys_rst_n]
 #
 # set_property CONFIG_VOLTAGE 1.8 [current_design]
 #
 #############################################################################################################
-set_property LOC [get_package_pins -of_objects [get_bels [get_sites -filter {NAME =~ *COMMON*} -of_objects [get_iobanks -of_objects [get_sites GTHE4_CHANNEL_X0Y7]]]/REFCLK0P]] [get_ports sys_clk_p]
-set_property LOC [get_package_pins -of_objects [get_bels [get_sites -filter {NAME =~ *COMMON*} -of_objects [get_iobanks -of_objects [get_sites GTHE4_CHANNEL_X0Y7]]]/REFCLK0N]] [get_ports sys_clk_n]
+set_property PACKAGE_PIN Y5 [get_ports sys_clk_n]
+set_property PACKAGE_PIN Y6 [get_ports sys_clk_p]
 #
 # MGT 0 interface pins
 # set_property PACKAGE_PIN Y5 [get_ports sys_clk_n] FIXED
@@ -95,22 +285,22 @@ set_property LOC [get_package_pins -of_objects [get_bels [get_sites -filter {NAM
 # set_property PACKAGE_PIN V5 [get_ports gth_ref_clk1_n]
 # set_property PACKAGE_PIN V6 [get_ports gth_ref_clk1_p]
 
-set_property PACKAGE_PIN Y1 [get_ports {pcie_mgt_0_rxn[0]}]
-set_property PACKAGE_PIN V1 [get_ports {pcie_mgt_0_rxn[1]}]
-set_property PACKAGE_PIN T1 [get_ports {pcie_mgt_0_rxn[2]}]
-set_property PACKAGE_PIN P1 [get_ports {pcie_mgt_0_rxn[3]}]
 set_property PACKAGE_PIN Y2 [get_ports {pcie_mgt_0_rxp[0]}]
-set_property PACKAGE_PIN V2 [get_ports {pcie_mgt_0_rxp[1]}]
-set_property PACKAGE_PIN T2 [get_ports {pcie_mgt_0_rxp[2]}]
-set_property PACKAGE_PIN P2 [get_ports {pcie_mgt_0_rxp[3]}]
-set_property PACKAGE_PIN W3 [get_ports {pcie_mgt_0_txn[0]}]
-set_property PACKAGE_PIN U3 [get_ports {pcie_mgt_0_txn[1]}]
-set_property PACKAGE_PIN R3 [get_ports {pcie_mgt_0_txn[2]}]
-set_property PACKAGE_PIN N3 [get_ports {pcie_mgt_0_txn[3]}]
+set_property PACKAGE_PIN Y1 [get_ports {pcie_mgt_0_rxn[0]}]
 set_property PACKAGE_PIN W4 [get_ports {pcie_mgt_0_txp[0]}]
+set_property PACKAGE_PIN W3 [get_ports {pcie_mgt_0_txn[0]}]
+set_property PACKAGE_PIN V2 [get_ports {pcie_mgt_0_rxp[1]}]
+set_property PACKAGE_PIN V1 [get_ports {pcie_mgt_0_rxn[1]}]
 set_property PACKAGE_PIN U4 [get_ports {pcie_mgt_0_txp[1]}]
+set_property PACKAGE_PIN U3 [get_ports {pcie_mgt_0_txn[1]}]
+set_property PACKAGE_PIN T2 [get_ports {pcie_mgt_0_rxp[2]}]
+set_property PACKAGE_PIN T1 [get_ports {pcie_mgt_0_rxn[2]}]
 set_property PACKAGE_PIN R4 [get_ports {pcie_mgt_0_txp[2]}]
+set_property PACKAGE_PIN R3 [get_ports {pcie_mgt_0_txn[2]}]
+set_property PACKAGE_PIN P2 [get_ports {pcie_mgt_0_rxp[3]}]
+set_property PACKAGE_PIN P1 [get_ports {pcie_mgt_0_rxn[3]}]
 set_property PACKAGE_PIN N4 [get_ports {pcie_mgt_0_txp[3]}]
+set_property PACKAGE_PIN N3 [get_ports {pcie_mgt_0_txn[3]}]
 
 #############################################################################################################
 #############################################################################################################
@@ -125,5 +315,6 @@ set_property PACKAGE_PIN N4 [get_ports {pcie_mgt_0_txp[3]}]
 #set_property BITSTREAM.CONFIG.UNUSEDPIN Pulldown [current_design]
 #
 #
-set_false_path -to [get_pins -hier *sync_reg[0]/D]
+set_false_path -to [get_pins -hier {*sync_reg[0]/D}]
 #
+

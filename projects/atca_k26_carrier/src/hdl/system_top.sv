@@ -64,27 +64,32 @@ module system_top #(
     output [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pcie_mgt_0_txn,
     input  [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pcie_mgt_0_rxp,
     input  [PL_LINK_CAP_MAX_LINK_WIDTH-1 : 0] pcie_mgt_0_rxn,
-
+    
     input    sys_clk_p,
     input    sys_clk_n,
     input    sys_rst_n,  // This board uses ATCA RX3 signal
     
     
-  output acq_clk_n,
-  output acq_clk_p,
-  output adc_cnvst_n,
-  output adc_cnvst_p,
-  output adc_sck_n,
-  output adc_sck_p,
-  output adc_sdi_n,
-  output adc_sdi_p,
-  input [ADC_MODULES-1 :0] adc_sdo_cha_n,
-  input [ADC_MODULES-1 :0] adc_sdo_cha_p,
-  input [ADC_MODULES-1 :0] adc_sdo_chb_n,
-  input [ADC_MODULES-1 :0] adc_sdo_chb_p,
-  output  adc_chop, 
-  output [3 :0] carrier_led,
-  output    fan_en_b
+    output acq_clk_n,
+    output acq_clk_p,
+    output adc_cnvst_n,
+    output adc_cnvst_p,
+    output adc_sck_n,
+    output adc_sck_p,
+    output adc_sdi_n,
+    output adc_sdi_p,
+    input [ADC_MODULES-1 :0] adc_sdo_cha_n,
+    input [ADC_MODULES-1 :0] adc_sdo_cha_p,
+    input [ADC_MODULES-1 :0] adc_sdo_chb_n,
+    input [ADC_MODULES-1 :0] adc_sdo_chb_p,
+    output  adc_chop, 
+    output [3 :0] carrier_led,
+    output    fan_en_b,
+    
+    inout  pll_sdio,
+    output pll_nreset,
+    output pll_nCS,
+    output pll_sclk
 );
 
    
@@ -494,8 +499,55 @@ module system_top #(
        .adc_sdo_cha_n(adc_sdo_cha_n), // i
        .adc_sdo_chb_p(adc_sdo_chb_p), // i
        .adc_sdo_chb_n(adc_sdo_chb_n), // i 
-       .adc_data_arr(adc_data_arr_i),  // o
+       .adc_data_arr(adc_data_arr_i)  // o
    );
+   
+    wire pll_sdo_i, pll_sdi_i, pll_in_en_i,pll_iface_reset;
+    wire pll_read, pll_write;
+    wire [7:0] pll_rw_addr,pll_write_data,pll_read_data;
+    wire [9:0] pll_rom_addr_i;
+    wire [15:0] pll_rom_data_i;
+   
+    IOBUF IOBUF_pll_inst (
+        .O(pll_sdi_i),     // Buffer output
+        .IO(pll_sdio),   // Buffer inout port (connect directly to top-level port)
+        .I(pll_sdo_i),     // Buffer input
+        .T(pll_in_en_i)      // 3-state enable input, high=input, low=output
+    );
+    
+    pll_config_rom pll_config_rom_inst (
+        .a(pll_rom_addr_i),      // input wire [9 : 0] 
+        .spo(pll_rom_data_i)  // output wire [15 : 0] 
+    );
+
+    si53xx_spi_interface si53xx_inst (
+        .clk(pl_clk0_i),  // i 100 MHz
+        .reset(pll_iface_reset),  // i
+        .read(pll_read),      // i
+        .write(pll_write),    // i 
+        .rw_addr(pll_rw_addr), //  [7:0] i
+        .write_data(pll_write_data),  // [7:0] i
+        .rom_data(pll_rom_data_i),  // [15:0] i
+        .sdi(pll_sdi_i),    // i
+        .in_en(pll_in_en_i),
+        .nCS(pll_nCS),     // o
+        .rom_addr(pll_rom_addr_i),     // [9:0]  o
+        .sdo(pll_sdo_i),    // o 
+        .sclk(pll_sclk), // o
+        .read_data(pll_read_data),  // [7:0] o
+        .done(pll_config_done)     // o
+    );
+    
+    vio_0 your_instance_name (
+        .clk(pl_clk0_i),              // input wire clk
+        .probe_in0(pll_read_data),    // input wire [7 : 0] probe_in0
+        .probe_out0(pll_iface_reset), // output wire [0 : 0] probe_out0
+        .probe_out1(pll_read),        // output wire [0 : 0] probe_out1
+        .probe_out2(pll_write),       // output wire [0 : 0] probe_out2
+        .probe_out3(pll_rw_addr),     // output wire [7 : 0] probe_out3
+        .probe_out4(pll_write_data),  // output wire [7 : 0] probe_out4
+        .probe_out5(pll_nreset)       // output wire [0 : 0] probe_out5
+    );    
    
 // ---            ADC data acquisition and packeting ---------
   xdma_data_producer #(

@@ -81,22 +81,22 @@ module ad4003_deserializer #(
      initial state=RESET;
     reg [15:0] sdi_reg;
      initial sdi_reg = 16'hffff;
-    reg data_written;
-     initial data_written = 1'b0;
     
     wire reader_en,reader_en_sync;
     wire cfg_store_done_sync,cfg_store_req_sync;
     reg cfg_store_req,cfg_store_done;
     
-    wire forceread,viorst;
+    wire forceread;
+    
+    assign forceread = 1'b0;
     
     always @* begin
     
         case(state) // state transition table
-            RESET:          next_state = rst || viorst ? RESET: DATA_W;
-            TURBO_DATA:     next_state = rst || viorst ? RESET: TURBO_DATA;
-            DATA_R:         next_state = rst || viorst ? RESET: cyc_cntr==6'd39  ? (forceread ? DATA_R : TURBO_DATA ) :DATA_R;
-            DATA_W:         next_state = rst || viorst ? RESET: cyc_cntr==6'd39  ? DATA_R     : DATA_W;
+            RESET:          next_state = rst ? RESET: DATA_W;
+            TURBO_DATA:     next_state = rst ? RESET: TURBO_DATA;
+            DATA_R:         next_state = rst ? RESET: cyc_cntr==6'd39  ? (forceread ? DATA_R : TURBO_DATA ) :DATA_R;
+            DATA_W:         next_state = rst ? RESET: cyc_cntr==6'd39  ? DATA_R     : DATA_W;
             default:        next_state = RESET; 
         endcase
     
@@ -112,13 +112,10 @@ module ad4003_deserializer #(
     always @(negedge adc_spi_clk) begin
         if(cyc_cntr == 6'd17)
             case (state)
-                RESET:
-                    data_written <= #TCQ  1'b0;
                 DATA_R: 
                     sdi_reg      <= #TCQ 16'h54ff;
                 DATA_W: begin 
                     sdi_reg      <= #TCQ 16'h1402; 
-                    data_written <= #TCQ  1'b1; 
                 end
                 default: 
                     sdi_reg <= #TCQ 16'hffff;
@@ -165,8 +162,6 @@ module ad4003_deserializer #(
         .src_clk(adc_spi_clk),     // 1-bit input: optional; required when SRC_INPUT_REG = 1
         .src_in(reader_en)         // 1-bit input: Input signal to be synchronized to dest_clk domain.
     );
-    
-    
 
     // required for crossing clock domains between the acqusition clock and the read clock.
     xpm_cdc_single #(
@@ -251,24 +246,24 @@ module ad4003_deserializer #(
     
 /*    
     ila_0 adc_ila (
-       .clk(ila_clk), // input wire clk
-    
-    
-       .probe0(rst), // input wire [0:0]  probe0  
-       .probe1(adc_spi_clk), // input wire [0:0]  probe1 
-       .probe2(adc_read_clk), // input wire [0:0]  probe2 
-       .probe3(sck), // input wire [0:0]  probe3 
-       .probe4(cnvst), // input wire [0:0]  probe4 
-       .probe5(sdi), // input wire [0:0]  probe5 
-       .probe6(cyc_state), // input wire [3:0]  probe6 
-       .probe7(cyc_cntr), // input wire [5:0]  probe7 
-       .probe8(reader_en_sync), // input wire [0:0]  probe8 
-       .probe9(adc_sdo_cha), // input wire [3:0]  probe9 
-       .probe10(adc_sdo_chb), // input wire [3:0]  probe10 
-       .probe11(adc_a_data[0]), // input wire [17:0]  probe11 
-       .probe12(adc_b_data[0]), // input wire [17:0]  probe12 
-   	 .probe13(adc_a_data[1]), // input wire [17:0]  probe13 
-	    .probe14(adc_b_data[1]) // input wire [17:0]  probe14
+        .clk(ila_clk), // input wire clk
+        
+        
+        .probe0(rst), // input wire [0:0]  probe0  
+        .probe1(adc_spi_clk), // input wire [0:0]  probe1 
+        .probe2(adc_read_clk), // input wire [0:0]  probe2 
+        .probe3(sck), // input wire [0:0]  probe3 
+        .probe4(cnvst), // input wire [0:0]  probe4 
+        .probe5(sdi), // input wire [0:0]  probe5 
+        .probe6(cyc_state), // input wire [3:0]  probe6 
+        .probe7(cyc_cntr), // input wire [5:0]  probe7 
+        .probe8(reader_en_sync), // input wire [0:0]  probe8 
+        .probe9(adc_sdo_cha), // input wire [3:0]  probe9 
+        .probe10(adc_sdo_chb), // input wire [3:0]  probe10 
+        .probe11(adc_a_data[0]), // input wire [17:0]  probe11 
+        .probe12(adc_b_data[0]), // input wire [17:0]  probe12 
+        .probe13(adc_a_data[1]), // input wire [17:0]  probe13 
+        .probe14(adc_b_data[1]) // input wire [17:0]  probe14
     );
 */    
     

@@ -41,6 +41,7 @@ module chop_gen #(
     parameter TCQ        = 1	
 )(
     input adc_data_clk,  // ADC data  clock domain (80MHz)
+    input axi_clk,       // axi clock domain to sync chopper_en
     input [5:0] adc_clk_cnt, // counts 0->39 in each adc period for channel mux
 
     //input adc_word_sync_n,
@@ -62,11 +63,37 @@ module chop_gen #(
 
     reg [CHOP_DLAY-1:0] chop_dly = 0;
     assign chop_dly_o = chop_dly[CHOP_DLAY-1];
+    
+    reg [15:0] max_count_local, change_count_local;
+    wire chop_en_sync;
+    reg  chop_en_prev;
 
+    xpm_cdc_single #(
+      .DEST_SYNC_FF(3),   // DECIMAL; range: 2-10
+      .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+      .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+      .SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
+    )
+    xpm_cdc_single_inst (
+      .dest_out(chop_en_sync), // 1-bit output: src_in synchronized to the destination clock domain. This output is
+                               // registered.
+    
+      .dest_clk(adc_data_clk), // 1-bit input: Clock signal for the destination clock domain.
+      .src_clk(axi_clk),       // 1-bit input: optional; required when SRC_INPUT_REG = 1
+      .src_in(chop_en)         // 1-bit input: Input signal to be synchronized to dest_clk domain.
+    );
+    
+    always @(posedge adc_data_clk) begin
+        if(chop_en_sync && !chop_en_prev) begin
+            max_count_local <= max_count;
+            change_count_local <= change_count;
+        end
+        chop_en_prev <= chop_en_sync;
+    end
 
     reg [15:0] chop_counter_r = 0;
-    always @(posedge adc_data_clk or negedge chop_en)
-        if(!chop_en) begin
+    always @(posedge adc_data_clk or negedge chop_en_sync)
+        if(!chop_en_sync) begin
             chop_counter_r <= 0;
             chop_r <= CHOP_DEFAULT;
             hold_r <= 0;
@@ -81,13 +108,13 @@ module chop_gen #(
                 // case(chop_counter_r)
                 if ( chop_counter_r == (HOLD_SAMPLES-1) )
                     hold_r <= #TCQ 1'b0;
-                else if ( chop_counter_r == (change_count-1) ) begin
+                else if ( chop_counter_r == (change_count_local-1) ) begin
                     chop_r <= #TCQ !CHOP_DEFAULT;
                     hold_r <= #TCQ  1'b1;
                 end
-                else if ( chop_counter_r == (change_count + HOLD_SAMPLES-1) )
+                else if ( chop_counter_r == (change_count_local + HOLD_SAMPLES-1) )
                     hold_r <= #TCQ  1'b0;
-                else if ( chop_counter_r == (max_count-1) ) begin
+                else if ( chop_counter_r == (max_count_local-1) ) begin
                     chop_counter_r <= #TCQ 'h00;
                     chop_r         <= #TCQ CHOP_DEFAULT;
                     hold_r         <= #TCQ 1'b1;
