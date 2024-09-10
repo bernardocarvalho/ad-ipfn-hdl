@@ -110,12 +110,12 @@ module
       endcase
       
       case(state)
-        RESET:      next_state = reset ? RESET : SET_ADDR;
+        RESET:      next_state = reset ? RESET : go ? SET_ADDR : RESET;
         SET_ADDR:   next_state = reset ? RESET : shift_done ? 
                                  (top_state==READ ? READ : WRITE) : SET_ADDR;
         READ:       next_state = reset ? RESET : shift_done ? DONE : READ;
         WRITE:      next_state = reset ? RESET : shift_done? DONE : WRITE;
-        DONE:       next_state = reset ? RESET : DONE;
+        DONE:       next_state = reset ? RESET : go ? SET_ADDR : DONE;
         default:    next_state = DONE;
       endcase // case (state)
       
@@ -137,6 +137,7 @@ module
       case(top_state)
         RESET: begin
            reset_timeout <= timeout_ctr_init;
+           go <= 1'b0;
         end
         RESET_WAIT: begin
            reset_timeout <= reset_timeout - 25'd1;

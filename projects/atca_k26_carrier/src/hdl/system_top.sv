@@ -67,8 +67,7 @@ module system_top #(
     
     input    sys_clk_p,
     input    sys_clk_n,
-    input    sys_rst_n,  // This board uses ATCA RX3 signal
-    
+    input    sys_rst_n,  // This board uses ATCA RX3 signal   
     
     output acq_clk_n,
     output acq_clk_p,
@@ -84,12 +83,17 @@ module system_top #(
     input [ADC_MODULES-1 :0] adc_sdo_chb_p,
     output  adc_chop, 
     output [3 :0] carrier_led,
-    output    fan_en_b,
     
     inout  pll_sdio,
     output pll_nreset,
     output pll_nCS,
-    output pll_sclk
+    output pll_sclk,
+    
+    output adc_read_clk_dbg,
+    output adc_sdo_cha1,
+    output adc_cnvst_dbg,
+    output adc_sck_dbg,
+    output reader_en_sync
 );
 
    
@@ -99,8 +103,8 @@ module system_top #(
    localparam C_M_AXI_LITE_ADDR_WIDTH = 32;
    localparam C_S_AXI_LITE_ADDR_WIDTH = 10;
 
-  wire    [94:0]  gpio_i;
-  wire    [94:0]  gpio_o; 
+  wire    [15:0]  gpio_o;
+  wire    [31:0]  gpio_i; 
 
    //----------PCIEe------------------------------------------------------------------------------------------------------//
    //  AXI Interface                                                                                                 //
@@ -125,6 +129,7 @@ module system_top #(
      wire             usr_irq_ack;
 
      wire pl_clk0_i, ps_periph_aresetn_i, ps_periph_reset_i;
+     wire pl_axi_aclk, ps_periph_300m_aresetn_i, ps_periph_300m_reset_i;
      wire ila_clk;
      wire mmcm_100_locked_i;
 
@@ -245,10 +250,6 @@ module system_top #(
     OBUFDS cnvst_obuf ( .O(adc_cnvst_p), .OB(adc_cnvst_n), .I(adc_cnvst));
     OBUFDS acq_clk_obuf ( .O(acq_clk_p), .OB(acq_clk_n), .I(adc_spi_clk));
 
-    assign gpio_i[94:1] = gpio_o[94:1];
-
-    assign fan_en_b = gpio_o[0];
-
 // required for crossing clock domains between the acqusition clock and the read clock.
     xpm_cdc_single #(
         .DEST_SYNC_FF(2),   // DECIMAL; range: 2-10
@@ -339,18 +340,6 @@ module system_top #(
     end
 
   // instantiations
-  system_wrapper i_system_wrapper (
-      .gpio_i (gpio_i),
-      .gpio_o (gpio_o),
-      .gpio_t (),
-      .pl_clk0(pl_clk0_i), // o
-      .periph_aresetn(ps_periph_aresetn_i),
-      .periph_reset(ps_periph_reset_i),
-      .spi0_csn (),
-      .spi0_miso (1'b0),
-      .spi0_mosi (),
-      .spi0_sclk ()
-    );
     
   xdma_id0034 xdma_id0034_i (
       .sys_clk(sys_clk),                          // input wire sys_clk
@@ -456,7 +445,6 @@ module system_top #(
     );
     
    wire [5:0] adc_spi_clk_count_i;
-   wire reader_en_sync;
 
    chop_gen chop_gen_inst (
         .adc_data_clk(adc_spi_clk), // i
@@ -499,7 +487,9 @@ module system_top #(
        .adc_sdo_cha_n(adc_sdo_cha_n), // i
        .adc_sdo_chb_p(adc_sdo_chb_p), // i
        .adc_sdo_chb_n(adc_sdo_chb_n), // i 
-       .adc_data_arr(adc_data_arr_i)  // o
+       .adc_data_arr(adc_data_arr_i),
+       .reader_en_sync_out(reader_en_sync),
+       .adc_sdo_cha1(adc_sdo_cha1)  // o
    );
    
     wire pll_sdo_i, pll_sdi_i, pll_in_en_i,pll_iface_reset;
@@ -539,15 +529,57 @@ module system_top #(
     );
     
     vio_0 your_instance_name (
-        .clk(pl_clk0_i),              // input wire clk
-        .probe_in0(pll_read_data),    // input wire [7 : 0] probe_in0
-        .probe_out0(pll_iface_reset), // output wire [0 : 0] probe_out0
-        .probe_out1(pll_read),        // output wire [0 : 0] probe_out1
-        .probe_out2(pll_write),       // output wire [0 : 0] probe_out2
-        .probe_out3(pll_rw_addr),     // output wire [7 : 0] probe_out3
-        .probe_out4(pll_write_data),  // output wire [7 : 0] probe_out4
-        .probe_out5(pll_nreset)       // output wire [0 : 0] probe_out5
-    );    
+        .clk(pl_clk0_i),                // input wire clk
+        .probe_in0(probe_in0),    // input wire [7 : 0] probe_in0
+        .probe_out0(probe_out0),  // output wire [0 : 0] probe_out0
+        .probe_out1(probe_out1),  // output wire [0 : 0] probe_out1
+        .probe_out2(probe_out2),  // output wire [0 : 0] probe_out2
+        .probe_out3(probe_out3),  // output wire [7 : 0] probe_out3
+        .probe_out4(probe_out4),  // output wire [7 : 0] probe_out4
+        .probe_out5(probe_out5)  // output wire [0 : 0] probe_out5
+    );
+    
+    pll_spi_tester pll_spi_tester_i(
+        .axi_reset(gpio_o[0]),
+        .clk(pl_clk0_i),
+        .axi_clk(pl_axi_aclk),
+        .if_read(pll_read),
+        .if_write(pll_write),
+        .if_rdata(pll_read_data),
+        .if_wdata(pll_write_data),
+        .if_addr(pll_rw_addr),
+        .if_reset(pll_iface_reset),
+        .pll_reset(pll_nreset),
+        .pll_regs(gpio_i[24:0]),
+        .if_done(pll_config_done)     
+    );
+    
+    ila_0 pll (
+        .clk(pl_axi_aclk), // input wire clk
+    
+    
+        .probe0(gpio_o[0]), // input wire [15:0]  probe0  
+        .probe1(gpio_i[24:0]), // input wire [31:0]  probe1 
+        .probe2(pll_rw_addr), // input wire [7:0]  probe2 
+        .probe3(pll_read_data), // input wire [7:0]  probe3 
+        .probe4(pll_write_data), // input wire [7:0]  probe4 
+        .probe5(pll_read), // input wire [0:0]  probe5 
+        .probe6(pll_write), // input wire [0:0]  probe6 
+        .probe7(pll_nreset), // input wire [0:0]  probe7 
+        .probe8(pll_iface_reset), // input wire [0:0]  probe8 
+        .probe9(pll_config_done) // input wire [0:0]  probe9
+    );
+    
+    system_wrapper i_system_wrapper (
+      .gpio_i(gpio_i),
+      .gpio_o(gpio_o),
+      .periph_100m_aresetn(ps_periph_aresetn_i),
+      .periph_100m_reset(ps_periph_reset_i),
+      .periph_300m_aresetn(ps_periph_300m_aresetn_i),
+      .periph_300m_reset(ps_periph_300m_reset_i),
+      .pl_clk0(pl_clk0_i),
+      .pl_clk1(pl_axi_aclk)
+    );   
    
 // ---            ADC data acquisition and packeting ---------
   xdma_data_producer #(
@@ -582,5 +614,9 @@ module system_top #(
         .m_axis_tkeep_1(s_axis_c2h_tkeep_1),
         .m_axis_tready_1(s_axis_c2h_tready_1)
   );
+  
+    assign adc_read_clk_dbg = adc_read_clk; 
+    assign adc_cnvst_dbg = adc_cnvst;
+    assign adc_sck_dbg = adc_sck;
 
 endmodule

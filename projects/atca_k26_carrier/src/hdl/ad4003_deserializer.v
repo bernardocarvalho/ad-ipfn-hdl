@@ -37,7 +37,6 @@
 // ***************************************************************************
 
 `timescale 1ns/1ps
-
 module ad4003_deserializer #(
     parameter ADC_CHANNELS = 8,           // Maximum 48, Must be even 
     // Do not override parameters below this line
@@ -58,16 +57,19 @@ module ad4003_deserializer #(
     input [ADC_MODULES-1 :0] adc_sdo_chb_n,
 
     output [5:0] adc_spi_clk_count,
-    output cnvst,
+    output reg cnvst,
     output sdi,
     output sck,
     //output reg [863:0] adc_data
     
     output  [ADC_DATA_WIDTH*ADC_CHANNELS-1 :0] adc_data_arr,
     
-    output reg [ADC_CHANNELS*8-1:0] cfg_readback
+    output reg [ADC_CHANNELS*8-1:0] cfg_readback,
+    output adc_sdo_cha1,
+    output reader_en_sync_out,
+    input  forceread
 );
-
+    
     localparam  RESET          = 3'b000, 
                 TURBO_DATA     = 3'b001, 
                 DATA_R         = 3'b010,
@@ -85,10 +87,8 @@ module ad4003_deserializer #(
     wire reader_en,reader_en_sync;
     wire cfg_store_done_sync,cfg_store_req_sync;
     reg cfg_store_req,cfg_store_done;
-    
-    wire forceread;
-    
-    assign forceread = 1'b0;
+   
+    reg sck_en;
     
     always @* begin
     
@@ -101,11 +101,8 @@ module ad4003_deserializer #(
         endcase
     
     end
-    
-    assign cnvst = cyc_cntr<6'd17;
                     
     assign sdi = sdi_reg[15];
-    assign sck = (cyc_cntr>6'd17 && cyc_cntr<6'd36) && state!=RESET ? adc_spi_clk : 0;
     
     // sdi is sampled by adc at pos edge of sck(same phase as adc_spi_clk) 
     // so its best to update it at the negative edge of the clock
@@ -120,7 +117,7 @@ module ad4003_deserializer #(
                 default: 
                     sdi_reg <= #TCQ 16'hffff;
             endcase
-        if(cyc_cntr > 6'd17 && cyc_cntr < 6'd34)
+        if(cyc_cntr > 6'd18 && cyc_cntr < 6'd35)
             sdi_reg <= #TCQ {sdi_reg[14:0], 1'b1};
     end
     
@@ -143,16 +140,30 @@ module ad4003_deserializer #(
         else
             cyc_cntr <= #TCQ cyc_cntr + 1'b1;
         state <= #TCQ next_state;
+        cnvst <= cyc_cntr<6'd17;
+        sck_en <= (cyc_cntr>6'd17 && cyc_cntr<6'd36) && state!=RESET;
     end
+    
+   BUFGCE #(
+      .CE_TYPE("SYNC"),          // ASYNC, HARDSYNC, SYNC
+      .IS_CE_INVERTED(1'b0),     // Programmable inversion on CE
+      .IS_I_INVERTED(1'b0),      // Programmable inversion on I
+      .SIM_DEVICE("ULTRASCALE")  // ULTRASCALE
+   )
+   BUFGCE_inst (
+      .O(sck),   // 1-bit output: Buffer
+      .CE(sck_en), // 1-bit input: Buffer enable
+      .I(adc_spi_clk)    // 1-bit input: Buffer
+   );
     
     // synchronizer adds 2 cycles of latency
     // adc_read_clk is 90o delayed phase, at 12.5nsec per clock period total delay is ... 
-    assign reader_en = (cyc_cntr >= 6'd18 && cyc_cntr < 6'd36 && state != RESET)? 1'b1: 1'b0;
+    assign reader_en = (cyc_cntr >= 6'd19 && cyc_cntr < 6'd37 && state != RESET);
     
     xpm_cdc_single #(
         .DEST_SYNC_FF(2),   // DECIMAL; range: 2-10
         .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
-        .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+        .SIM_ASSERT_CHK(1), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
         .SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
     )
     reader_en_syncro (
@@ -244,10 +255,9 @@ module ad4003_deserializer #(
         end
     endgenerate
     
-/*    
-    ila_0 adc_ila (
+    /*    
+    adc_ila deser_ila (
         .clk(ila_clk), // input wire clk
-        
         
         .probe0(rst), // input wire [0:0]  probe0  
         .probe1(adc_spi_clk), // input wire [0:0]  probe1 
@@ -264,7 +274,8 @@ module ad4003_deserializer #(
         .probe12(adc_b_data[0]), // input wire [17:0]  probe12 
         .probe13(adc_a_data[1]), // input wire [17:0]  probe13 
         .probe14(adc_b_data[1]) // input wire [17:0]  probe14
-    );
-*/    
-    
+    );    
+    */
+    assign reader_en_sync_out = reader_en_sync;
+    assign adc_sdo_cha1 = adc_sdo_cha[0];
 endmodule

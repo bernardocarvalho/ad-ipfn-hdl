@@ -24,10 +24,11 @@ module si5396a_spi_writer_tb;
 
     reg clk,reset;
     wire nCS,sdo,sck,readdata,in_en;
+    wire [9:0] romaddr;
     
     si53xx_spi_interface dut (.clk(clk),
                               .reset(reset),
-                              .read(1'b1),
+                              .read(1'b0),
                               .write(1'b0),
                               .rw_addr(8'haa),
                               .write_data(8'ha6),
@@ -36,6 +37,7 @@ module si5396a_spi_writer_tb;
                               .sclk(sck),
                               .sdi(1'b1),
                               .rom_data(16'h1616),
+                              .rom_addr(romaddr),
                               .read_data(readdata),
                               .in_en(in_en));                     
                               

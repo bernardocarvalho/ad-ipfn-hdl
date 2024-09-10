@@ -72,7 +72,7 @@ module chop_gen #(
       .DEST_SYNC_FF(3),   // DECIMAL; range: 2-10
       .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
       .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
-      .SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
+      .SRC_INPUT_REG(0)   // DECIMAL; 0=do not register input, 1=register input
     )
     xpm_cdc_single_inst (
       .dest_out(chop_en_sync), // 1-bit output: src_in synchronized to the destination clock domain. This output is
@@ -121,5 +121,15 @@ module chop_gen #(
                 end
             end
         end
+    /*
+    chop_ila your_instance_name (
+        .clk(adc_data_clk), // input wire clk
 
+        .probe0(chop_en), // input wire [0:0]  probe0  
+        .probe1(chop_en_sync), // input wire [0:0]  probe1 
+        .probe2(max_count_local), // input wire [15:0]  probe2 
+        .probe3(change_count_local), // input wire [15:0]  probe3 
+        .probe4(chop_counter_r) // input wire [15:0]  probe4
+    );
+    */
 endmodule //chop_gen

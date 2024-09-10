@@ -21,8 +21,9 @@
 
 
 module pll_spi_tester(
-        input reset,
+        input axi_reset,
         input clk,
+        input axi_clk,
         output reg if_read,
         output reg if_write,
         input  [7:0] if_rdata,
@@ -31,12 +32,11 @@ module pll_spi_tester(
         output reg if_reset,
         input if_done,
         output pll_reset,
-        output test_success,
-        output reg [39:0] pll_regs
-        
+        output reg [23:0] pll_regs     
     );
     
     parameter RESET=2'd0,SENDCOMMAND=2'd1,WAITFORDONE=2'd2,TESTCOMPLETE=2'd3;
+    parameter RESET_WAIT=32'd100000000;
     
     reg [3:0] sequence;
     reg [1:0] state;
@@ -44,11 +44,13 @@ module pll_spi_tester(
         
     reg [1:0] next_state;
     
+    
+    
     always @(*) begin //set state of sdo (follows timing as long as spi bit changes at correct time)
         case(state)
             RESET:         next_state = reset ? RESET :( reset_timeout==32'd0 ? SENDCOMMAND:RESET);
             SENDCOMMAND:   next_state = reset ? RESET : if_done ? SENDCOMMAND : WAITFORDONE;
-            WAITFORDONE:   next_state = reset ? RESET : if_done ? sequence==4'd9 ? TESTCOMPLETE :SENDCOMMAND :WAITFORDONE;
+            WAITFORDONE:   next_state = reset ? RESET : if_done ? sequence==4'd7 ? TESTCOMPLETE :SENDCOMMAND :WAITFORDONE;
             TESTCOMPLETE:  next_state = reset ? RESET : TESTCOMPLETE;
             default : next_state = TESTCOMPLETE;
         endcase
@@ -60,14 +62,14 @@ module pll_spi_tester(
                 sequence <= 4'd0;
                 if_reset <= 1'b1;
                 if (reset)
-                    reset_timeout <= 32'd200;
+                    reset_timeout <= RESET_WAIT;
                 else
                     reset_timeout <= reset_timeout-1;
             end
             SENDCOMMAND: begin
                 if_reset <= 1'b1;
                 case(sequence)
-                    4'd0: begin
+                    4'd0: begin                    
                         if_read <=1'b0;
                         if_write<=1'b1;
                         if_addr <=8'h01;
@@ -96,38 +98,26 @@ module pll_spi_tester(
                     4'd4: begin
                         if_read <=1'b1;
                         if_write<=1'b0;
-                        if_addr <=8'h00;
+                        if_addr <=8'h02;
                         end 
                     4'd5: begin
                         if_read <=1'b1;
                         if_write<=1'b0;
-                        if_addr <=8'h02;
+                        if_addr <=8'h03;
                         pll_regs [7:0] <= if_rdata;
                         end 
                     4'd6: begin
                         if_read <=1'b1;
                         if_write<=1'b0;
-                        if_addr <=8'h03;
+                        if_addr <=8'h0C;
                         pll_regs [15:8] <= if_rdata;
-                        end 
+                        end
                     4'd7: begin
                         if_read <=1'b1;
                         if_write<=1'b0;
-                        if_addr <=8'h04;
+                        if_addr <=8'h0C;
                         pll_regs [23:16] <= if_rdata;
-                        end 
-                    4'd8: begin
-                        if_read <=1'b1;
-                        if_write<=1'b0;
-                        if_addr <=8'h05;
-                        pll_regs [31:24] <= if_rdata;
-                        end
-                    4'd9: begin
-                        if_read <=1'b1;
-                        if_write<=1'b0;
-                        if_addr <=8'h00;
-                        pll_regs [39:32] <= if_rdata;
-                        end                     
+                        end                       
                 endcase
                 end
                 WAITFORDONE: begin
@@ -140,6 +130,20 @@ module pll_spi_tester(
     end
     
     assign pll_reset= !(reset);
-    assign test_success = (state==TESTCOMPLETE) && (pll_regs==40'hffffffffff);
     
+   xpm_cdc_single #(
+      .DEST_SYNC_FF(4),   // DECIMAL; range: 2-10
+      .INIT_SYNC_FF(0),   // DECIMAL; 0=disable simulation init values, 1=enable simulation init values
+      .SIM_ASSERT_CHK(0), // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
+      .SRC_INPUT_REG(1)   // DECIMAL; 0=do not register input, 1=register input
+   )
+   reset_sync (
+      .dest_out(reset), // 1-bit output: src_in synchronized to the destination clock domain. This output is
+                           // registered.
+
+      .dest_clk(clk), // 1-bit input: Clock signal for the destination clock domain.
+      .src_clk(axi_clk),   // 1-bit input: optional; required when SRC_INPUT_REG = 1
+      .src_in(axi_reset)      // 1-bit input: Input signal to be synchronized to dest_clk domain.
+   );
+   
 endmodule

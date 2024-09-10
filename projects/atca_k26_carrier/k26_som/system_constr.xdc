@@ -2,16 +2,8 @@
 ## Copyright (C) 2023 Analog Devices, Inc. All rights reserved.
 ### SPDX short identifier: ADIBSD
 ###############################################################################
-
-# constraints
-# KV260
-set_property -dict {PACKAGE_PIN A12 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4} [get_ports fan_en_b]
-
-set_property -dict {PACKAGE_PIN AE10 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports adc_chop]
-
 # K26_SOM
 # Common rules
-
 set_property IOSTANDARD LVDS [get_ports {adc_sdo_cha_p[*]}]
 set_property IOSTANDARD LVDS [get_ports {adc_sdo_chb_p[*]}]
 set_property DIFF_TERM_ADV TERM_100 [get_ports {adc_sdo_cha_p[*]}]
@@ -72,23 +64,17 @@ set_property PACKAGE_PIN P7 [get_ports {adc_sdo_chb_p[3]}]
 #set_property LOC [get_package_pins -filter {PIN_FUNC =~  *L3P_*_66}] [get_ports {adc_sdo_cha_p[23]}]; #24A
 #set_property LOC [get_package_pins -filter {PIN_FUNC =~  *L1P_*_66}] [get_ports {adc_sdo_chb_p[23]}]; #24B
 
-
-set_property PACKAGE_PIN AB7 [get_ports adc_sdi_p]
-set_property PACKAGE_PIN AF7 [get_ports acq_clk_p]
-set_property PACKAGE_PIN AC4 [get_ports adc_sck_p]
-set_property PACKAGE_PIN AD7 [get_ports adc_cnvst_p]
 set_property IOSTANDARD LVDS [get_ports adc_sdi_p]
 set_property IOSTANDARD LVDS [get_ports adc_sck_p]
 set_property IOSTANDARD LVDS [get_ports acq_clk_p]
 set_property IOSTANDARD LVDS [get_ports adc_cnvst_p]
 
-set_property PACKAGE_PIN AG11 [get_ports pll_sdio]
-set_property PACKAGE_PIN AH11 [get_ports pll_nreset]
-set_property PACKAGE_PIN AH10 [get_ports pll_sclk]
-set_property PACKAGE_PIN AF11 [get_ports pll_nCS]
-set_property -dict {IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4} [get_ports pll_*]
+set_property PACKAGE_PIN AB7 [get_ports adc_sdi_p]
+set_property PACKAGE_PIN AF7 [get_ports acq_clk_p]
+set_property PACKAGE_PIN AC4 [get_ports adc_sck_p]
+set_property PACKAGE_PIN AD7 [get_ports adc_cnvst_p]
 
-
+set_property PACKAGE_PIN AE10 [get_ports adc_chop]
 set_property -dict {IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports adc_chop]
 
 set_property PACKAGE_PIN AC11 [get_ports {carrier_led[0]}]
@@ -96,6 +82,27 @@ set_property PACKAGE_PIN AB11 [get_ports {carrier_led[1]}]
 set_property PACKAGE_PIN AA10 [get_ports {carrier_led[2]}]
 set_property PACKAGE_PIN AA11 [get_ports {carrier_led[3]}]
 set_property -dict {IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {carrier_led[*]}]
+
+set_property PACKAGE_PIN AG11 [get_ports pll_sdio]
+set_property PACKAGE_PIN AH11 [get_ports pll_nreset]
+set_property PACKAGE_PIN AH10 [get_ports pll_sclk]
+set_property PACKAGE_PIN AF11 [get_ports pll_nCS]
+
+set_property -dict {IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4} [get_ports pll_*]
+
+set_property PACKAGE_PIN AG13 [get_ports adc_read_clk_dbg]
+set_property PACKAGE_PIN AH13 [get_ports adc_sdo_cha1]
+set_property PACKAGE_PIN AG14 [get_ports reader_en_sync]
+set_property PACKAGE_PIN AH14 [get_ports adc_cnvst_dbg]
+set_property PACKAGE_PIN AE13 [get_ports adc_sck_dbg]
+
+set_property PACKAGE_PIN AC14 [get_ports sys_rst_n]
+
+set_property -dict {IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4} [get_ports *_dbg]
+set_property -dict {IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4} [get_ports adc_sdo_cha1]
+set_property -dict {IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4} [get_ports reader_en_sync]
+set_property IOSTANDARD LVCMOS33 [get_ports sys_rst_n]
+set_property PULLUP true [get_ports sys_rst_n]
 
 set_property BITSTREAM.CONFIG.OVERTEMPSHUTDOWN ENABLE [current_design]
 
